@@ -9,6 +9,8 @@ public class Util {
 			return false;
 		} else if (xMax < 1 || yMax < 1) {
 			return false;
+		} else if (p.getX()<0 || p.getY()<0){
+			return false;
 		} else {
 			return p.getX() < xMax && p.getY() < yMax;
 		}
