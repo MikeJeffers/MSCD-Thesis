@@ -25,8 +25,7 @@ public class ZoneFactoryImpl implements ZoneFactory {
 			z = new EmptyZone(pos);
 			break;
 		}
-		// TODO Auto-generated method stub
-		return null;
+		return z;
 	}
 
 }
