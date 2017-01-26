@@ -6,8 +6,8 @@ import javafx.scene.paint.Paint;
 
 public class Commercial extends AbstractZone{
 
-	public Commercial(Pos2D pos) {
-		super(pos);
+	public Commercial(Pos2D pos, Tile tile) {
+		super(pos, tile);
 	}
 
 	@Override
@@ -24,6 +24,12 @@ public class Commercial extends AbstractZone{
 	@Override
 	public String toString() {
 		return "Zone{pos=" + getPos().toString() + ", type=" + this.getZoneType().toString() + "}";
+	}
+	
+	@Override
+	public void update(){
+		//TODO add zone rule logic here to eval growth/decay of buildings in zone
+		//super.getBuildings().add(new House(super.getPos(), super.getTile(), ZoneType.RESIDENTIAL));
 	}
 
 }

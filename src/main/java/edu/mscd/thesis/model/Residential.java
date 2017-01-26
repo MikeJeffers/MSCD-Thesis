@@ -5,8 +5,8 @@ import javafx.scene.paint.Color;
 
 public class Residential extends AbstractZone {
 
-	public Residential(Pos2D pos) {
-		super(pos);
+	public Residential(Pos2D pos, Tile tile) {
+		super(pos, tile);
 	}
 
 	@Override
@@ -18,11 +18,20 @@ public class Residential extends AbstractZone {
 	public void draw(GraphicsContext g, double scale) {
 		g.setFill(new Color(0, 1.0, 0, 0.5));
 		super.draw(g, scale);
+		
 	}
 
 	@Override
 	public String toString() {
 		return "Zone{pos=" + getPos().toString() + ", type=" + this.getZoneType().toString() + "}";
+	}
+	
+	@Override
+	public void update(){
+		//TODO add zone rule logic here to eval growth/decay of buildings in zone
+		House home = new House(super.getPos());
+		System.out.println(home);
+		super.getBuildings().add(home);
 	}
 
 }

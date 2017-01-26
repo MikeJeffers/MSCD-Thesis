@@ -1,23 +1,28 @@
 package edu.mscd.thesis.model;
 
-import java.util.Collection;
+import java.net.URL;
+import java.util.Objects;
 
-import edu.mscd.thesis.view.Sprite;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.image.Image;
 
-public abstract class AbstractBuilding implements Building, Sprite{
-	protected Pos2D pos;
+public abstract class AbstractBuilding implements Building{
+	private Pos2D pos;
 	private Image image;
 	private Rectangle2D rect;
 	private double width;
 	private double height;
 	
+	public AbstractBuilding(Pos2D pos){
+		this.pos = pos;
+	}
+	
 
 	@Override
-	public boolean setImage(String filePath) {
+	public boolean setImage(URL url) {
+		System.out.println(url.toString());
 		try{
-			this.image = new Image(filePath);
+			this.image = new Image(url.getPath());
 			return true;
 		}catch(Exception e){
 			System.err.println(e);
@@ -56,7 +61,33 @@ public abstract class AbstractBuilding implements Building, Sprite{
 	public Pos2D getPos() {
 		return this.pos;
 	}
+	
+	void setPos(Pos2D pos){
+		this.pos = pos;
+	}
 
+	
+	@Override
+	public boolean equals(Object o){
+		if(o==null){
+			return false;
+		}
+		if(o instanceof Building){
+			Building b = (Building) o;
+			if(b.getPos()!=null){
+				return b.getPos().equals(this.getPos());
+			}else{
+				return b.getPos()==null && this.getPos()==null;
+			}
+			
+		}
+		return false;
+	}
+	
+	@Override
+	public int hashCode(){
+		return Objects.hash(pos);
+	}
 
 
 }

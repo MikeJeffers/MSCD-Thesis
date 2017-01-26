@@ -14,7 +14,7 @@ public class TileImpl implements Tile {
 		this.pos = pos;
 		this.type = type;
 		this.factory = factory;
-		this.zoning = this.factory.createZone(ZoneType.EMPTY, pos);
+		this.zoning = this.factory.createZone(ZoneType.EMPTY, pos, this);
 	}
 	
 	@Override
@@ -63,7 +63,7 @@ public class TileImpl implements Tile {
 	@Override
 	public boolean setZone(ZoneType zType) {
 		if (this.isZonable() && !zType.equals(this.zoning.getZoneType())) {
-			this.zoning = this.factory.createZone(zType, this.pos);
+			this.zoning = this.factory.createZone(zType, this.pos, this);
 			return true;
 		}
 		return false;

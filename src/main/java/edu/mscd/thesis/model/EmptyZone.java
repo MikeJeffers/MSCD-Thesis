@@ -5,8 +5,8 @@ import javafx.scene.paint.Color;
 
 public class EmptyZone extends AbstractZone {
 
-	public EmptyZone(Pos2D pos) {
-		super(pos);
+	public EmptyZone(Pos2D pos, Tile tile) {
+		super(pos, tile);
 	}
 
 	@Override

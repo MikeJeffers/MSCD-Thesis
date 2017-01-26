@@ -1,20 +1,22 @@
 package edu.mscd.thesis.model;
 
+import java.io.File;
 import java.util.Collection;
 import java.util.HashSet;
 
+import javafx.scene.image.Image;
+
 public class House extends AbstractBuilding {
 	private Collection<Person> occupants;
-	private Tile tile;
-	private Zone zone;
-	private Pos2D pos;
 
-	public House(Pos2D site, Tile land, Zone zoning, String imageFile) {
-		this.pos = site;
-		this.tile = land;
-		this.zone = zoning;
+
+	public House(Pos2D site) {
+		super(site);
 		this.occupants = new HashSet<Person>();
-		super.setImage(imageFile);
+		File file = new File("resources/house.png");
+		Image img = new Image(file.toURI().toString());
+		super.setImage(img);
+		
 	}
 
 	@Override
@@ -22,5 +24,7 @@ public class House extends AbstractBuilding {
 		// TODO Auto-generated method stub
 		return occupants;
 	}
+	
+
 
 }

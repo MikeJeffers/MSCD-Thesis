@@ -17,10 +17,12 @@ public class GameLoop extends AnimationTimer {
 
 	@Override
 	public void handle(long now) {
-		world.update();
+		
 		world.draw(graphics);
 		if(gameStep && stepMode){
 			gameStep=false;
+			world.update();
+			
 		}
 	}
 	
