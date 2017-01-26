@@ -3,24 +3,32 @@ package edu.mscd.thesis.model;
 import java.util.Objects;
 
 public class Pos2D {
-	private int x;
-	private int y;
+	private double x;
+	private double y;
 
-	public Pos2D(int _x, int _y) {
+	public Pos2D(double _x, double _y) {
 		this.x = _x;
 		this.y = _y;
 	}
 
-	public int getX() {
+	public double getX() {
 		return this.x;
 	}
 
-	public int getY() {
+	public double getY() {
 		return this.y;
 	}
 
 	Pos2D copy() {
 		return new Pos2D(x, y);
+	}
+	
+	public double distBetween(Pos2D o){
+		if(o==null){
+			return -1;
+		}
+		double d = Math.sqrt(Math.pow(this.x-o.x, 2)+Math.pow(this.y-o.y, 2));
+		return d;
 	}
 
 	@Override

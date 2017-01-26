@@ -68,7 +68,9 @@ media/
 
 #java and eclipse
 bin/
+lib/
 libs/
+resources/
 .classpath
 .project
 

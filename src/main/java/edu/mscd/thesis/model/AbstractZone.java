@@ -16,12 +16,17 @@ public abstract class AbstractZone implements Zone {
 
 	@Override
 	public void draw(GraphicsContext g, double scale) {
-		g.fillRect(this.pos.getX() * scale, this.getPos().getY() * scale, scale, scale);
+		g.fillRect(this.pos.getX(), this.getPos().getY(), scale, scale);
 	}
 
 	@Override
 	public String toString() {
 		return "Zone{pos=" + pos.toString() + ", type=abstract}";
+	}
+	
+	@Override
+	public void update(){
+		
 	}
 
 }

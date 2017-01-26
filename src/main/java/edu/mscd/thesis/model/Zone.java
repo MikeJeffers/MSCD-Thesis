@@ -8,4 +8,5 @@ public interface Zone {
 	ZoneType getZoneType();
 
 	void draw(GraphicsContext g, double scale);
+	void update();
 }

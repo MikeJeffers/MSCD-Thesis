@@ -7,19 +7,29 @@ import javafx.scene.canvas.GraphicsContext;
 public class GameLoop extends AnimationTimer {
 	private GraphicsContext graphics;
 	private World world;
-	private double scale;
+	private boolean gameStep;
+	private boolean stepMode;
 
-	public GameLoop(World w, GraphicsContext gc, double scaleFactor) {
+	public GameLoop(World w, GraphicsContext gc) {
 		this.graphics = gc;
 		this.world = w;
-		this.scale = scaleFactor;
 	}
 
 	@Override
 	public void handle(long now) {
 		world.update();
-		world.draw(graphics, scale);
-
+		world.draw(graphics);
+		if(gameStep && stepMode){
+			gameStep=false;
+		}
+	}
+	
+	public void setStepMode(boolean isStepMode){
+		this.stepMode = isStepMode;
+	}
+	
+	public void step(){
+		this.gameStep = true;
 	}
 
 }

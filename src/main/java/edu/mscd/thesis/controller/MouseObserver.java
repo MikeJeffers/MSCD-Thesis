@@ -16,18 +16,14 @@ public class MouseObserver implements EventHandler<MouseEvent> {
 
 	@Override
 	public void handle(MouseEvent event) {
-		System.out.println("Event fired!");
 		if (event.getEventType().equals(MouseEvent.MOUSE_CLICKED)) {
-			double sf = Main.SCALE_FACTOR;
-			double dx = (event.getSceneX() - (sf / 2)) / sf;
-			double dy = (event.getSceneY() - (sf / 2)) / sf;
-			int x = (int) Math.round(dx);
-			int y = (int) Math.round(dy);
-			System.out.println("x" + x + " y" + y);
-			Tile t = world.getTileAt(new Pos2D(x, y));
+			double sf = world.getScale();
+			double dx = Math.round((event.getSceneX()-(sf/2))/sf)*sf;
+			double dy = Math.round((event.getSceneY()-(sf/2))/sf)*sf;
+			Tile t = world.getTileAt(new Pos2D(dx, dy));
+			t.setMouseOver(true);
 			System.out.println(t);
+			t.setZone(Main.selection);
 		}
-
 	}
-
 }
