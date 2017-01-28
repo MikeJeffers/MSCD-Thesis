@@ -4,6 +4,7 @@ import java.net.URL;
 import java.util.Objects;
 
 import javafx.geometry.Rectangle2D;
+import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 
 public abstract class AbstractBuilding implements Building{
@@ -17,12 +18,23 @@ public abstract class AbstractBuilding implements Building{
 		this.pos = pos;
 	}
 	
+	@Override
+	public void render(GraphicsContext g, double scale){
+		if(!this.image.isError() && !this.image.isBackgroundLoading()){
+			g.drawImage(this.image, pos.getX(), pos.getY(), scale, scale);
+		}
+		
+	}
+	
 
 	@Override
 	public boolean setImage(URL url) {
 		System.out.println(url.toString());
 		try{
 			this.image = new Image(url.getPath());
+			if(this.image.isError()){
+				System.err.println(this.image.getException().getMessage());
+			}
 			return true;
 		}catch(Exception e){
 			System.err.println(e);
@@ -89,5 +101,10 @@ public abstract class AbstractBuilding implements Building{
 		return Objects.hash(pos);
 	}
 
+	
+	@Override
+	public String toString(){
+		return "Building:{at="+this.pos.toString()+" img="+this.image.toString()+"}";
+	}
 
 }

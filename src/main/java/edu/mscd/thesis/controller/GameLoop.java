@@ -23,6 +23,7 @@ public class GameLoop extends AnimationTimer {
 			gameStep=false;
 			world.update();
 			
+			
 		}
 	}
 	

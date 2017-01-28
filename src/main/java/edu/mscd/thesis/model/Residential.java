@@ -7,6 +7,10 @@ public class Residential extends AbstractZone {
 
 	public Residential(Pos2D pos, Tile tile) {
 		super(pos, tile);
+		House home = new House(super.getPos());
+		System.out.println(home);
+		boolean success = super.addBuilding(home);
+		System.out.println("Add :"+home.toString()+" Success?:"+success);
 	}
 
 	@Override
@@ -29,9 +33,7 @@ public class Residential extends AbstractZone {
 	@Override
 	public void update(){
 		//TODO add zone rule logic here to eval growth/decay of buildings in zone
-		House home = new House(super.getPos());
-		System.out.println(home);
-		super.getBuildings().add(home);
+		
 	}
 
 }

@@ -23,13 +23,10 @@ public abstract class AbstractZone implements Zone {
 
 	@Override
 	public void draw(GraphicsContext g, double scale) {
-		g.fillRect(this.pos.getX(), this.getPos().getY(), scale, scale);
+		g.fillRect(this.getPos().getX(), this.getPos().getY(), scale, scale);
 		if (buildings != null && !buildings.isEmpty()) {
 			for (Building b : buildings) {
-				if (b != null && b.getImage()!=null && b.getPos()!=null) {
-					g.drawImage(b.getImage(), b.getPos().getX(), b.getPos().getY(), scale*5, scale*5);
-				}
-
+				b.render(g, scale);
 			}
 		}
 
@@ -45,8 +42,13 @@ public abstract class AbstractZone implements Zone {
 
 	}
 
+	@Override
 	public Collection<Building> getBuildings() {
 		return this.buildings;
+	}
+	
+	public boolean addBuilding(Building b){
+		return this.buildings.add(b);
 	}
 
 	public Tile getTile() {
