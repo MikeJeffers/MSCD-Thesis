@@ -1,10 +1,6 @@
 package edu.mscd.thesis.main;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
 import java.net.URL;
-import java.util.Enumeration;
 
 import edu.mscd.thesis.controller.GameLoop;
 import edu.mscd.thesis.controller.MouseObserver;
@@ -21,7 +17,6 @@ import javafx.scene.control.Button;
 import javafx.scene.image.Image;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.FlowPane;
-import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 
 public class Main extends Application {
@@ -81,9 +76,10 @@ public class Main extends Application {
 		root.getChildren().add(canvas);
 		root.getChildren().add(pane);
 
-		canvas.addEventHandler(MouseEvent.MOUSE_CLICKED, new MouseObserver(this.world));
-
+		canvas.addEventHandler(MouseEvent.MOUSE_CLICKED, new MouseObserver(timer));
+		
 		timer.start();
+		timer.step();
 		stage.show();
 	}
 

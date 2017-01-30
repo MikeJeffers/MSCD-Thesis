@@ -4,6 +4,7 @@ import java.util.Random;
 
 import edu.mscd.thesis.util.Util;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.paint.Color;
 
 public class WorldImpl implements World {
 	private Tile[] tiles;
@@ -45,6 +46,7 @@ public class WorldImpl implements World {
 
 	@Override
 	public void draw(GraphicsContext g) {
+		g.setFill(Color.WHITE);
 		g.fillRect(0, 0, width, height);
 		for (int i = 0; i < tiles.length; i++) {
 			tiles[i].draw(g, scale);

@@ -18,10 +18,11 @@ public class GameLoop extends AnimationTimer {
 	@Override
 	public void handle(long now) {
 		
-		world.draw(graphics);
+		
 		if(gameStep && stepMode){
 			gameStep=false;
 			world.update();
+			world.draw(graphics);
 			
 			
 		}
@@ -33,6 +34,14 @@ public class GameLoop extends AnimationTimer {
 	
 	public void step(){
 		this.gameStep = true;
+	}
+	
+	public World getWorld(){
+		return this.world;
+	}
+	
+	public GraphicsContext getGraphics(){
+		return this.graphics;
 	}
 
 }

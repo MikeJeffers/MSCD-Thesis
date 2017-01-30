@@ -8,22 +8,25 @@ import javafx.event.EventHandler;
 import javafx.scene.input.MouseEvent;
 
 public class MouseObserver implements EventHandler<MouseEvent> {
-	private World world;
+	private GameLoop controller;
 
-	public MouseObserver(World w) {
-		world = w;
+	public MouseObserver(GameLoop gameController) {
+		controller = gameController;
 	}
 
 	@Override
 	public void handle(MouseEvent event) {
 		if (event.getEventType().equals(MouseEvent.MOUSE_CLICKED)) {
-			double sf = world.getScale();
+			World w  = controller.getWorld();
+			double sf = w.getScale();
 			double dx = Math.round((event.getSceneX()-(sf/2))/sf)*sf;
 			double dy = Math.round((event.getSceneY()-(sf/2))/sf)*sf;
-			Tile t = world.getTileAt(new Pos2D(dx, dy));
+			Tile t = w.getTileAt(new Pos2D(dx, dy));
 			t.setMouseOver(true);
 			System.out.println(t);
 			t.setZone(Main.selection);
+			controller.step();
+			
 		}
 	}
 }
