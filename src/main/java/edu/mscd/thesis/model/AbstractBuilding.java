@@ -19,9 +19,9 @@ public abstract class AbstractBuilding implements Building{
 	}
 	
 	@Override
-	public void render(GraphicsContext g, double scale){
+	public void render(GraphicsContext g){
 		if(!this.image.isError() && !this.image.isBackgroundLoading()){
-			g.drawImage(this.image, pos.getX(), pos.getY(), scale, scale);
+			g.drawImage(this.image, pos.getX(), pos.getY(), 1, 1);
 		}
 		
 	}

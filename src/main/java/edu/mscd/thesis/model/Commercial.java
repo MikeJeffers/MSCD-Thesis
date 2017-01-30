@@ -16,9 +16,9 @@ public class Commercial extends AbstractZone{
 	}
 	
 	@Override 
-	public void draw(GraphicsContext g, double scale){
+	public void draw(GraphicsContext g){
 		g.setFill(new Color(0, 0, 1.0, 0.5));
-		super.draw(g, scale);
+		super.draw(g);
 	}
 	
 	@Override

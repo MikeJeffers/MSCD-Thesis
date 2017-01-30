@@ -22,11 +22,11 @@ public abstract class AbstractZone implements Zone {
 	}
 
 	@Override
-	public void draw(GraphicsContext g, double scale) {
-		g.fillRect(this.getPos().getX(), this.getPos().getY(), scale, scale);
+	public void draw(GraphicsContext g) {
+		g.fillRect(this.getPos().getX(), this.getPos().getY(), 1, 1);
 		if (buildings != null && !buildings.isEmpty()) {
 			for (Building b : buildings) {
-				b.render(g, scale);
+				b.render(g);
 			}
 		}
 

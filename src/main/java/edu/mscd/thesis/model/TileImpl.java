@@ -70,11 +70,11 @@ public class TileImpl implements Tile {
 	}
 
 	@Override
-	public void draw(GraphicsContext g, double scale) {
+	public void draw(GraphicsContext g) {
 		g.setFill(this.type.getColor());
-		g.fillRect(this.pos.getX(), this.getPos().getY(), scale, scale);
+		g.fillRect(this.pos.getX(), this.getPos().getY(), 1, 1);
 		if (this.zoning != null) {
-			this.zoning.draw(g, scale);
+			this.zoning.draw(g);
 		}
 		if(overFlag){
 			g.setStroke(Main.selection.getColor());

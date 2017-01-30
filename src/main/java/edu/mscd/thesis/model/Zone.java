@@ -11,6 +11,6 @@ public interface Zone {
 	
 	Collection<Building> getBuildings();
 
-	void draw(GraphicsContext g, double scale);
+	void draw(GraphicsContext g);
 	void update();
 }

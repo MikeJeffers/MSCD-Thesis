@@ -17,6 +17,7 @@ import javafx.scene.control.Button;
 import javafx.scene.image.Image;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.FlowPane;
+import javafx.scene.transform.Affine;
 import javafx.stage.Stage;
 
 public class Main extends Application {
@@ -40,7 +41,7 @@ public class Main extends Application {
 	}
 
 	private void initWorld() {
-		this.world = new WorldImpl(WORLD_X, WORLD_Y, SCALE_FACTOR);
+		this.world = new WorldImpl(WORLD_X, WORLD_Y);
 
 	}
 
@@ -58,6 +59,9 @@ public class Main extends Application {
 		FlowPane pane = new FlowPane();
 		Canvas canvas = new Canvas(850, 600);
 		GraphicsContext gc = canvas.getGraphicsContext2D();
+		Affine transformMatrix = gc.getTransform();
+		transformMatrix.appendScale(SCALE_FACTOR, SCALE_FACTOR);
+		gc.setTransform(transformMatrix);
 		GameLoop timer = new GameLoop(world, gc);
 		timer.setStepMode(true);
 		for (ZoneType zType : ZoneType.values()) {

@@ -2,6 +2,8 @@ package edu.mscd.thesis.model;
 
 import java.util.Objects;
 
+import javafx.geometry.Point2D;
+
 public class Pos2D {
 	private double x;
 	private double y;
@@ -21,6 +23,10 @@ public class Pos2D {
 
 	Pos2D copy() {
 		return new Pos2D(x, y);
+	}
+	
+	Point2D getPt2D(){
+		return new Point2D(x, y);
 	}
 	
 	public double distBetween(Pos2D o){

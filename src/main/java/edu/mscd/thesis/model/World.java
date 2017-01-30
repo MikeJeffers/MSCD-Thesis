@@ -11,5 +11,4 @@ public interface World {
 
 	Zone getZoneAt(Pos2D pos);
 	
-	public double getScale();
 }
