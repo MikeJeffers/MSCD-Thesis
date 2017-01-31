@@ -1,6 +1,9 @@
 package edu.mscd.thesis.model;
 
 import edu.mscd.thesis.main.Main;
+import edu.mscd.thesis.model.zones.Zone;
+import edu.mscd.thesis.model.zones.ZoneFactory;
+import edu.mscd.thesis.model.zones.ZoneType;
 import javafx.scene.canvas.GraphicsContext;
 
 public class TileImpl implements Tile {
@@ -41,17 +44,17 @@ public class TileImpl implements Tile {
 	}
 
 	@Override
-	public int materialValue() {
+	public double materialValue() {
 		return this.type.getBaseLandValue();
 	}
 
 	@Override
-	public int baseLandValue() {
+	public double baseLandValue() {
 		return this.type.getBaseLandValue();
 	}
 
 	@Override
-	public int maxDensity() {
+	public double maxDensity() {
 		return this.type.getMaxDensity();
 	}
 

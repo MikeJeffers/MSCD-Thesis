@@ -2,6 +2,10 @@ package edu.mscd.thesis.model;
 
 import java.util.Random;
 
+import edu.mscd.thesis.model.zones.Zone;
+import edu.mscd.thesis.model.zones.ZoneFactory;
+import edu.mscd.thesis.model.zones.ZoneFactoryImpl;
+import edu.mscd.thesis.model.zones.ZoneType;
 import edu.mscd.thesis.util.Util;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
@@ -32,10 +36,35 @@ public class WorldImpl implements World {
 
 	@Override
 	public void update() {
+		//TODO
+		//iterate through all zones: incr/decr value based on conditions
+		
 		for (int i = 0; i < tiles.length; i++) {
+			Tile t = tiles[i];
+			if(t.getZone().getZoneType()!=ZoneType.EMPTY){
+				//getnearest of type, get dist, modify value of zone in tile as per ruleset
+			}
 			tiles[i].update();
 		}
 
+	}
+	
+	private Tile getNearestOfType(Tile t, ZoneType zt){
+		double distance = 10000;
+		Tile found = null;
+		for(int i=0; i<tiles.length; i++){
+			if(!tiles[i].equals(t)){
+				if(tiles[i].getZone().getZoneType()==zt){
+					double dist = tiles[i].getPos().distBetween(t.getPos());
+					if(dist<distance){
+						distance = dist;
+						found = tiles[i];
+					}
+				}
+					
+			}
+		}
+		return found;
 	}
 
 	@Override
@@ -45,7 +74,6 @@ public class WorldImpl implements World {
 		for (int i = 0; i < tiles.length; i++) {
 			tiles[i].draw(g);
 		}
-
 	}
 
 	@Override
@@ -61,6 +89,12 @@ public class WorldImpl implements World {
 	@Override
 	public Zone getZoneAt(Pos2D pos) {
 		return getTileAt(pos).getZone();
+	}
+
+	@Override
+	public City getCity() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

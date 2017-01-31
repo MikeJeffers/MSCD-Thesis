@@ -3,6 +3,8 @@ package edu.mscd.thesis.util;
 import edu.mscd.thesis.model.Pos2D;
 
 public class Util {
+	public static final int MAX = 255;
+	public static final int GROWTH_THRESHOLD = 255;
 
 	public static boolean isValidPos2D(Pos2D p, double xMax, double yMax) {
 		if (p == null) {

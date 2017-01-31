@@ -1,5 +1,7 @@
 package edu.mscd.thesis.model;
 
+import edu.mscd.thesis.model.zones.Zone;
+import edu.mscd.thesis.model.zones.ZoneType;
 import javafx.scene.canvas.GraphicsContext;
 
 public interface Tile {
@@ -13,11 +15,11 @@ public interface Tile {
 
 	boolean isPassable();
 
-	int materialValue();
+	double materialValue();
 
-	int baseLandValue();
+	double baseLandValue();
 
-	int maxDensity();
+	double maxDensity();
 
 	void draw(GraphicsContext g);
 	

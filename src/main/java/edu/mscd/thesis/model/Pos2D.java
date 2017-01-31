@@ -21,7 +21,7 @@ public class Pos2D {
 		return this.y;
 	}
 
-	Pos2D copy() {
+	public Pos2D copy() {
 		return new Pos2D(x, y);
 	}
 	

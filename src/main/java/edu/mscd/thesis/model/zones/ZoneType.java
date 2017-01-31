@@ -1,4 +1,4 @@
-package edu.mscd.thesis.model;
+package edu.mscd.thesis.model.zones;
 
 import javafx.scene.paint.Color;
 

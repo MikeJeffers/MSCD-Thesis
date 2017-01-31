@@ -1,4 +1,7 @@
-package edu.mscd.thesis.model;
+package edu.mscd.thesis.model.zones;
+
+import edu.mscd.thesis.model.Pos2D;
+import edu.mscd.thesis.model.Tile;
 
 public class ZoneFactoryImpl implements ZoneFactory {
 

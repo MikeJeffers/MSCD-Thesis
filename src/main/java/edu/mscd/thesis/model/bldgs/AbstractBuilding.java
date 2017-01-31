@@ -1,8 +1,12 @@
-package edu.mscd.thesis.model;
+package edu.mscd.thesis.model.bldgs;
 
 import java.net.URL;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.Objects;
 
+import edu.mscd.thesis.model.Person;
+import edu.mscd.thesis.model.Pos2D;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
@@ -13,9 +17,44 @@ public abstract class AbstractBuilding implements Building{
 	private Rectangle2D rect;
 	private double width;
 	private double height;
+	private Collection<Person> occupants;
+	private int maxOccupants;
+	private int wealthLevel;
 	
 	public AbstractBuilding(Pos2D pos){
 		this.pos = pos;
+		this.occupants = new HashSet<Person>();
+	}
+	
+	@Override
+	public Collection<Person> getOccupants() {
+		return this.occupants;
+	}
+
+	@Override
+	public int getMaxOccupants() {
+		return maxOccupants;
+	}
+
+	@Override
+	public int getWealth() {
+		return wealthLevel;
+	}
+	
+	public void setWealthLevel(int wealth){
+		this.wealthLevel = wealth;
+	}
+	
+	public void setMaxOccupancy(int max){
+		this.maxOccupants = max;
+	}
+
+
+	public boolean addOccupant(Person p) {
+		if(maxOccupants<=occupants.size()){
+			return false;
+		}
+		return occupants.add(p);
 	}
 	
 	@Override
@@ -106,5 +145,7 @@ public abstract class AbstractBuilding implements Building{
 	public String toString(){
 		return "Building:{at="+this.pos.toString()+" img="+this.image.toString()+"}";
 	}
+
+
 
 }

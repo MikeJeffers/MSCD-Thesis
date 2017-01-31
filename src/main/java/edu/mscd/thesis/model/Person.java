@@ -1,5 +1,7 @@
 package edu.mscd.thesis.model;
 
+import edu.mscd.thesis.model.bldgs.Building;
+
 public interface Person {
 	Pos2D getCurrentPos();
 
