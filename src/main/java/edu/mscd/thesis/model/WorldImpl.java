@@ -40,9 +40,8 @@ public class WorldImpl implements World {
 
 	@Override
 	public void draw(GraphicsContext g) {
-
 		g.setFill(Color.DARKGRAY);
-		g.fillRect(0, 0, cols, rows);
+		g.fillRect(0, 0, g.getCanvas().getWidth(),  g.getCanvas().getHeight());
 		for (int i = 0; i < tiles.length; i++) {
 			tiles[i].draw(g);
 		}
