@@ -1,6 +1,7 @@
 package edu.mscd.thesis.model;
 
 import edu.mscd.thesis.main.Main;
+import edu.mscd.thesis.model.zones.Density;
 import edu.mscd.thesis.model.zones.Zone;
 import edu.mscd.thesis.model.zones.ZoneFactory;
 import edu.mscd.thesis.model.zones.ZoneType;
@@ -54,7 +55,7 @@ public class TileImpl implements Tile {
 	}
 
 	@Override
-	public double maxDensity() {
+	public Density maxDensity() {
 		return this.type.getMaxDensity();
 	}
 

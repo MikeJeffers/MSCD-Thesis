@@ -28,8 +28,8 @@ import javafx.stage.Stage;
 public class Main extends Application {
 	private World world;
 	private GameLoop controller;
-	private static final int WORLD_X = 40;
-	private static final int WORLD_Y = 30;
+	private static final int WORLD_X = 20;
+	private static final int WORLD_Y = 15;
 	private static final int SCREEN_WIDTH = 800;
 	private static final int SCREEN_HEIGHT = 600;
 	public static final double SCALE_FACTOR = Util.getScaleFactor(WORLD_X, WORLD_Y, SCREEN_WIDTH, SCREEN_HEIGHT);
