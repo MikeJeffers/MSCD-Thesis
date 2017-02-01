@@ -1,6 +1,16 @@
 package edu.mscd.thesis.main;
 
+import java.awt.image.RenderedImage;
+import java.util.Calendar;
+import java.util.Date;
+
+import java.io.File;
+import java.io.IOException;
 import java.net.URL;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+
+import javax.imageio.ImageIO;
 
 import edu.mscd.thesis.controller.GameLoop;
 import edu.mscd.thesis.controller.MouseObserver;
@@ -11,6 +21,9 @@ import edu.mscd.thesis.model.zones.ZoneType;
 import edu.mscd.thesis.util.Util;
 import javafx.application.Application;
 import javafx.collections.ObservableList;
+import javafx.embed.swing.SwingFXUtils;
+import javafx.event.Event;
+import javafx.event.EventHandler;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.Scene;
@@ -18,6 +31,7 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
 import javafx.scene.image.Image;
+import javafx.scene.image.WritableImage;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.Pane;
@@ -51,16 +65,10 @@ public class Main extends Application {
 
 	}
 
-	private void loadGraphics() {
-		URL url = Main.class.getClassLoader().getResource("house.png");
-		System.out.println(url);
-		houseImage = new Image(url.toString());
-		System.out.println(houseImage);
-	}
 
 	@Override
 	public void start(Stage stage) throws Exception {
-		this.loadGraphics();
+
 		Group root = new Group();
 
 		Canvas canvas = new Canvas(SCREEN_WIDTH, SCREEN_HEIGHT);
@@ -90,14 +98,20 @@ public class Main extends Application {
 		root.getChildren().add(canvas);
 		root.getChildren().add(controlPane);
 
-		canvas.addEventHandler(MouseEvent.MOUSE_CLICKED, new MouseObserver(controller));
-
 		Affine transformMatrix = gc.getTransform();
 		transformMatrix.appendScale(SCALE_FACTOR, SCALE_FACTOR);
 		gc.setTransform(transformMatrix);
 
 		Scene mainScene = new Scene(root, Color.WHITE);
 		stage.setScene(mainScene);
+
+		canvas.addEventHandler(MouseEvent.MOUSE_CLICKED, new MouseObserver(controller));
+		canvas.addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
+			@Override
+			public void handle(MouseEvent event) {
+				Util.takeScreenshot(stage);
+			}
+		});
 
 		controller.start();
 		controller.step();
@@ -170,4 +184,6 @@ public class Main extends Application {
 		System.out.println("Selection changed to:" + zType.toString());
 		Main.selection = zType;
 	}
+
+	
 }
