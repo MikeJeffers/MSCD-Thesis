@@ -63,7 +63,6 @@ public class Util {
 		File file = new File("screenshots/screen"+stamp+".png");
 		
 		try {
-			//file.createNewFile();
 			RenderedImage renderedImage = SwingFXUtils.fromFXImage(img, null);
 			ImageIO.write(renderedImage, "png", file);
 		} catch (IOException e) {

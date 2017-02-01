@@ -1,16 +1,5 @@
 package edu.mscd.thesis.main;
 
-import java.awt.image.RenderedImage;
-import java.util.Calendar;
-import java.util.Date;
-
-import java.io.File;
-import java.io.IOException;
-import java.net.URL;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-
-import javax.imageio.ImageIO;
 
 import edu.mscd.thesis.controller.GameLoop;
 import edu.mscd.thesis.controller.MouseObserver;
@@ -21,8 +10,6 @@ import edu.mscd.thesis.model.zones.ZoneType;
 import edu.mscd.thesis.util.Util;
 import javafx.application.Application;
 import javafx.collections.ObservableList;
-import javafx.embed.swing.SwingFXUtils;
-import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.scene.Group;
 import javafx.scene.Node;
@@ -31,7 +18,6 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
 import javafx.scene.image.Image;
-import javafx.scene.image.WritableImage;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.Pane;
@@ -42,6 +28,7 @@ import javafx.stage.Stage;
 public class Main extends Application {
 	private World world;
 	private GameLoop controller;
+	private static final boolean SCREENSHOT = true;
 	private static final int WORLD_X = 20;
 	private static final int WORLD_Y = 15;
 	private static final int SCREEN_WIDTH = 800;
@@ -62,7 +49,6 @@ public class Main extends Application {
 
 	private void initWorld() {
 		this.world = new WorldImpl(WORLD_X, WORLD_Y);
-
 	}
 
 
@@ -106,12 +92,15 @@ public class Main extends Application {
 		stage.setScene(mainScene);
 
 		canvas.addEventHandler(MouseEvent.MOUSE_CLICKED, new MouseObserver(controller));
-		canvas.addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
-			@Override
-			public void handle(MouseEvent event) {
-				Util.takeScreenshot(stage);
-			}
-		});
+		if(SCREENSHOT){
+			canvas.addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
+				@Override
+				public void handle(MouseEvent event) {
+					Util.takeScreenshot(stage);
+				}
+			});
+		}
+		
 
 		controller.start();
 		controller.step();
