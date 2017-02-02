@@ -1,5 +1,6 @@
 package edu.mscd.thesis.controller;
 
+
 import edu.mscd.thesis.main.Main;
 import edu.mscd.thesis.model.Pos2D;
 import edu.mscd.thesis.model.Tile;
@@ -41,10 +42,11 @@ public class MouseObserver implements EventHandler<MouseEvent> {
 				System.err.println("No Tile found at: click pt="+pt.toString()+" model(xy):"+modelCoordinate);
 				return;
 			}
-			t.setMouseOver(true);
 			System.out.println(t);
 			t.setZone(Main.selection);
 			controller.step();
+
+			
 			
 		}
 	}

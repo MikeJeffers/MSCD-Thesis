@@ -1,12 +1,17 @@
 package edu.mscd.thesis.model;
 
 import edu.mscd.thesis.model.zones.Zone;
+import edu.mscd.thesis.model.zones.ZoneType;
 import javafx.scene.canvas.GraphicsContext;
 
 public interface World {
 	public void update();
 
 	public void draw(GraphicsContext g);
+	
+	boolean setZoneAt(Pos2D pos, ZoneType zt);
+	boolean setAllZonesAround(Pos2D pos, ZoneType zt, int radius);
+	boolean setAllZonesAround_ManhattanDist(Pos2D pos, ZoneType zt, int radius);
 
 	Tile getTileAt(Pos2D pos);
 

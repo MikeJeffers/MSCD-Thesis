@@ -28,7 +28,7 @@ import javafx.stage.Stage;
 public class Main extends Application {
 	private World world;
 	private GameLoop controller;
-	private static final boolean SCREENSHOT = true;
+	private static final boolean SCREENSHOT = false;
 	private static final int WORLD_X = 20;
 	private static final int WORLD_Y = 15;
 	private static final int SCREEN_WIDTH = 800;

@@ -28,6 +28,11 @@ public class TileImpl implements Tile {
 		}
 		
 	}
+	
+	@Override
+	public TileType getType() {
+		return this.type;
+	}
 
 	@Override
 	public Pos2D getPos() {
@@ -96,5 +101,16 @@ public class TileImpl implements Tile {
 		this.overFlag = over;
 		
 	}
+	
+	@Override
+	public boolean equals(Object other){
+		if(other instanceof Tile){
+			Tile o = (Tile) other;
+			return o.getPos().equals(this.getPos())&&o.getZone().equals(this.getZone())&&this.getType()==o.getType();
+		}
+		return false;
+	}
+
+
 
 }

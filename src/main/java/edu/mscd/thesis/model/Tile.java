@@ -27,5 +27,7 @@ public interface Tile {
 	void setMouseOver(boolean over);
 	
 	void update();
+	
+	TileType getType();
 
 }
