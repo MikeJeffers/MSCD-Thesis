@@ -1,9 +1,8 @@
 package edu.mscd.thesis.controller;
 
 
-import edu.mscd.thesis.main.Main;
+import edu.mscd.thesis.view.GUI;
 import edu.mscd.thesis.model.Pos2D;
-import edu.mscd.thesis.model.Tile;
 import edu.mscd.thesis.model.World;
 import javafx.event.EventHandler;
 import javafx.geometry.Point2D;
@@ -33,13 +32,8 @@ public class MouseObserver implements EventHandler<MouseEvent> {
 			double dx = pt.getX();
 			double dy = pt.getY();
 			Pos2D modelCoordinate = new Pos2D(dx, dy);
-			
-			w.setAllZonesAround(modelCoordinate, Main.selection, Main.radiusSelection);
-
+			w.setAllZonesAround(modelCoordinate, GUI.selection, GUI.radiusSelection);
 			controller.step();
-
-			
-			
 		}
 	}
 }

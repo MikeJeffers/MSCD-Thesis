@@ -5,6 +5,7 @@ import edu.mscd.thesis.model.zones.Density;
 import edu.mscd.thesis.model.zones.Zone;
 import edu.mscd.thesis.model.zones.ZoneFactory;
 import edu.mscd.thesis.model.zones.ZoneType;
+import edu.mscd.thesis.view.GUI;
 import javafx.scene.canvas.GraphicsContext;
 
 public class TileImpl implements Tile {
@@ -86,7 +87,7 @@ public class TileImpl implements Tile {
 			this.zoning.draw(g);
 		}
 		if(overFlag){
-			g.setStroke(Main.selection.getColor());
+			g.setStroke(GUI.selection.getColor());
 			g.setLineWidth(2);
 		}
 	}
