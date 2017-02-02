@@ -58,20 +58,33 @@ public class WorldImpl implements World {
 		if(t==null){
 			return false;
 		}
-		
-		return false;
+		return t.setZone(zt);
 	}
 
 	@Override
 	public boolean setAllZonesAround(Pos2D pos, ZoneType zt, int radius) {
-		// TODO Auto-generated method stub
-		return false;
+		Tile t = this.getTileAt(pos);
+		if(t==null){
+			return false;
+		}
+		List<Tile> tilesInRange = getNeighborsCircularDist(t, radius);
+		for(Tile reZone: tilesInRange){
+			reZone.setZone(zt);
+		}
+		return true;
 	}
 
 	@Override
 	public boolean setAllZonesAround_ManhattanDist(Pos2D pos, ZoneType zt, int radius) {
-		// TODO Auto-generated method stub
-		return false;
+		Tile t = this.getTileAt(pos);
+		if(t==null){
+			return false;
+		}
+		List<Tile> tilesInRange = getNeighborsManhattanDist(t, radius);
+		for(Tile reZone: tilesInRange){
+			reZone.setZone(zt);
+		}
+		return true;
 	}
 
 	private Tile getNearestOfType(Tile t, ZoneType zt) {
@@ -96,8 +109,23 @@ public class WorldImpl implements World {
 		// TODO
 		return null;
 	}
+	
+	private List<Tile> getNeighborsCircularDist(Tile origin, int radius){
+		int index = getIndexOfTile(origin);
+		List<Tile> neighbors = new ArrayList<Tile>();
+		if(index==-1){
+			return neighbors;
+		}
+		Pos2D originPt = origin.getPos();
+		for(int i=0; i<tiles.length; i++){
+			if(tiles[i].getPos().distBetween(originPt)<=radius){
+				neighbors.add(tiles[i]);
+			}
+		}
+		return neighbors;
+	}
 
-	public List<Tile> getNeighborsManhattanDist(Tile origin, int radius){
+	private List<Tile> getNeighborsManhattanDist(Tile origin, int radius){
 		int index = getIndexOfTile(origin);
 		List<Tile> neighbors = new ArrayList<Tile>();
 		if(index==-1){

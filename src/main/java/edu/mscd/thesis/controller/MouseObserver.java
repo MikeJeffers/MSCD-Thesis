@@ -23,27 +23,19 @@ public class MouseObserver implements EventHandler<MouseEvent> {
 		if (event.getEventType().equals(MouseEvent.MOUSE_CLICKED)) {
 			World w  = controller.getWorld();
 			Affine xForm = controller.getGraphics().getTransform();
-	
 			Point2D pt = new Point2D(event.getSceneX(), event.getSceneY());
 			try {
 				pt = xForm.inverseTransform(pt);
 			} catch (NonInvertibleTransformException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 				return;
 			}
-			System.out.println("Click At:"+event.getSceneX()+"x, "+event.getSceneY()+"y");
 			double dx = pt.getX();
 			double dy = pt.getY();
-			System.out.println("Click At:"+dx+"x, "+dy+"y");
 			Pos2D modelCoordinate = new Pos2D(dx, dy);
-			Tile t = w.getTileAt(modelCoordinate);
-			if(t==null){
-				System.err.println("No Tile found at: click pt="+pt.toString()+" model(xy):"+modelCoordinate);
-				return;
-			}
-			System.out.println(t);
-			t.setZone(Main.selection);
+			
+			w.setAllZonesAround(modelCoordinate, Main.selection, Main.radiusSelection);
+
 			controller.step();
 
 			

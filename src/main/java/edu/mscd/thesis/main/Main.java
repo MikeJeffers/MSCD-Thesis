@@ -1,6 +1,5 @@
 package edu.mscd.thesis.main;
 
-
 import edu.mscd.thesis.controller.GameLoop;
 import edu.mscd.thesis.controller.MouseObserver;
 import edu.mscd.thesis.model.Pos2D;
@@ -9,6 +8,8 @@ import edu.mscd.thesis.model.WorldImpl;
 import edu.mscd.thesis.model.zones.ZoneType;
 import edu.mscd.thesis.util.Util;
 import javafx.application.Application;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
 import javafx.scene.Group;
@@ -17,6 +18,7 @@ import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
+import javafx.scene.control.Spinner;
 import javafx.scene.image.Image;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.FlowPane;
@@ -35,7 +37,7 @@ public class Main extends Application {
 	private static final int SCREEN_HEIGHT = 600;
 	public static final double SCALE_FACTOR = Util.getScaleFactor(WORLD_X, WORLD_Y, SCREEN_WIDTH, SCREEN_HEIGHT);
 	public static ZoneType selection = ZoneType.EMPTY;
-	public static Image houseImage;
+	public static int radiusSelection = 1;
 
 	public static void main(String[] args) {
 		Application.launch(args);
@@ -50,7 +52,6 @@ public class Main extends Application {
 	private void initWorld() {
 		this.world = new WorldImpl(WORLD_X, WORLD_Y);
 	}
-
 
 	@Override
 	public void start(Stage stage) throws Exception {
@@ -73,6 +74,15 @@ public class Main extends Application {
 		step.setOnAction(e -> controller.step());
 		zonePanel.getChildren().add(step);
 
+		Spinner<Integer> radiusSelector = new Spinner<Integer>(0, 10, 1);
+		radiusSelector.valueProperty().addListener(new ChangeListener<Integer>() {
+			@Override
+			public void changed(ObservableValue<? extends Integer> observable, Integer oldValue, Integer newValue) {
+				Main.radiusSelection = newValue;
+			}
+		});
+		zonePanel.getChildren().add(radiusSelector);
+
 		FlowPane cameraControls = new FlowPane();
 		makeControlButtons(cameraControls, gc);
 
@@ -92,7 +102,7 @@ public class Main extends Application {
 		stage.setScene(mainScene);
 
 		canvas.addEventHandler(MouseEvent.MOUSE_CLICKED, new MouseObserver(controller));
-		if(SCREENSHOT){
+		if (SCREENSHOT) {
 			canvas.addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
 				@Override
 				public void handle(MouseEvent event) {
@@ -100,7 +110,6 @@ public class Main extends Application {
 				}
 			});
 		}
-		
 
 		controller.start();
 		controller.step();
@@ -174,5 +183,4 @@ public class Main extends Application {
 		Main.selection = zType;
 	}
 
-	
 }
