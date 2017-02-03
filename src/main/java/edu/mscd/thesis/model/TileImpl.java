@@ -94,7 +94,7 @@ public class TileImpl implements Tile {
 
 	@Override
 	public String toString() {
-		return "Tile{at=" + this.getPos() + ", type=" + this.type.toString() + ", zone=" + this.getZone() + "}";
+		return "Tile{at=" + this.getPos() + ", type=" + this.type.toString() + ", zone=" + this.getZone().toString() + "}";
 	}
 
 	@Override

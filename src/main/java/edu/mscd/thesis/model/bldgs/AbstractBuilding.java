@@ -139,7 +139,19 @@ public abstract class AbstractBuilding implements Building {
 
 	@Override
 	public String toString() {
-		return "Building:{at=" + this.pos.toString() + " img=" + this.image.toString() + "}";
+		StringBuilder sb = new StringBuilder("");
+		sb.append("Building:{at=");
+		sb.append(pos);
+		sb.append(" img=");
+		sb.append(this.image.toString());
+		sb.append(" Occupants: ");
+		for(Person p: this.getOccupants()){
+			sb.append("{");
+			sb.append(p);
+			sb.append("},");
+		}
+		sb.append("}");
+		return sb.toString();
 	}
 
 }

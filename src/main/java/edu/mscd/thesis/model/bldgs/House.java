@@ -1,6 +1,9 @@
 package edu.mscd.thesis.model.bldgs;
 
 import java.io.File;
+
+import edu.mscd.thesis.model.Citizen;
+import edu.mscd.thesis.model.Person;
 import edu.mscd.thesis.model.Pos2D;
 import edu.mscd.thesis.model.zones.Density;
 import javafx.scene.image.Image;
@@ -17,6 +20,11 @@ public class House extends AbstractBuilding {
 		super.setImage(img);
 		super.setWealthLevel(level);
 		super.setMaxOccupancy(level);
+		for(int i=0; i<level; i++){
+			Person p = new Citizen();
+			p.setHome(this);
+			super.addOccupant(p);
+		}
 	}
 
 	@Override

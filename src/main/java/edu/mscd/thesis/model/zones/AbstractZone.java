@@ -48,7 +48,13 @@ public abstract class AbstractZone implements Zone {
 
 	@Override
 	public String toString() {
-		return "Zone{pos=" + pos.toString() + ", type=abstract}";
+		StringBuilder sb = new StringBuilder("");
+		sb.append("Zone{pos=");
+		sb.append(getPos());
+		sb.append(", type=");
+		sb.append(getZoneType());
+		sb.append(this.getBuilding());
+		return sb.toString();
 	}
 
 	@Override

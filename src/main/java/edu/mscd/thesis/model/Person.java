@@ -8,6 +8,10 @@ public interface Person {
 	Building getHome();
 
 	Building getWork();
+	
+	void setWork(Building b);
+	
+	void setHome(Building b);
 
 	float getHappiness();
 

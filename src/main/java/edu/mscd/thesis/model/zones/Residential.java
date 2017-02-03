@@ -32,10 +32,6 @@ public class Residential extends AbstractZone {
 
 	}
 
-	@Override
-	public String toString() {
-		return "Zone{pos=" + getPos().toString() + ", type=" + this.getZoneType().toString() + "}";
-	}
 
 	@Override
 	public void update() {

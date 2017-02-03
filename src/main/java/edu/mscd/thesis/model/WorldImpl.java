@@ -1,9 +1,11 @@
 package edu.mscd.thesis.model;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Random;
 
+import edu.mscd.thesis.model.bldgs.Building;
 import edu.mscd.thesis.model.zones.Zone;
 import edu.mscd.thesis.model.zones.ZoneFactory;
 import edu.mscd.thesis.model.zones.ZoneFactoryImpl;
@@ -44,6 +46,29 @@ public class WorldImpl implements World {
 		for (int i = 0; i < tiles.length; i++) {
 			Tile t = tiles[i];
 			if (t.getZone().getZoneType() != ZoneType.EMPTY) {
+				if(t.getZone().getZoneType()==ZoneType.INDUSTRIAL){
+					System.out.println(t);
+					
+					Zone z = t.getZone();
+					Building b = z.getBuilding();
+					if(b!=null){
+						boolean searchExhausted = false;
+						int maxOccupants = z.getBuilding().getMaxOccupants();
+						int currentOccpancy = z.getBuilding().getOccupants().size();
+						while(currentOccpancy<maxOccupants && !searchExhausted){
+							Person p = findUnemployed(t);
+							if(p!=null){
+								p.setWork(z.getBuilding());
+								z.getBuilding().getOccupants().add(p);
+								currentOccpancy = z.getBuilding().getOccupants().size();
+							}else{
+								searchExhausted=true;
+							}
+							
+						}
+					}
+					
+				}
 				// getnearest of type, get dist, modify value of zone in tile as
 				// per ruleset
 			}
@@ -103,6 +128,26 @@ public class WorldImpl implements World {
 			}
 		}
 		return found;
+	}
+	
+	
+	private Person findUnemployed(Tile t){
+		for (int i = 0; i < tiles.length; i++) {
+			if (!tiles[i].equals(t)) {
+				if (tiles[i].getZone().getZoneType() == ZoneType.RESIDENTIAL) {
+					Zone z = tiles[i].getZone();
+					Building b= z.getBuilding();
+					Collection<Person> people = b.getOccupants();
+					for(Person p: people){
+						if(p.getWork()==null){
+							return p;
+						}
+					}
+				}
+
+			}
+		}
+		return null;
 	}
 
 	private Tile findNearestOfType(Tile origin, ZoneType zt) {

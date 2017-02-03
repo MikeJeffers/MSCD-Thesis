@@ -2,6 +2,8 @@ package edu.mscd.thesis.model.zones;
 
 import edu.mscd.thesis.model.Pos2D;
 import edu.mscd.thesis.model.Tile;
+import edu.mscd.thesis.model.bldgs.House;
+import edu.mscd.thesis.util.Util;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 
@@ -12,6 +14,8 @@ public class Industrial extends AbstractZone {
 		// Industry zone tile-bias
 		double tileValues = (tile.baseLandValue() + tile.materialValue())/2.0;
 		super.setValue(super.getValue() + tileValues);
+		//TODO make indy building class and sprite img
+		super.setBuilding(new House(pos, Density.NONE));
 	}
 
 	@Override
@@ -25,10 +29,7 @@ public class Industrial extends AbstractZone {
 		super.draw(g);
 	}
 
-	@Override
-	public String toString() {
-		return "Zone{pos=" + getPos().toString() + ", type=" + this.getZoneType().toString() + "}";
-	}
+
 
 	@Override
 	public void update() {
@@ -36,5 +37,12 @@ public class Industrial extends AbstractZone {
 		// zone
 		// super.getBuildings().add(new House(super.getPos(), super.getTile(),
 		// ZoneType.RESIDENTIAL));
+		
+		if (this.getTile().maxDensity().getDensityLevel() >= super.getBuilding().getDensity().getDensityLevel()) {
+			if (super.getValue() > Util.GROWTH_THRESHOLD) {
+				super.setBuilding(new House(this.getPos(), super.getBuilding().getDensity().getNextLevel()));
+				super.setValue(super.getValue() - 1);
+			}
+		}
 	}
 }
