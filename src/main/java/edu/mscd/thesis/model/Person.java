@@ -11,10 +11,11 @@ public interface Person {
 	Building getWork();
 	boolean employed();
 	
+	void fire();
+	void evict();
+	void employAt(Building b);
 	
-	void setWork(Building b);
-	
-	void setHome(Building b);
+	void liveAt(Building b);
 
 	float getHappiness();
 

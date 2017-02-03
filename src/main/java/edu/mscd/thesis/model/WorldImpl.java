@@ -47,28 +47,28 @@ public class WorldImpl implements World {
 		for (int i = 0; i < tiles.length; i++) {
 			Tile t = tiles[i];
 			if (t.getZone().getZoneType() != ZoneType.EMPTY) {
-				if(t.getZone().getZoneType()==ZoneType.INDUSTRIAL){
+				if (t.getZone().getZoneType() == ZoneType.INDUSTRIAL) {
 					System.out.println(t);
-					
+
 					Zone z = t.getZone();
 					PlaceOfWork b = (PlaceOfWork) z.getBuilding();
-					if(b!=null){
+					if (b != null) {
 						boolean searchExhausted = false;
 						int maxOccupants = b.getMaxOccupants();
 						int currentOccpancy = b.currentOccupancy();
-						while(currentOccpancy<maxOccupants && !searchExhausted){
-							Person p = findUnemployed(t);
+						while (currentOccpancy < maxOccupants && !searchExhausted) {
+							Person p = findClosestUnemployed(t);
 							System.out.println(p);
-							if(p!=null){
+							if (p != null) {
 								b.addOccupant(p);
 								currentOccpancy = b.currentOccupancy();
-							}else{
-								searchExhausted=true;
+							} else {
+								searchExhausted = true;
 							}
-							
+
 						}
 					}
-					
+
 				}
 				// getnearest of type, get dist, modify value of zone in tile as
 				// per ruleset
@@ -77,11 +77,11 @@ public class WorldImpl implements World {
 		}
 
 	}
-	
+
 	@Override
 	public boolean setZoneAt(Pos2D pos, ZoneType zt) {
 		Tile t = this.getTileAt(pos);
-		if(t==null){
+		if (t == null) {
 			return false;
 		}
 		return t.setZone(zt);
@@ -90,11 +90,11 @@ public class WorldImpl implements World {
 	@Override
 	public boolean setAllZonesAround(Pos2D pos, ZoneType zt, int radius) {
 		Tile t = this.getTileAt(pos);
-		if(t==null){
+		if (t == null) {
 			return false;
 		}
 		List<Tile> tilesInRange = getNeighborsCircularDist(t, radius);
-		for(Tile reZone: tilesInRange){
+		for (Tile reZone : tilesInRange) {
 			reZone.setZone(zt);
 		}
 		return true;
@@ -103,11 +103,11 @@ public class WorldImpl implements World {
 	@Override
 	public boolean setAllZonesAround_ManhattanDist(Pos2D pos, ZoneType zt, int radius) {
 		Tile t = this.getTileAt(pos);
-		if(t==null){
+		if (t == null) {
 			return false;
 		}
 		List<Tile> tilesInRange = getNeighborsManhattanDist(t, radius);
-		for(Tile reZone: tilesInRange){
+		for (Tile reZone : tilesInRange) {
 			reZone.setZone(zt);
 		}
 		return true;
@@ -130,18 +130,44 @@ public class WorldImpl implements World {
 		}
 		return found;
 	}
-	
-	
-	private Person findUnemployed(Tile t){
+
+	private Person findClosestUnemployed(Tile t) {
+		double minDist = Double.MAX_VALUE;
+		Person bestCandidate = null;
+		Pos2D origin = t.getPos();
+		for (int i = 0; i < tiles.length; i++) {
+			if (!tiles[i].equals(t)) {
+				if (tiles[i].getZone().getZoneType() == ZoneType.RESIDENTIAL) {
+					Pos2D dest = tiles[i].getPos();
+					double d = origin.distBetween(dest);
+					if (d < minDist) {
+						Zone z = tiles[i].getZone();
+						Building b = z.getBuilding();
+						Collection<Person> people = b.getOccupants();
+						for (Person p : people) {
+							System.out.println(p);
+							if (!p.employed()) {
+								minDist = d;
+								bestCandidate = p;
+							}
+						}
+					}
+				}
+			}
+		}
+		return bestCandidate;
+	}
+
+	private Person findUnemployed(Tile t) {
 		for (int i = 0; i < tiles.length; i++) {
 			if (!tiles[i].equals(t)) {
 				if (tiles[i].getZone().getZoneType() == ZoneType.RESIDENTIAL) {
 					Zone z = tiles[i].getZone();
-					Building b= z.getBuilding();
+					Building b = z.getBuilding();
 					Collection<Person> people = b.getOccupants();
-					for(Person p: people){
+					for (Person p : people) {
 						System.out.println(p);
-						if(!p.employed()){
+						if (!p.employed()) {
 							return p;
 						}
 					}
@@ -156,47 +182,46 @@ public class WorldImpl implements World {
 		// TODO
 		return null;
 	}
-	
-	private List<Tile> getNeighborsCircularDist(Tile origin, int radius){
+
+	private List<Tile> getNeighborsCircularDist(Tile origin, int radius) {
 		int index = getIndexOfTile(origin);
 		List<Tile> neighbors = new ArrayList<Tile>();
-		if(index==-1){
+		if (index == -1) {
 			return neighbors;
 		}
 		Pos2D originPt = origin.getPos();
-		for(int i=0; i<tiles.length; i++){
-			if(tiles[i].getPos().distBetween(originPt)<=radius){
+		for (int i = 0; i < tiles.length; i++) {
+			if (tiles[i].getPos().distBetween(originPt) <= radius) {
 				neighbors.add(tiles[i]);
 			}
 		}
 		return neighbors;
 	}
 
-	private List<Tile> getNeighborsManhattanDist(Tile origin, int radius){
+	private List<Tile> getNeighborsManhattanDist(Tile origin, int radius) {
 		int index = getIndexOfTile(origin);
 		List<Tile> neighbors = new ArrayList<Tile>();
-		if(index==-1){
+		if (index == -1) {
 			return neighbors;
 		}
-		
-		for(int j=-radius; j<=radius; j++){
-			for(int k=-radius; k<=radius; k++){
-				int indexOfNeighbor = index + (k*cols)+(j);
-				if(indexOfNeighbor>=tiles.length || indexOfNeighbor<0){
+
+		for (int j = -radius; j <= radius; j++) {
+			for (int k = -radius; k <= radius; k++) {
+				int indexOfNeighbor = index + (k * cols) + (j);
+				if (indexOfNeighbor >= tiles.length || indexOfNeighbor < 0) {
 					continue;
 				}
-				int expectedCol = (index%cols)+j;
-				int expectedRow = (int)(index/cols)+k;
-				int actualCol = indexOfNeighbor%cols;
-				int actualRow = indexOfNeighbor/cols;
-				if(actualRow==expectedRow && actualCol==expectedCol){
+				int expectedCol = (index % cols) + j;
+				int expectedRow = (int) (index / cols) + k;
+				int actualCol = indexOfNeighbor % cols;
+				int actualRow = indexOfNeighbor / cols;
+				if (actualRow == expectedRow && actualCol == expectedCol) {
 					neighbors.add(tiles[indexOfNeighbor]);
 				}
 			}
 		}
 		return neighbors;
 	}
-	
 
 	private int getIndexOfTile(Tile t) {
 		for (int i = 0; i < tiles.length; i++) {
@@ -236,7 +261,5 @@ public class WorldImpl implements World {
 		// TODO Auto-generated method stub
 		return null;
 	}
-
-
 
 }

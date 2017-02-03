@@ -17,6 +17,14 @@ public abstract class AbstractZone implements Zone {
 		this.tile = tile;
 		this.value = Rules.getValueForZoneOnTile(tile.getType(), this.getZoneType());
 	}
+	
+	@Override
+	public void clear(){
+		if(this.building==null){
+			return;
+		}
+		this.building.clear();
+	}
 
 	@Override
 	public void deltaValue(double v) {

@@ -27,12 +27,12 @@ public class Citizen implements Person {
 	}
 
 	@Override
-	public void setWork(Building b) {
+	public void employAt(Building b) {
 		work = b;
 	}
 
 	@Override
-	public void setHome(Building b) {
+	public void liveAt(Building b) {
 		home = b;
 	}
 
@@ -52,6 +52,14 @@ public class Citizen implements Person {
 	@Override
 	public boolean employed() {
 		return this.work!=null;
+	}
+	@Override
+	public void fire() {
+		this.work = null;
+	}
+	@Override
+	public void evict() {
+		this.home=null;
 	}
 
 }

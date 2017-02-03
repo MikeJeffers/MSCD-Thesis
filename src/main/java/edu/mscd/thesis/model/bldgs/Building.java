@@ -18,5 +18,6 @@ public interface Building extends Sprite{
 	Density getDensity();
 	void changeDensity(Density density);
 	double update(double growthValue);
+	void clear();
 
 }

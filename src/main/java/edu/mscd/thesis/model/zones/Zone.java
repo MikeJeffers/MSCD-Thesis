@@ -21,4 +21,6 @@ public interface Zone {
 	void draw(GraphicsContext g);
 
 	void update();
+	
+	void clear();
 }

@@ -33,6 +33,12 @@ public abstract class AbstractBuilding implements Building {
 		this.occupants = new HashSet<Person>();
 	}
 	
+
+	@Override
+	public void clear(){
+		this.occupants.clear();
+	}
+	
 	@Override
 	public double update(double growthValue) {
 		if (this.getTileType().getMaxDensity().getDensityLevel() >= getDensity().getDensityLevel()) {

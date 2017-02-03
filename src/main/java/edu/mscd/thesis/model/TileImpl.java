@@ -73,6 +73,7 @@ public class TileImpl implements Tile {
 	@Override
 	public boolean setZone(ZoneType zType) {
 		if (this.isZonable() && !zType.equals(this.zoning.getZoneType())) {
+			this.zoning.clear();
 			this.zoning = this.factory.createZone(zType, this.pos, this);
 			return true;
 		}

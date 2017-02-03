@@ -25,12 +25,19 @@ public abstract class PlaceOfWork extends AbstractBuilding{
 		}
 		return growthValue;
 	}
+	
+	@Override
+	public void clear(){
+		for(Person p:this.getOccupants()){
+			p.fire();
+		}
+	}
 
 	@Override
 	public boolean addOccupant(Person p){
 		if(p!=null && !p.employed()){
 			if( super.addOccupant(p)){
-				p.setWork(this);
+				p.employAt(this);
 				return true;
 			}
 		}

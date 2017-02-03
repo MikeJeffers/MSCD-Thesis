@@ -8,11 +8,9 @@ import edu.mscd.thesis.model.Pos2D;
 import edu.mscd.thesis.model.TileType;
 import edu.mscd.thesis.model.zones.Density;
 import edu.mscd.thesis.model.zones.ZoneType;
-import edu.mscd.thesis.util.Rules;
-import edu.mscd.thesis.util.Util;
 import javafx.scene.image.Image;
 
-public class House extends AbstractBuilding {
+public class House extends Home {
 	private Density density;
 
 
