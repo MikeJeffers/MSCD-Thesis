@@ -3,7 +3,7 @@ package edu.mscd.thesis.model.zones;
 import edu.mscd.thesis.model.Pos2D;
 import edu.mscd.thesis.model.Tile;
 import edu.mscd.thesis.model.bldgs.Building;
-import edu.mscd.thesis.util.Util;
+import edu.mscd.thesis.util.Rules;
 import javafx.scene.canvas.GraphicsContext;
 
 public abstract class AbstractZone implements Zone {
@@ -15,12 +15,13 @@ public abstract class AbstractZone implements Zone {
 	public AbstractZone(Pos2D pos, Tile tile) {
 		this.pos = pos;
 		this.tile = tile;
+		this.value = Rules.getValueForZoneOnTile(tile.getType(), this.getZoneType());
 	}
 
 	@Override
 	public void deltaValue(double v) {
 		this.value += v;
-		Math.max(this.value, Util.MAX);
+		Math.max(this.value, Rules.MAX);
 	}
 
 	@Override
@@ -30,7 +31,7 @@ public abstract class AbstractZone implements Zone {
 
 	public void setValue(double v) {
 		this.value = v;
-		Math.max(this.value, Util.MAX);
+		Math.max(this.value, Rules.MAX);
 	}
 
 	@Override
@@ -50,16 +51,21 @@ public abstract class AbstractZone implements Zone {
 	public String toString() {
 		StringBuilder sb = new StringBuilder("");
 		sb.append("Zone{pos=");
-		sb.append(getPos());
-		sb.append(", type=");
+		sb.append("Zone{type=");
 		sb.append(getZoneType());
+		sb.append(" Value=");
+		sb.append(this.getValue());
+		sb.append(" pos=");
+		sb.append(getPos());
 		sb.append(this.getBuilding());
 		return sb.toString();
 	}
 
 	@Override
 	public void update() {
-
+		if(this.building!=null){
+			this.setValue(this.building.update(this.getValue()));
+		}
 	}
 
 	@Override

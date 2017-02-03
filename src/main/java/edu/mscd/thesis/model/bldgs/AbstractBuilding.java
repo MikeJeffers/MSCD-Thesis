@@ -7,7 +7,9 @@ import java.util.Objects;
 
 import edu.mscd.thesis.model.Person;
 import edu.mscd.thesis.model.Pos2D;
-import edu.mscd.thesis.model.zones.Density;
+import edu.mscd.thesis.model.TileType;
+import edu.mscd.thesis.model.zones.ZoneType;
+import edu.mscd.thesis.util.Rules;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
@@ -15,6 +17,8 @@ import javafx.scene.image.Image;
 public abstract class AbstractBuilding implements Building {
 	private Pos2D pos;
 	private Image image;
+	private TileType tileType;
+	private ZoneType zoneType;
 	private Rectangle2D rect;
 	private double width;
 	private double height;
@@ -22,9 +26,30 @@ public abstract class AbstractBuilding implements Building {
 	private int maxOccupants;
 	private int wealthLevel;
 
-	public AbstractBuilding(Pos2D pos) {
+	public AbstractBuilding(Pos2D pos, TileType tType, ZoneType zType) {
+		this.tileType = tType;
+		this.zoneType = zType;
 		this.pos = pos;
 		this.occupants = new HashSet<Person>();
+	}
+	
+	@Override
+	public double update(double growthValue) {
+		if (this.getTileType().getMaxDensity().getDensityLevel() >= getDensity().getDensityLevel()) {
+			if (growthValue > Rules.GROWTH_THRESHOLD) {
+				this.changeDensity(getDensity().getNextLevel());
+				return growthValue-Rules.BASE_GROWTH_COST;
+			}else{
+				this.changeDensity(getDensity().getPrevLevel());
+				return growthValue+Rules.BASE_GROWTH_COST*2;
+			}
+		}
+		return growthValue;
+	}
+	
+	@Override
+	public int currentOccupancy(){
+		return this.occupants.size();
 	}
 
 	@Override
@@ -134,7 +159,7 @@ public abstract class AbstractBuilding implements Building {
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(pos);
+		return Objects.hash(pos, zoneType, tileType, wealthLevel, maxOccupants);
 	}
 
 	@Override
@@ -142,8 +167,10 @@ public abstract class AbstractBuilding implements Building {
 		StringBuilder sb = new StringBuilder("");
 		sb.append("Building:{at=");
 		sb.append(pos);
-		sb.append(" img=");
-		sb.append(this.image.toString());
+		sb.append(" maxOccupants:");
+		sb.append(this.maxOccupants);
+		sb.append(" currentCount:");
+		sb.append(this.currentOccupancy());
 		sb.append(" Occupants: ");
 		for(Person p: this.getOccupants()){
 			sb.append("{");
@@ -152,6 +179,22 @@ public abstract class AbstractBuilding implements Building {
 		}
 		sb.append("}");
 		return sb.toString();
+	}
+
+	public TileType getTileType() {
+		return tileType;
+	}
+
+	public void setTileType(TileType tileType) {
+		this.tileType = tileType;
+	}
+
+	public ZoneType getZoneType() {
+		return zoneType;
+	}
+
+	public void setZoneType(ZoneType zoneType) {
+		this.zoneType = zoneType;
 	}
 
 }

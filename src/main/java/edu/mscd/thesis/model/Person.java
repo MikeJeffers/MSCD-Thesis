@@ -6,8 +6,11 @@ public interface Person {
 	Pos2D getCurrentPos();
 
 	Building getHome();
+	boolean homeless();
 
 	Building getWork();
+	boolean employed();
+	
 	
 	void setWork(Building b);
 	

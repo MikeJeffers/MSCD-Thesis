@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Random;
 
 import edu.mscd.thesis.model.bldgs.Building;
+import edu.mscd.thesis.model.bldgs.PlaceOfWork;
 import edu.mscd.thesis.model.zones.Zone;
 import edu.mscd.thesis.model.zones.ZoneFactory;
 import edu.mscd.thesis.model.zones.ZoneFactoryImpl;
@@ -50,17 +51,17 @@ public class WorldImpl implements World {
 					System.out.println(t);
 					
 					Zone z = t.getZone();
-					Building b = z.getBuilding();
+					PlaceOfWork b = (PlaceOfWork) z.getBuilding();
 					if(b!=null){
 						boolean searchExhausted = false;
-						int maxOccupants = z.getBuilding().getMaxOccupants();
-						int currentOccpancy = z.getBuilding().getOccupants().size();
+						int maxOccupants = b.getMaxOccupants();
+						int currentOccpancy = b.currentOccupancy();
 						while(currentOccpancy<maxOccupants && !searchExhausted){
 							Person p = findUnemployed(t);
+							System.out.println(p);
 							if(p!=null){
-								p.setWork(z.getBuilding());
-								z.getBuilding().getOccupants().add(p);
-								currentOccpancy = z.getBuilding().getOccupants().size();
+								b.addOccupant(p);
+								currentOccpancy = b.currentOccupancy();
 							}else{
 								searchExhausted=true;
 							}
@@ -139,7 +140,8 @@ public class WorldImpl implements World {
 					Building b= z.getBuilding();
 					Collection<Person> people = b.getOccupants();
 					for(Person p: people){
-						if(p.getWork()==null){
+						System.out.println(p);
+						if(!p.employed()){
 							return p;
 						}
 					}

@@ -45,5 +45,13 @@ public class Citizen implements Person {
 	public float getMoney() {
 		return 1;
 	}
+	@Override
+	public boolean homeless() {
+		return this.home==null;
+	}
+	@Override
+	public boolean employed() {
+		return this.work!=null;
+	}
 
 }
