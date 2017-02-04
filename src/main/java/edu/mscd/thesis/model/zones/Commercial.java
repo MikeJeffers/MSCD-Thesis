@@ -2,6 +2,8 @@ package edu.mscd.thesis.model.zones;
 
 import edu.mscd.thesis.model.Pos2D;
 import edu.mscd.thesis.model.Tile;
+import edu.mscd.thesis.model.bldgs.House;
+import edu.mscd.thesis.model.bldgs.Shop;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 
@@ -9,10 +11,7 @@ public class Commercial extends AbstractZone {
 
 	public Commercial(Pos2D pos, Tile tile) {
 		super(pos, tile);
-
-		// Commercial zone tile-bias
-		double tileValues = (tile.baseLandValue() + (tile.materialValue() / 2.0)) / 1.5;
-		super.setValue(super.getValue() + tileValues);
+		super.setBuilding(new Shop(pos, tile.getType(), getZoneType(), Density.NONE));
 	}
 
 	@Override
@@ -26,14 +25,5 @@ public class Commercial extends AbstractZone {
 		super.draw(g);
 	}
 
-
-
-	@Override
-	public void update() {
-		// TODO add zone rule logic here to eval growth/decay of buildings in
-		// zone
-		// super.getBuildings().add(new House(super.getPos(), super.getTile(),
-		// ZoneType.RESIDENTIAL));
-	}
 
 }

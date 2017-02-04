@@ -48,9 +48,9 @@ public class WorldImpl implements World {
 			Tile t = tiles[i];
 			if (t.getZone().getZoneType() != ZoneType.EMPTY) {
 				if (t.getZone().getZoneType() == ZoneType.INDUSTRIAL) {
-					//fillJobsAt(t);
+					// fillJobsAt(t);
 					System.out.println(t);
-				}else if(t.getZone().getZoneType()==ZoneType.RESIDENTIAL){
+				} else if (t.getZone().getZoneType() == ZoneType.RESIDENTIAL) {
 					findJobNearest(t);
 					System.out.println(t);
 				}
@@ -60,13 +60,13 @@ public class WorldImpl implements World {
 			tiles[i].update();
 		}
 	}
-	
-	private void findJobNearest(Tile t){
+
+	private void findJobNearest(Tile t) {
 		Zone z = t.getZone();
 		Building b = z.getBuilding();
 		if (b != null) {
-			for(Person p: b.getOccupants()){
-				if(!p.employed()){
+			for (Person p : b.getOccupants()) {
+				if (!p.employed()) {
 					Building work = findClosestUnfilledJob(t);
 					p.employAt(work);
 				}
@@ -81,13 +81,13 @@ public class WorldImpl implements World {
 		for (int i = 0; i < tiles.length; i++) {
 			if (!tiles[i].equals(t)) {
 				ZoneType type = tiles[i].getZone().getZoneType();
-				if (type == ZoneType.INDUSTRIAL || type ==ZoneType.COMMERICAL) {
+				if (type == ZoneType.INDUSTRIAL || type == ZoneType.COMMERICAL) {
 					Pos2D dest = tiles[i].getPos();
 					double d = origin.distBetween(dest);
 					if (d < minDist) {
 						Zone z = tiles[i].getZone();
 						Building b = z.getBuilding();
-						if(b.getMaxOccupants()>b.getOccupants().size()){
+						if (b.getMaxOccupants() > b.getOccupants().size()) {
 							minDist = d;
 							bestCandidate = b;
 						}
@@ -97,7 +97,8 @@ public class WorldImpl implements World {
 		}
 		return bestCandidate;
 	}
-	private void fillJobsAt(Tile t){
+
+	private void fillJobsAt(Tile t) {
 		if (t.getZone().getZoneType() == ZoneType.INDUSTRIAL) {
 			Zone z = t.getZone();
 			Building b = z.getBuilding();
@@ -117,7 +118,7 @@ public class WorldImpl implements World {
 			}
 		}
 	}
-	
+
 	private Person findClosestUnemployed(Tile t) {
 		double minDist = Double.MAX_VALUE;
 		Person bestCandidate = null;
@@ -173,30 +174,23 @@ public class WorldImpl implements World {
 	}
 
 	@Override
-	public boolean setAllZonesAround(Pos2D pos, ZoneType zt, int radius) {
+	public boolean setAllZonesAround(Pos2D pos, ZoneType zt, int radius, boolean squareSelect) {
 		Tile t = this.getTileAt(pos);
 		if (t == null) {
 			return false;
 		}
-		List<Tile> tilesInRange = getNeighborsCircularDist(t, radius);
+		List<Tile> tilesInRange;
+		if (squareSelect) {
+			tilesInRange = getNeighborsManhattanDist(t, radius);
+		} else {
+			tilesInRange = getNeighborsCircularDist(t, radius);
+		}
 		for (Tile reZone : tilesInRange) {
 			reZone.setZone(zt);
 		}
 		return true;
 	}
 
-	@Override
-	public boolean setAllZonesAround_ManhattanDist(Pos2D pos, ZoneType zt, int radius) {
-		Tile t = this.getTileAt(pos);
-		if (t == null) {
-			return false;
-		}
-		List<Tile> tilesInRange = getNeighborsManhattanDist(t, radius);
-		for (Tile reZone : tilesInRange) {
-			reZone.setZone(zt);
-		}
-		return true;
-	}
 
 	private Tile getNearestOfType(Tile t, ZoneType zt) {
 		double distance = 10000;
@@ -215,8 +209,6 @@ public class WorldImpl implements World {
 		}
 		return found;
 	}
-
-
 
 	private Tile findNearestOfType(Tile origin, ZoneType zt) {
 		// TODO

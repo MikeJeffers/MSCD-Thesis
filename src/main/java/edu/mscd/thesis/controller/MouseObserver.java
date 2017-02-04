@@ -32,7 +32,7 @@ public class MouseObserver implements EventHandler<MouseEvent> {
 			double dx = pt.getX();
 			double dy = pt.getY();
 			Pos2D modelCoordinate = new Pos2D(dx, dy);
-			w.setAllZonesAround(modelCoordinate, GUI.selection, GUI.radiusSelection);
+			w.setAllZonesAround(modelCoordinate, GUI.selection, GUI.radiusSelection, GUI.squareSelect);
 			controller.step();
 		}
 	}

@@ -26,6 +26,4 @@ public class Residential extends AbstractZone {
 
 	}
 
-
-
 }

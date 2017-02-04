@@ -26,7 +26,4 @@ public class Industrial extends AbstractZone {
 		super.draw(g);
 	}
 
-
-
-	
 }

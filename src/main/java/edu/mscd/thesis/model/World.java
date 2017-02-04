@@ -10,8 +10,7 @@ public interface World {
 	public void draw(GraphicsContext g);
 	
 	boolean setZoneAt(Pos2D pos, ZoneType zt);
-	boolean setAllZonesAround(Pos2D pos, ZoneType zt, int radius);
-	boolean setAllZonesAround_ManhattanDist(Pos2D pos, ZoneType zt, int radius);
+	boolean setAllZonesAround(Pos2D pos, ZoneType zt, int radius, boolean squareSelect);
 
 	Tile getTileAt(Pos2D pos);
 

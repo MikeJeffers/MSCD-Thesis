@@ -11,6 +11,8 @@ import javafx.application.Application;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
+import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.scene.Group;
 import javafx.scene.Node;
@@ -26,7 +28,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.transform.Affine;
 import javafx.stage.Stage;
 
-public class GUI extends Application{
+public class GUI extends Application {
 	private World world;
 	private GameLoop controller;
 	private static final boolean SCREENSHOT = false;
@@ -35,10 +37,10 @@ public class GUI extends Application{
 	private static final int SCREEN_WIDTH = 800;
 	private static final int SCREEN_HEIGHT = 600;
 	public static final double SCALE_FACTOR = Util.getScaleFactor(WORLD_X, WORLD_Y, SCREEN_WIDTH, SCREEN_HEIGHT);
+	// User selections on UI elements
 	public static ZoneType selection = ZoneType.EMPTY;
 	public static int radiusSelection = 1;
-
-
+	public static boolean squareSelect = false;
 
 	@Override
 	public void init() {
@@ -69,6 +71,20 @@ public class GUI extends Application{
 		Button step = new Button("STEP");
 		step.setOnAction(e -> controller.step());
 		zonePanel.getChildren().add(step);
+		Button brushShape = new Button("Circle");
+		brushShape.setOnAction(new EventHandler<ActionEvent>() {
+			@Override
+			public void handle(ActionEvent event) {
+				squareSelect=!squareSelect;
+				if(squareSelect){
+					brushShape.setText("Square");
+				}else{
+					brushShape.setText("Circle");
+				}	
+				
+			}
+		});
+		zonePanel.getChildren().add(brushShape);
 
 		Spinner<Integer> radiusSelector = new Spinner<Integer>(0, 10, 1);
 		radiusSelector.valueProperty().addListener(new ChangeListener<Integer>() {

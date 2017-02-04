@@ -1,15 +1,16 @@
 package edu.mscd.thesis.model.bldgs;
 
+import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Objects;
 
 import edu.mscd.thesis.model.Person;
 import edu.mscd.thesis.model.Pos2D;
 import edu.mscd.thesis.model.TileType;
+import edu.mscd.thesis.model.zones.Density;
 import edu.mscd.thesis.model.zones.ZoneType;
 import edu.mscd.thesis.util.Rules;
 import javafx.geometry.Rectangle2D;
@@ -27,12 +28,14 @@ public abstract class AbstractBuilding implements Building {
 	private Collection<Person> occupants;
 	private int maxOccupants;
 	private int wealthLevel;
+	private Density density;
 
-	public AbstractBuilding(Pos2D pos, TileType tType, ZoneType zType) {
+	public AbstractBuilding(Pos2D pos, TileType tType, ZoneType zType, Density density) {
 		this.tileType = tType;
 		this.zoneType = zType;
 		this.pos = pos;
 		this.occupants = new HashSet<Person>();
+		this.changeDensity(density);
 	}
 	
 
@@ -58,6 +61,11 @@ public abstract class AbstractBuilding implements Building {
 			}
 		}
 		return growthValue;
+	}
+	
+	@Override
+	public void changeDensity(Density density) {
+		this.density = density;
 	}
 	
 	@Override
@@ -175,6 +183,12 @@ public abstract class AbstractBuilding implements Building {
 		this.pos = pos;
 	}
 
+	@Override
+	public Density getDensity() {
+		return this.density;
+	}
+
+	
 	@Override
 	public boolean equals(Object o) {
 		if (o == null) {

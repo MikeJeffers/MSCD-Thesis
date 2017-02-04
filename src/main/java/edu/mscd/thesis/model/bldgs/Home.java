@@ -6,12 +6,13 @@ import java.util.Collection;
 import edu.mscd.thesis.model.Person;
 import edu.mscd.thesis.model.Pos2D;
 import edu.mscd.thesis.model.TileType;
+import edu.mscd.thesis.model.zones.Density;
 import edu.mscd.thesis.model.zones.ZoneType;
 
 public abstract class Home extends AbstractBuilding{
 
-	public Home(Pos2D pos, TileType tileType, ZoneType zoneType) {
-		super(pos, tileType, zoneType);
+	public Home(Pos2D pos, TileType tileType, ZoneType zoneType, Density density) {
+		super(pos, tileType, zoneType, density);
 	}
 	
 	@Override
