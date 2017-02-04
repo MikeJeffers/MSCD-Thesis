@@ -48,33 +48,119 @@ public class WorldImpl implements World {
 			Tile t = tiles[i];
 			if (t.getZone().getZoneType() != ZoneType.EMPTY) {
 				if (t.getZone().getZoneType() == ZoneType.INDUSTRIAL) {
+					//fillJobsAt(t);
 					System.out.println(t);
-
-					Zone z = t.getZone();
-					PlaceOfWork b = (PlaceOfWork) z.getBuilding();
-					if (b != null) {
-						boolean searchExhausted = false;
-						int maxOccupants = b.getMaxOccupants();
-						int currentOccpancy = b.currentOccupancy();
-						while (currentOccpancy < maxOccupants && !searchExhausted) {
-							Person p = findClosestUnemployed(t);
-							if (p != null) {
-								b.addOccupant(p);
-								currentOccpancy = b.currentOccupancy();
-							} else {
-								searchExhausted = true;
-							}
-
-						}
-					}
-
+				}else if(t.getZone().getZoneType()==ZoneType.RESIDENTIAL){
+					findJobNearest(t);
+					System.out.println(t);
 				}
 				// getnearest of type, get dist, modify value of zone in tile as
 				// per ruleset
 			}
 			tiles[i].update();
 		}
+	}
+	
+	private void findJobNearest(Tile t){
+		Zone z = t.getZone();
+		Building b = z.getBuilding();
+		if (b != null) {
+			for(Person p: b.getOccupants()){
+				if(!p.employed()){
+					Building work = findClosestUnfilledJob(t);
+					p.employAt(work);
+				}
+			}
+		}
+	}
 
+	private Building findClosestUnfilledJob(Tile t) {
+		double minDist = Double.MAX_VALUE;
+		Building bestCandidate = null;
+		Pos2D origin = t.getPos();
+		for (int i = 0; i < tiles.length; i++) {
+			if (!tiles[i].equals(t)) {
+				ZoneType type = tiles[i].getZone().getZoneType();
+				if (type == ZoneType.INDUSTRIAL || type ==ZoneType.COMMERICAL) {
+					Pos2D dest = tiles[i].getPos();
+					double d = origin.distBetween(dest);
+					if (d < minDist) {
+						Zone z = tiles[i].getZone();
+						Building b = z.getBuilding();
+						if(b.getMaxOccupants()>b.getOccupants().size()){
+							minDist = d;
+							bestCandidate = b;
+						}
+					}
+				}
+			}
+		}
+		return bestCandidate;
+	}
+	private void fillJobsAt(Tile t){
+		if (t.getZone().getZoneType() == ZoneType.INDUSTRIAL) {
+			Zone z = t.getZone();
+			Building b = z.getBuilding();
+			if (b != null) {
+				boolean searchExhausted = false;
+				int maxOccupants = b.getMaxOccupants();
+				int currentOccpancy = b.currentOccupancy();
+				while (currentOccpancy < maxOccupants && !searchExhausted) {
+					Person p = findClosestUnemployed(t);
+					if (p != null) {
+						b.addOccupant(p);
+						currentOccpancy = b.currentOccupancy();
+					} else {
+						searchExhausted = true;
+					}
+				}
+			}
+		}
+	}
+	
+	private Person findClosestUnemployed(Tile t) {
+		double minDist = Double.MAX_VALUE;
+		Person bestCandidate = null;
+		Pos2D origin = t.getPos();
+		for (int i = 0; i < tiles.length; i++) {
+			if (!tiles[i].equals(t)) {
+				if (tiles[i].getZone().getZoneType() == ZoneType.RESIDENTIAL) {
+					Pos2D dest = tiles[i].getPos();
+					double d = origin.distBetween(dest);
+					if (d < minDist) {
+						Zone z = tiles[i].getZone();
+						Building b = z.getBuilding();
+						Collection<Person> people = b.getOccupants();
+						for (Person p : people) {
+							if (!p.employed()) {
+								minDist = d;
+								bestCandidate = p;
+							}
+						}
+					}
+				}
+			}
+		}
+		return bestCandidate;
+	}
+
+	private Person findUnemployed(Tile t) {
+		for (int i = 0; i < tiles.length; i++) {
+			if (!tiles[i].equals(t)) {
+				if (tiles[i].getZone().getZoneType() == ZoneType.RESIDENTIAL) {
+					Zone z = tiles[i].getZone();
+					Building b = z.getBuilding();
+					Collection<Person> people = b.getOccupants();
+					for (Person p : people) {
+						if (!p.employed()) {
+							return p;
+						}
+					}
+				}
+
+			}
+		}
+		return null;
 	}
 
 	@Override
@@ -130,50 +216,7 @@ public class WorldImpl implements World {
 		return found;
 	}
 
-	private Person findClosestUnemployed(Tile t) {
-		double minDist = Double.MAX_VALUE;
-		Person bestCandidate = null;
-		Pos2D origin = t.getPos();
-		for (int i = 0; i < tiles.length; i++) {
-			if (!tiles[i].equals(t)) {
-				if (tiles[i].getZone().getZoneType() == ZoneType.RESIDENTIAL) {
-					Pos2D dest = tiles[i].getPos();
-					double d = origin.distBetween(dest);
-					if (d < minDist) {
-						Zone z = tiles[i].getZone();
-						Building b = z.getBuilding();
-						Collection<Person> people = b.getOccupants();
-						for (Person p : people) {
-							if (!p.employed()) {
-								minDist = d;
-								bestCandidate = p;
-							}
-						}
-					}
-				}
-			}
-		}
-		return bestCandidate;
-	}
 
-	private Person findUnemployed(Tile t) {
-		for (int i = 0; i < tiles.length; i++) {
-			if (!tiles[i].equals(t)) {
-				if (tiles[i].getZone().getZoneType() == ZoneType.RESIDENTIAL) {
-					Zone z = tiles[i].getZone();
-					Building b = z.getBuilding();
-					Collection<Person> people = b.getOccupants();
-					for (Person p : people) {
-						if (!p.employed()) {
-							return p;
-						}
-					}
-				}
-
-			}
-		}
-		return null;
-	}
 
 	private Tile findNearestOfType(Tile origin, ZoneType zt) {
 		// TODO
