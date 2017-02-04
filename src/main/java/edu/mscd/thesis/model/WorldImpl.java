@@ -58,7 +58,6 @@ public class WorldImpl implements World {
 						int currentOccpancy = b.currentOccupancy();
 						while (currentOccpancy < maxOccupants && !searchExhausted) {
 							Person p = findClosestUnemployed(t);
-							System.out.println(p);
 							if (p != null) {
 								b.addOccupant(p);
 								currentOccpancy = b.currentOccupancy();
@@ -145,7 +144,6 @@ public class WorldImpl implements World {
 						Building b = z.getBuilding();
 						Collection<Person> people = b.getOccupants();
 						for (Person p : people) {
-							System.out.println(p);
 							if (!p.employed()) {
 								minDist = d;
 								bestCandidate = p;
@@ -166,7 +164,6 @@ public class WorldImpl implements World {
 					Building b = z.getBuilding();
 					Collection<Person> people = b.getOccupants();
 					for (Person p : people) {
-						System.out.println(p);
 						if (!p.employed()) {
 							return p;
 						}

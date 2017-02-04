@@ -25,13 +25,6 @@ public abstract class PlaceOfWork extends AbstractBuilding{
 		}
 		return growthValue;
 	}
-	
-	@Override
-	public void clear(){
-		for(Person p:this.getOccupants()){
-			p.fire();
-		}
-	}
 
 	@Override
 	public boolean addOccupant(Person p){

@@ -1,6 +1,8 @@
 package edu.mscd.thesis.model;
 
 import edu.mscd.thesis.model.bldgs.Building;
+import edu.mscd.thesis.model.bldgs.Home;
+import edu.mscd.thesis.model.bldgs.PlaceOfWork;
 
 public class Citizen implements Person {
 	private Building home;
@@ -60,6 +62,10 @@ public class Citizen implements Person {
 	@Override
 	public void evict() {
 		this.home=null;
+	}
+	@Override
+	public void removeSelfFrom(Building b) {
+		b.removeOccupant(this);
 	}
 
 }

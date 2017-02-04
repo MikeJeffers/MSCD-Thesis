@@ -11,14 +11,7 @@ public abstract class Home extends AbstractBuilding{
 		super(pos, tileType, zoneType);
 	}
 
-	@Override
-	public void clear(){
-		for(Person p:this.getOccupants()){
-			p.evict();
-		}
-		super.clear();
-	}
-	
+
 	@Override
 	public boolean addOccupant(Person p){
 		if(p!=null && p.homeless()){

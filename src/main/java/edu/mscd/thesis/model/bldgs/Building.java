@@ -12,6 +12,8 @@ public interface Building extends Sprite{
 
 	Pos2D getPos();
 	Collection<Person> getOccupants();
+	boolean addOccupant(Person p);
+	boolean removeOccupant(Person p);
 	int getMaxOccupants();
 	int currentOccupancy();
 	int getWealth();

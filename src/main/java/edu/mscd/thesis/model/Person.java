@@ -11,6 +11,7 @@ public interface Person {
 	Building getWork();
 	boolean employed();
 	
+	void removeSelfFrom(Building b);
 	void fire();
 	void evict();
 	void employAt(Building b);

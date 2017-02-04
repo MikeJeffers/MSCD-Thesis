@@ -1,8 +1,10 @@
 package edu.mscd.thesis.model.bldgs;
 
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Objects;
 
 import edu.mscd.thesis.model.Person;
@@ -36,6 +38,11 @@ public abstract class AbstractBuilding implements Building {
 
 	@Override
 	public void clear(){
+		Collection<Person> copy = new ArrayList<Person>();
+		copy.addAll(occupants);
+		for(Person p: copy){
+			p.removeSelfFrom(this);
+		}
 		this.occupants.clear();
 	}
 	
@@ -78,14 +85,36 @@ public abstract class AbstractBuilding implements Building {
 	}
 
 	public void setMaxOccupancy(int max) {
+		
+		int diff = this.occupants.size()-max;
+		if(diff>0){
+			Collection<Person> toRemove = new ArrayList<Person>();
+			for(Person p: occupants){
+				toRemove.add(p);
+				diff--;
+				if(diff<=0){
+					break;
+				}
+			}
+			for(Person p: toRemove){
+				p.removeSelfFrom(this);
+			}
+		}
+		
 		this.maxOccupants = max;
 	}
 
+	@Override
 	public boolean addOccupant(Person p) {
 		if (maxOccupants <= occupants.size()) {
 			return false;
 		}
 		return occupants.add(p);
+	}
+	
+	@Override
+	public boolean removeOccupant(Person p){
+		return this.occupants.remove(p);
 	}
 
 	@Override
