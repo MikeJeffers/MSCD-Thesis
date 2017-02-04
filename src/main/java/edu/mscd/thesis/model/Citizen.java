@@ -29,17 +29,19 @@ public class Citizen implements Person {
 	@Override
 	public void employAt(Building b) {
 		if (b != null) {
-			b.addOccupant(this);
+			if(b.addOccupant(this)){
+				work = b;
+			}
 		}
-		work = b;
 	}
 
 	@Override
 	public void liveAt(Building b) {
 		if (b != null) {
-			b.addOccupant(this);
+			if(b.addOccupant(this)){
+				home=b;
+			}
 		}
-		home = b;
 	}
 
 	@Override
@@ -74,7 +76,9 @@ public class Citizen implements Person {
 
 	@Override
 	public void removeSelfFrom(Building b) {
-		b.removeOccupant(this);
+		if(b!=null){
+			b.removeOccupant(this);
+		}
 	}
 
 }

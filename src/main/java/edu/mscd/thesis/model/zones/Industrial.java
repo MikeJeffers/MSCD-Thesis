@@ -12,8 +12,6 @@ public class Industrial extends AbstractZone {
 
 	public Industrial(Pos2D pos, Tile tile) {
 		super(pos, tile);
-
-		//TODO make indy building class and sprite img
 		super.setBuilding(new Factory(pos, tile.getType(), getZoneType(), Density.NONE));
 	}
 

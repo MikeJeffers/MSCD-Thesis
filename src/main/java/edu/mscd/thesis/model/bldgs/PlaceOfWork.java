@@ -18,9 +18,9 @@ public abstract class PlaceOfWork extends AbstractBuilding{
 			if (growthValue > Rules.GROWTH_THRESHOLD && this.currentOccupancy()+1>this.getMaxOccupants()) {
 				this.changeDensity(getDensity().getNextLevel());
 				return growthValue-Rules.BASE_GROWTH_COST;
-			}else if(growthValue < Rules.GROWTH_THRESHOLD || this.currentOccupancy()<this.getMaxOccupants()-2){
+			}else if(growthValue < Rules.GROWTH_THRESHOLD || this.currentOccupancy()<this.getMaxOccupants()){
 				this.changeDensity(getDensity().getPrevLevel());
-				return growthValue+Rules.BASE_GROWTH_COST*2;
+				return growthValue+Rules.BASE_GROWTH_COST;
 			}
 		}
 		return growthValue;
