@@ -133,16 +133,16 @@ public class GUI extends Application {
 		Button downButton = new Button("DOWN");
 		Button rightButton = new Button("RIGHT");
 		Button leftbutton = new Button("LEFT");
-		upButton.setOnAction(e -> translateView(gc, new Pos2D(0, -1)));
-		downButton.setOnAction(e -> translateView(gc, new Pos2D(0, 1)));
-		rightButton.setOnAction(e -> translateView(gc, new Pos2D(1, 0)));
-		leftbutton.setOnAction(e -> translateView(gc, new Pos2D(-1, 0)));
+		upButton.setOnAction(e -> translateView(gc, new Pos2D(0, 1)));
+		downButton.setOnAction(e -> translateView(gc, new Pos2D(0, -1)));
+		rightButton.setOnAction(e -> translateView(gc, new Pos2D(-1, 0)));
+		leftbutton.setOnAction(e -> translateView(gc, new Pos2D(1, 0)));
 
 		Button zoomIn = new Button("+");
 		Button zoomOut = new Button("-");
 
-		zoomIn.setOnAction(e -> scaleView(gc, 1.1));
-		zoomOut.setOnAction(e -> scaleView(gc, 0.9));
+		zoomIn.setOnAction(e -> scaleView(gc, 1.2));
+		zoomOut.setOnAction(e -> scaleView(gc, 0.8));
 
 		Button resetView = new Button("Reset View");
 		resetView.setOnAction(e -> resetMatrix(gc));

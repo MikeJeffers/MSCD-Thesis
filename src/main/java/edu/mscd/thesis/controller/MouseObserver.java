@@ -1,6 +1,5 @@
 package edu.mscd.thesis.controller;
 
-
 import edu.mscd.thesis.view.GUI;
 import edu.mscd.thesis.model.Pos2D;
 import edu.mscd.thesis.model.World;
@@ -20,7 +19,7 @@ public class MouseObserver implements EventHandler<MouseEvent> {
 	@Override
 	public void handle(MouseEvent event) {
 		if (event.getEventType().equals(MouseEvent.MOUSE_CLICKED)) {
-			World w  = controller.getWorld();
+			World w = controller.getWorld();
 			Affine xForm = controller.getGraphics().getTransform();
 			Point2D pt = new Point2D(event.getSceneX(), event.getSceneY());
 			try {
