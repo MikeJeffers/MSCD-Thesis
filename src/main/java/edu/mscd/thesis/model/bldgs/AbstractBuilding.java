@@ -1,6 +1,5 @@
 package edu.mscd.thesis.model.bldgs;
 
-import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -12,7 +11,6 @@ import edu.mscd.thesis.model.Pos2D;
 import edu.mscd.thesis.model.TileType;
 import edu.mscd.thesis.model.zones.Density;
 import edu.mscd.thesis.model.zones.ZoneType;
-import edu.mscd.thesis.util.Rules;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
@@ -37,39 +35,16 @@ public abstract class AbstractBuilding implements Building {
 		this.occupants = new HashSet<Person>();
 		this.changeDensity(density);
 	}
-	
 
-	@Override
-	public void clear(){
-		Collection<Person> copy = new ArrayList<Person>();
-		copy.addAll(occupants);
-		for(Person p: copy){
-			p.removeSelfFrom(this);
-		}
-		this.occupants.clear();
-	}
-	
-	@Override
-	public double update(double growthValue) {
-		if (this.getTileType().getMaxDensity().getDensityLevel() >= getDensity().getDensityLevel()) {
-			if (growthValue > Rules.GROWTH_THRESHOLD) {
-				this.changeDensity(getDensity().getNextLevel());
-				return growthValue-Rules.BASE_GROWTH_COST;
-			}else{
-				this.changeDensity(getDensity().getPrevLevel());
-				return growthValue+Rules.BASE_GROWTH_COST*2;
-			}
-		}
-		return growthValue;
-	}
-	
+
+
 	@Override
 	public void changeDensity(Density density) {
 		this.density = density;
 	}
-	
+
 	@Override
-	public int currentOccupancy(){
+	public int currentOccupancy() {
 		return this.occupants.size();
 	}
 
@@ -93,36 +68,7 @@ public abstract class AbstractBuilding implements Building {
 	}
 
 	public void setMaxOccupancy(int max) {
-		
-		int diff = this.occupants.size()-max;
-		if(diff>0){
-			Collection<Person> toRemove = new ArrayList<Person>();
-			for(Person p: occupants){
-				toRemove.add(p);
-				diff--;
-				if(diff<=0){
-					break;
-				}
-			}
-			for(Person p: toRemove){
-				p.removeSelfFrom(this);
-			}
-		}
-		
 		this.maxOccupants = max;
-	}
-
-	@Override
-	public boolean addOccupant(Person p) {
-		if (maxOccupants <= occupants.size()) {
-			return false;
-		}
-		return occupants.add(p);
-	}
-	
-	@Override
-	public boolean removeOccupant(Person p){
-		return this.occupants.remove(p);
 	}
 
 	@Override
@@ -188,20 +134,12 @@ public abstract class AbstractBuilding implements Building {
 		return this.density;
 	}
 
-	
 	@Override
 	public boolean equals(Object o) {
-		if (o == null) {
-			return false;
-		}
 		if (o instanceof Building) {
 			Building b = (Building) o;
-			if (b.getPos() != null) {
-				return b.getPos().equals(this.getPos());
-			} else {
-				return b.getPos() == null && this.getPos() == null;
-			}
-
+			return b.getPos().equals(this.getPos()) && b.getDensity() == this.getDensity()
+					&& b.getMaxOccupants() == this.getMaxOccupants();
 		}
 		return false;
 	}
@@ -221,7 +159,7 @@ public abstract class AbstractBuilding implements Building {
 		sb.append(" currentCount:");
 		sb.append(this.currentOccupancy());
 		sb.append(" Occupants: ");
-		for(Person p: this.getOccupants()){
+		for (Person p : this.getOccupants()) {
 			sb.append("{");
 			sb.append(p);
 			sb.append("},");

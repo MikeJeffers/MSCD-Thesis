@@ -13,6 +13,7 @@ public class Shop extends PlaceOfWork{
 
 	public Shop(Pos2D pos, TileType tileType, ZoneType zoneType, Density density) {
 		super(pos, tileType, zoneType, density);
+		this.changeDensity(density);
 	}
 
 	
@@ -23,7 +24,7 @@ public class Shop extends PlaceOfWork{
 		Image img = new Image(file.toURI().toString());
 		super.setImage(img);
 		super.setWealthLevel(level);
-		super.setMaxOccupancy(level);
+		super.setMaxOccupancy(level+1);
 		super.changeDensity(density);
 	}
 

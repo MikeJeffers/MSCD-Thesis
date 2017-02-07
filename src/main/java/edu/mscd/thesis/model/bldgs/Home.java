@@ -8,54 +8,77 @@ import edu.mscd.thesis.model.Pos2D;
 import edu.mscd.thesis.model.TileType;
 import edu.mscd.thesis.model.zones.Density;
 import edu.mscd.thesis.model.zones.ZoneType;
+import edu.mscd.thesis.util.Rules;
 
-public abstract class Home extends AbstractBuilding{
+public abstract class Home extends AbstractBuilding {
 
 	public Home(Pos2D pos, TileType tileType, ZoneType zoneType, Density density) {
 		super(pos, tileType, zoneType, density);
 	}
-	
+
 	@Override
-	public void clear(){
-		Collection<Person> copy = new ArrayList<Person>();
-		copy.addAll(super.getOccupants());
-		for(Person p: copy){
-			p.removeSelfFrom(this);
-			p.removeSelfFrom(p.getWork());
+	public double update(double growthValue) {
+		int tileMaxDensity = this.getTileType().getMaxDensity().getDensityLevel();
+		int currentDensityLevel = this.getDensity().getDensityLevel();
+		int currentOccupancy = this.currentOccupancy();
+		int maxOccupancy = this.getMaxOccupants();
+		if(currentOccupancy>=maxOccupancy && growthValue>Rules.GROWTH_THRESHOLD && tileMaxDensity>currentDensityLevel){
+			this.changeDensity(getDensity().getNextLevel());
+			return growthValue - Rules.BASE_GROWTH_COST;
+		}else if(currentDensityLevel==0 && growthValue>Rules.GROWTH_THRESHOLD){
+			this.changeDensity(getDensity().getNextLevel());
+			return growthValue - Rules.BASE_GROWTH_COST;
+		}else if(growthValue>Rules.GROWTH_THRESHOLD){
+			this.changeDensity(getDensity().getPrevLevel());
+			return growthValue + Rules.BASE_GROWTH_COST*2;
 		}
-		super.getOccupants().clear();
+		return growthValue;
 	}
-	
+
 	@Override
 	public void setMaxOccupancy(int max) {
-		int diff = super.getOccupants().size()-max;
-		if(diff>0){
+
+		int diff = super.getOccupants().size() - max;
+		if (diff > 0) {
 			Collection<Person> toRemove = new ArrayList<Person>();
-			for(Person p: getOccupants()){
+			for (Person p : super.getOccupants()) {
 				toRemove.add(p);
 				diff--;
-				if(diff<=0){
+				if (diff <= 0) {
 					break;
 				}
 			}
-			for(Person p: toRemove){
-				p.removeSelfFrom(this);
-				p.removeSelfFrom(p.getWork());
+			for (Person p : toRemove) {
+				removeOccupant(p);
 			}
 		}
 		super.setMaxOccupancy(max);
 	}
 
+	@Override
+	public boolean removeOccupant(Person p) {
+		p.evict();
+		return super.getOccupants().remove(p);
+	}
 
 	@Override
-	public boolean addOccupant(Person p){
-		if(p!=null && p.homeless()){
-			if( super.addOccupant(p)){
-				p.liveAt(this);
-				return true;
-			}
+	public void clear() {
+		for (Person p : super.getOccupants()) {
+			p.evict();
 		}
-		return false;
+		super.getOccupants().clear();
+	}
+
+	@Override
+	public boolean addOccupant(Person p) {
+		if (super.getMaxOccupants() <= this.currentOccupancy()) {
+			return false;
+		}
+		boolean success = super.getOccupants().add(p);
+		if(success){
+			p.liveAt(this);
+		}	
+		return success;
 	}
 
 }

@@ -13,21 +13,12 @@ import javafx.scene.image.Image;
 public class House extends Home {
 
 
-
 	public House(Pos2D pos, TileType tileType, ZoneType zoneType, Density density) {
 		super(pos, tileType, zoneType, density);
-
-		this.fillWithPeople();
+		this.changeDensity(density);
 	}
 
 
-
-	@Override
-	public double update(double growth){
-		//TODO only add people if there is global Demand
-		fillWithPeople();
-		return super.update(growth);
-	}
 
 	@Override
 	public void changeDensity(Density density) {
@@ -36,15 +27,10 @@ public class House extends Home {
 		Image img = new Image(file.toURI().toString());
 		super.setImage(img);
 		super.setWealthLevel(level);
-		super.setMaxOccupancy(level);
+		super.setMaxOccupancy(level+1);
 		super.changeDensity(density);
 	}
 	
-	private void fillWithPeople(){
-		for(int i=0; i<super.getMaxOccupants(); i++){
-			Person p = new Citizen();
-			this.addOccupant(p);
-		}
-	}
+
 
 }

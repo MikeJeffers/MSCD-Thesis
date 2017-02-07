@@ -10,15 +10,17 @@ public interface Person {
 
 	Building getWork();
 	boolean employed();
-	
-	void removeSelfFrom(Building b);
+
 	void fire();
 	void evict();
 	void employAt(Building b);
-	
+
 	void liveAt(Building b);
 
-	float getHappiness();
+	int getHappiness();
 
-	float getMoney();
+	int getMoney();
+	int getID();
+	void update();
+	
 }

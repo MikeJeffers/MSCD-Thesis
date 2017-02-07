@@ -1,6 +1,5 @@
 package edu.mscd.thesis.model;
 
-import edu.mscd.thesis.main.Main;
 import edu.mscd.thesis.model.zones.Density;
 import edu.mscd.thesis.model.zones.Zone;
 import edu.mscd.thesis.model.zones.ZoneFactory;

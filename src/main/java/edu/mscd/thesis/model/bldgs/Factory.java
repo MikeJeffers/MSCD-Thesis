@@ -14,6 +14,7 @@ public class Factory extends PlaceOfWork{
 
 	public Factory(Pos2D pos, TileType tileType, ZoneType zoneType, Density density) {
 		super(pos, tileType, zoneType, density);
+		this.changeDensity(density);
 	}
 
 	@Override
@@ -26,5 +27,7 @@ public class Factory extends PlaceOfWork{
 		super.setMaxOccupancy(level+1);
 		super.changeDensity(density);
 	}
+
+
 
 }

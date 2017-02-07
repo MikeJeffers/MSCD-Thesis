@@ -7,6 +7,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Random;
 
 import javax.imageio.ImageIO;
 
@@ -16,7 +17,7 @@ import javafx.scene.image.WritableImage;
 import javafx.stage.Stage;
 
 public class Util {
-	
+	private static Random random = new Random();
 	private static DateFormat df = new SimpleDateFormat("yyMMdd_HHmmss");
 
 	public static boolean isValidPos2D(Pos2D p, double xMax, double yMax) {
@@ -30,6 +31,10 @@ public class Util {
 			return p.getX() < xMax && p.getY() < yMax;
 		}
 
+	}
+	
+	public static int getRandomBetween(int minInclusive, int maxExclusive){
+		return minInclusive+Util.random.nextInt(maxExclusive);
 	}
 
 	/**
