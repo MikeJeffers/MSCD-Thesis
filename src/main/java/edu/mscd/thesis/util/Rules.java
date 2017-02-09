@@ -6,7 +6,7 @@ import edu.mscd.thesis.model.zones.ZoneType;
 
 public class Rules {
 	public static final int MAX = 255;
-	public static final int GROWTH_THRESHOLD = 100;
+	public static final int GROWTH_THRESHOLD = 55;
 	public static final int BASE_GROWTH_COST = 10;
 	public static final int STARTING_POPULATION = 100;
 	public static final int BIRTH_RATE = 3;

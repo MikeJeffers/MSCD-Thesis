@@ -1,0 +1,18 @@
+apply plugin: 'java'
+apply plugin: 'application'
+sourceCompatibility = 1.8
+
+mainClassName = "edu.mscd.thesis.main.Main"
+
+
+repositories {
+  mavenCentral()
+}
+
+dependencies {
+  compile group: 'org.encog', name: 'encog-core', version: '3.3.0'
+  testCompile group: 'junit', name: 'junit', version: '4.+'
+}
+
+
+

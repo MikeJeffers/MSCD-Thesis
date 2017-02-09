@@ -75,3 +75,6 @@ resources/
 .project
 
 screenshots/
+
+.gradle
+/build/
