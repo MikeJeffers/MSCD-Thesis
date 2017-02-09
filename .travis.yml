@@ -1,3 +1,10 @@
 language: java
-gradle check
-gradle assemble
+
+jdk:
+- oraclejdk8
+
+script:
+- gradle check
+- gradle assemble
+- gradle build
+- gradle test
