@@ -20,10 +20,6 @@ public class Industrial extends AbstractZone {
 		return ZoneType.INDUSTRIAL;
 	}
 
-	@Override
-	public void draw(GraphicsContext g) {
-		g.setFill(new Color(1.0, 1.0, 0, 0.5));
-		super.draw(g);
-	}
+
 
 }

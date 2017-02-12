@@ -19,11 +19,7 @@ public class Commercial extends AbstractZone {
 		return ZoneType.COMMERICAL;
 	}
 
-	@Override
-	public void draw(GraphicsContext g) {
-		g.setFill(new Color(0, 0, 1.0, 0.5));
-		super.draw(g);
-	}
+
 
 
 }

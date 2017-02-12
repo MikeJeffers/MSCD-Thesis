@@ -22,7 +22,6 @@ public interface Tile {
 
 	Density maxDensity();
 
-	void draw(GraphicsContext g);
 	
 	void setMouseOver(boolean over);
 	

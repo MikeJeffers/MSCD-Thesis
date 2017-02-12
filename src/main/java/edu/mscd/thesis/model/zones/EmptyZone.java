@@ -16,11 +16,6 @@ public class EmptyZone extends AbstractZone {
 		return ZoneType.EMPTY;
 	}
 
-	@Override
-	public void draw(GraphicsContext g) {
-		g.setFill(new Color(0.1, 0.1, 0.1, 0.1));
-		super.draw(g);
-	}
 
 	@Override
 	public String toString() {

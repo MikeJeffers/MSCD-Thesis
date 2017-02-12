@@ -1,6 +1,6 @@
 package edu.mscd.thesis.controller;
 
-public interface Obesrver {
+public interface Observer {
 	
 	public void notifyUserDataChange(UserData data);
 

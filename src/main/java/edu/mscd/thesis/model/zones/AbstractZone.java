@@ -47,13 +47,6 @@ public abstract class AbstractZone implements Zone {
 		return this.pos.copy();
 	}
 
-	@Override
-	public void draw(GraphicsContext g) {
-		g.fillRect(this.getPos().getX(), this.getPos().getY(), 1, 1);
-		if (building != null) {
-			building.render(g);
-		}
-	}
 
 	@Override
 	public String toString() {

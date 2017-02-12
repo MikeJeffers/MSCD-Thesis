@@ -5,6 +5,8 @@ import edu.mscd.thesis.model.World;
 import edu.mscd.thesis.model.zones.ZoneType;
 
 public class Rules {
+	public static final int WORLD_X = 20;
+	public static final int WORLD_Y = 15;
 	public static final int MAX = 255;
 	public static final int GROWTH_THRESHOLD = 55;
 	public static final int BASE_GROWTH_COST = 10;

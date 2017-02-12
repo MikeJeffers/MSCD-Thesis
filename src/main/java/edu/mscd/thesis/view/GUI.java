@@ -1,19 +1,23 @@
 package edu.mscd.thesis.view;
 
-import edu.mscd.thesis.controller.GameLoop;
-import edu.mscd.thesis.controller.MouseObserver;
+import java.util.ArrayList;
+import java.util.Collection;
+
+import edu.mscd.thesis.controller.Observer;
+import edu.mscd.thesis.controller.UserData;
+import edu.mscd.thesis.model.Model;
 import edu.mscd.thesis.model.Pos2D;
 import edu.mscd.thesis.model.World;
-import edu.mscd.thesis.model.WorldImpl;
 import edu.mscd.thesis.model.zones.ZoneType;
+import edu.mscd.thesis.util.Rules;
 import edu.mscd.thesis.util.Util;
 import javafx.application.Application;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
-import javafx.event.Event;
 import javafx.event.EventHandler;
+import javafx.geometry.Point2D;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.Scene;
@@ -26,41 +30,31 @@ import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.transform.Affine;
+import javafx.scene.transform.NonInvertibleTransformException;
 import javafx.stage.Stage;
 
-public class GUI extends Application {
-	private World world;
-	private GameLoop controller;
+public class GUI implements View {
+	private Collection<Observer> observers = new ArrayList<Observer>();
+	private Renderer<Model> renderer = new ModelRenderer();
+	private GraphicsContext gc;
+
 	private static final boolean SCREENSHOT = false;
-	private static final int WORLD_X = 20;
-	private static final int WORLD_Y = 15;
+
 	private static final int SCREEN_WIDTH = 800;
 	private static final int SCREEN_HEIGHT = 600;
-	public static final double SCALE_FACTOR = Util.getScaleFactor(WORLD_X, WORLD_Y, SCREEN_WIDTH, SCREEN_HEIGHT);
+	public static final double SCALE_FACTOR = Util.getScaleFactor(Rules.WORLD_X, Rules.WORLD_Y, SCREEN_WIDTH,
+			SCREEN_HEIGHT);
 	// User selections on UI elements
-	public static ZoneType selection = ZoneType.EMPTY;
-	public static int radiusSelection = 1;
-	public static boolean squareSelect = false;
+	private static UserData selection = new UserData();
 
 	@Override
-	public void init() {
-		initWorld();
-	}
-
-	private void initWorld() {
-		this.world = new WorldImpl(WORLD_X, WORLD_Y);
-	}
-
-	@Override
-	public void start(Stage stage) throws Exception {
+	public void initView(Stage stage){
 
 		Group root = new Group();
 
 		Canvas canvas = new Canvas(SCREEN_WIDTH, SCREEN_HEIGHT);
-		GraphicsContext gc = canvas.getGraphicsContext2D();
+		gc = canvas.getGraphicsContext2D();
 
-		controller = new GameLoop(world, gc);
-		controller.setStepMode(true);
 		FlowPane controlPane = new FlowPane();
 		FlowPane zonePanel = new FlowPane();
 		for (ZoneType zType : ZoneType.values()) {
@@ -69,19 +63,19 @@ public class GUI extends Application {
 			zonePanel.getChildren().add(button);
 		}
 		Button step = new Button("STEP");
-		step.setOnAction(e -> controller.step());
+		step.setOnAction(e -> this.notifyObserver());
 		zonePanel.getChildren().add(step);
 		Button brushShape = new Button("Circle");
 		brushShape.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent event) {
-				squareSelect=!squareSelect;
-				if(squareSelect){
+				selection.setSquare(!selection.isSquare());
+				if (selection.isSquare()) {
 					brushShape.setText("Square");
-				}else{
+				} else {
 					brushShape.setText("Circle");
-				}	
-				
+				}
+
 			}
 		});
 		zonePanel.getChildren().add(brushShape);
@@ -90,7 +84,7 @@ public class GUI extends Application {
 		radiusSelector.valueProperty().addListener(new ChangeListener<Integer>() {
 			@Override
 			public void changed(ObservableValue<? extends Integer> observable, Integer oldValue, Integer newValue) {
-				GUI.radiusSelection = newValue;
+				selection.setRadius(newValue);
 			}
 		});
 		zonePanel.getChildren().add(radiusSelector);
@@ -112,19 +106,31 @@ public class GUI extends Application {
 
 		Scene mainScene = new Scene(root, Color.WHITE);
 		stage.setScene(mainScene);
-
-		canvas.addEventHandler(MouseEvent.MOUSE_CLICKED, new MouseObserver(controller));
-		if (SCREENSHOT) {
-			canvas.addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
-				@Override
-				public void handle(MouseEvent event) {
+		canvas.addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
+			@Override
+			public void handle(MouseEvent event) {
+				Affine xForm = gc.getTransform();
+				Point2D pt = new Point2D(event.getSceneX(), event.getSceneY());
+				try {
+					pt = xForm.inverseTransform(pt);
+				} catch (NonInvertibleTransformException e) {
+					e.printStackTrace();
+					return;
+				}
+				double dx = pt.getX();
+				double dy = pt.getY();
+				Pos2D modelCoordinate = new Pos2D(dx, dy);
+				selection.setClickLocation(modelCoordinate);
+				if(Util.isValidPos2D(modelCoordinate, Rules.WORLD_X, Rules.WORLD_Y)){
+					notifyObserver();
+				}
+				if (SCREENSHOT) {
 					Util.takeScreenshot(stage);
 				}
-			});
-		}
 
-		controller.start();
-		controller.step();
+			}
+
+		});
 		stage.show();
 	}
 
@@ -163,7 +169,6 @@ public class GUI extends Application {
 		Affine matrix = gc.getTransform();
 		matrix.appendTranslation(dir.getX(), dir.getY());
 		gc.setTransform(matrix);
-		controller.step();
 		redraw(gc);
 	}
 
@@ -172,7 +177,6 @@ public class GUI extends Application {
 		Affine matrix = gc.getTransform();
 		matrix.prependScale(scale, scale);
 		gc.setTransform(matrix);
-		controller.step();
 		redraw(gc);
 	}
 
@@ -181,7 +185,6 @@ public class GUI extends Application {
 		Affine identityMatrix = new Affine();
 		identityMatrix.appendScale(SCALE_FACTOR, SCALE_FACTOR);
 		gc.setTransform(identityMatrix);
-		controller.step();
 		redraw(gc);
 	}
 
@@ -192,7 +195,33 @@ public class GUI extends Application {
 
 	private void setSelectedTypeTo(ZoneType zType) {
 		System.out.println("Selection changed to:" + zType.toString());
-		GUI.selection = zType;
+		selection.setZoneSelection(zType);
+	}
+
+	@Override
+	public void attachObserver(Observer obs) {
+		this.observers.add(obs);
+
+	}
+
+	@Override
+	public void detachObserver(Observer obs) {
+		this.observers.remove(obs);
+
+	}
+
+	@Override
+	public void notifyObserver() {
+		for (Observer o : observers) {
+			o.notifyUserDataChange(selection);
+		}
+
+	}
+
+	@Override
+	public void renderView(Model model) {
+		this.renderer.draw(model, this.gc);
+		
 	}
 
 }

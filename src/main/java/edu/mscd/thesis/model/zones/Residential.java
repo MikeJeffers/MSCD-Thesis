@@ -19,11 +19,6 @@ public class Residential extends AbstractZone {
 		return ZoneType.RESIDENTIAL;
 	}
 
-	@Override
-	public void draw(GraphicsContext g) {
-		g.setFill(new Color(0, 1.0, 0, 0.5));
-		super.draw(g);
 
-	}
 
 }

@@ -4,10 +4,7 @@ import edu.mscd.thesis.model.zones.Zone;
 import edu.mscd.thesis.model.zones.ZoneType;
 import javafx.scene.canvas.GraphicsContext;
 
-public interface World {
-	public void update();
-
-	public void draw(GraphicsContext g);
+public interface World extends Model{
 	
 	boolean setZoneAt(Pos2D pos, ZoneType zt);
 	boolean setAllZonesAround(Pos2D pos, ZoneType zt, int radius, boolean squareSelect);
@@ -17,5 +14,7 @@ public interface World {
 	Zone getZoneAt(Pos2D pos);
 	
 	City getCity();
+	
+	Tile[] getTiles();
 	
 }

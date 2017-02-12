@@ -18,7 +18,6 @@ public interface Zone {
 
 	Building getBuilding();
 
-	void draw(GraphicsContext g);
 
 	void update();
 	

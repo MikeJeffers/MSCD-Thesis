@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Random;
 
+import edu.mscd.thesis.controller.UserData;
 import edu.mscd.thesis.model.bldgs.Building;
 import edu.mscd.thesis.model.bldgs.PlaceOfWork;
 import edu.mscd.thesis.model.zones.Zone;
@@ -43,7 +44,7 @@ public class WorldImpl implements World {
 
 	@Override
 	public void update() {
-		System.out.println(city);
+		//System.out.println(city);
 
 		// TODO
 		// iterate through all zones: incr/decr value based on conditions
@@ -239,15 +240,13 @@ public class WorldImpl implements World {
 		}
 		return -1;
 	}
-
+	
 	@Override
-	public void draw(GraphicsContext g) {
-		g.setFill(Color.DARKGRAY);
-		g.fillRect(0, 0, g.getCanvas().getWidth(), g.getCanvas().getHeight());
-		for (int i = 0; i < tiles.length; i++) {
-			tiles[i].draw(g);
-		}
+	public Tile[] getTiles(){
+		return this.tiles;
 	}
+
+
 
 	@Override
 	public Tile getTileAt(Pos2D pos) {
@@ -267,6 +266,17 @@ public class WorldImpl implements World {
 	@Override
 	public City getCity() {
 		return this.city;
+	}
+
+	@Override
+	public void userStateChange(UserData userData) {
+		this.setAllZonesAround(userData.getClickLocation(), userData.getZoneSelection(), userData.getRadius(), userData.isSquare());
+		
+	}
+
+	@Override
+	public World getWorld() {
+		return this;
 	}
 
 }

@@ -16,6 +16,5 @@ public interface Sprite {
 	double getWidth();
 	double getHeight();
 	boolean setImage(URL url);
-	void render(GraphicsContext g);
 
 }

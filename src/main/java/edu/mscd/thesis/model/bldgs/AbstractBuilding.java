@@ -71,13 +71,7 @@ public abstract class AbstractBuilding implements Building {
 		this.maxOccupants = max;
 	}
 
-	@Override
-	public void render(GraphicsContext g) {
-		if (!this.image.isError() && !this.image.isBackgroundLoading()) {
-			g.drawImage(this.image, pos.getX(), pos.getY(), 1, 1);
-		}
 
-	}
 
 	@Override
 	public boolean setImage(URL url) {
