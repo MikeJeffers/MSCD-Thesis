@@ -22,6 +22,10 @@ import javafx.stage.Stage;
  * @author Mike
  */
 public class Util {
+	/*
+	 * TODO this should scale with available cores.. at least its relative to world size..
+	 */
+	public static final int MAX_SEQUENTIAL = (Rules.WORLD_X*Rules.WORLD_Y)/8;
 	private static Random random = new Random();
 	private static DateFormat df = new SimpleDateFormat("yyMMdd_HHmmss");
 

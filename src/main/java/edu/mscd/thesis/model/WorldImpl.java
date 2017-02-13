@@ -11,12 +11,14 @@ import edu.mscd.thesis.model.zones.Zone;
 import edu.mscd.thesis.model.zones.ZoneFactory;
 import edu.mscd.thesis.model.zones.ZoneFactoryImpl;
 import edu.mscd.thesis.model.zones.ZoneType;
+import edu.mscd.thesis.util.TileUpdaterService;
 import edu.mscd.thesis.util.Util;
 
 public class WorldImpl implements World {
 	private Tile[] tiles;
 	private int cols, rows;
 	private City city;
+	private TileUpdaterService tileUpdater;
 
 	public WorldImpl(int sizeX, int sizeY) {
 		int size = sizeX * sizeY;
@@ -25,6 +27,7 @@ public class WorldImpl implements World {
 		this.cols = sizeX;
 		this.worldInit();
 		this.city = new CityImpl();
+		tileUpdater = new TileUpdaterService(this);
 	}
 
 	private void worldInit() {
@@ -84,8 +87,10 @@ public class WorldImpl implements World {
 			}
 		}
 
+		tileUpdater.runUpdates();
+		
 		for (int i = 0; i < tiles.length; i++) {
-			tiles[i].update();
+		//	tiles[i].update();
 		}
 		city.update();
 
@@ -166,28 +171,6 @@ public class WorldImpl implements World {
 		return true;
 	}
 
-	private Tile getNearestOfType(Tile t, ZoneType zt) {
-		double distance = 10000;
-		Tile found = null;
-		for (int i = 0; i < tiles.length; i++) {
-			if (!tiles[i].equals(t)) {
-				if (tiles[i].getZone().getZoneType() == zt) {
-					double dist = tiles[i].getPos().distBetween(t.getPos());
-					if (dist < distance) {
-						distance = dist;
-						found = tiles[i];
-					}
-				}
-
-			}
-		}
-		return found;
-	}
-
-	private Tile findNearestOfType(Tile origin, ZoneType zt) {
-		// TODO
-		return null;
-	}
 
 	private List<Tile> getNeighborsCircularDist(Tile origin, int radius) {
 		int index = getIndexOfTile(origin);

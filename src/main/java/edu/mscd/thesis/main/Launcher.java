@@ -23,7 +23,6 @@ public class Launcher extends Application {
 	Controller controller;
 
 	public Launcher() {
-		System.out.println(Thread.currentThread());
 		model = initModel();
 		view = initView();
 		controller = initController(model, view);
