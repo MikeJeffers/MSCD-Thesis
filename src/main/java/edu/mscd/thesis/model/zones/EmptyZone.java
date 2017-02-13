@@ -2,8 +2,6 @@ package edu.mscd.thesis.model.zones;
 
 import edu.mscd.thesis.model.Pos2D;
 import edu.mscd.thesis.model.Tile;
-import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.paint.Color;
 
 public class EmptyZone extends AbstractZone {
 

@@ -2,8 +2,6 @@ package edu.mscd.thesis.model.bldgs;
 
 import java.io.File;
 
-import edu.mscd.thesis.model.Citizen;
-import edu.mscd.thesis.model.Person;
 import edu.mscd.thesis.model.Pos2D;
 import edu.mscd.thesis.model.TileType;
 import edu.mscd.thesis.model.zones.Density;

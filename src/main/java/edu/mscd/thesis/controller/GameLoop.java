@@ -6,11 +6,11 @@ import javafx.animation.AnimationTimer;
 
 public class GameLoop extends AnimationTimer implements Controller{
 	private Model model;
-	private View view;
+	private View<UserData> view;
 	private UserData currentSelection = new UserData();
 	private boolean step = true;
 
-	public GameLoop(Model model, View view) {
+	public GameLoop(Model model, View<UserData> view) {
 		this.model = model;
 		this.view = view;
 		view.attachObserver(this);
@@ -28,22 +28,11 @@ public class GameLoop extends AnimationTimer implements Controller{
 		}
 		
 	}
-
-
-	@Override
-	public synchronized void notifyUserDataChange(UserData data) {
-		this.currentSelection = data;
-		model.userStateChange(data);
-		step = true;
-		
-	}
 	
 	@Override
 	public void start(){
 		super.start();
-		
 	}
-	
 	
 	@Override
 	public void stop(){
@@ -53,6 +42,13 @@ public class GameLoop extends AnimationTimer implements Controller{
 	@Override
 	public void run() {
 		this.start();
+	}
+
+	@Override
+	public synchronized void notifyNewData(UserData data) {
+		this.currentSelection = data;
+		model.userStateChange(data);
+		step = true;
 	}
 	
 	

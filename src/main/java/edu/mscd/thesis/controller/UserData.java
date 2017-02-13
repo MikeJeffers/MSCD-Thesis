@@ -3,6 +3,10 @@ package edu.mscd.thesis.controller;
 import edu.mscd.thesis.model.Pos2D;
 import edu.mscd.thesis.model.zones.ZoneType;
 
+/**
+ * Data packet class to encapsulate all possible user actions and communicate them to one listener as one type
+ * @author Mike
+ */
 public class UserData {
 	private int radius;
 	private boolean isSquare;
@@ -14,6 +18,7 @@ public class UserData {
 		setDefault();
 	}
 
+	//TODO Find better way to set common defaults across view and controller on init
 	public void setDefault() {
 		setSquare(false);
 		setRadius(1);
@@ -22,6 +27,10 @@ public class UserData {
 		setZoneSelection(ZoneType.EMPTY);
 	}
 
+	/**
+	 * Is the radius a Manhattan Distance or radial-distance?
+	 * @return true if manhattan (square)
+	 */
 	public boolean isSquare() {
 		return isSquare;
 	}
@@ -31,6 +40,10 @@ public class UserData {
 
 	}
 
+	/**
+	 * Radius of zoning
+	 * @return radius of effect
+	 */
 	public int getRadius() {
 		return radius;
 	}
@@ -40,6 +53,10 @@ public class UserData {
 
 	}
 
+	/**
+	 * ZoneType to set on tiles in radius
+	 * @return ZoneType
+	 */
 	public ZoneType getZoneSelection() {
 		return zoneSelection;
 	}
@@ -49,7 +66,10 @@ public class UserData {
 
 	}
 
-
+	/**
+	 * Is the game Paused, set to stepMode?
+	 * @return True if game in StepMode
+	 */
 	public boolean isStepMode() {
 		return isStepMode;
 	}
@@ -58,6 +78,10 @@ public class UserData {
 		this.isStepMode = isStepMode;
 	}
 
+	/**
+	 * Location of user MousePress on Canvas
+	 * @return {@link Pos2D} location in model-scale
+	 */
 	public Pos2D getClickLocation() {
 		return clickLocation;
 	}

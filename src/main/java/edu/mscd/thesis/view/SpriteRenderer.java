@@ -10,9 +10,14 @@ public class SpriteRenderer implements Renderer<Sprite>{
 
 	@Override
 	public void draw(Sprite sprite, GraphicsContext g) {
-		if (!sprite.getImage().isError() && !sprite.getImage().isBackgroundLoading()) {
-			g.drawImage(sprite.getImage(), sprite.getPos().getX(), sprite.getPos().getY(), 1, 1);
+		if(sprite.getImage()!=null){
+			if (!sprite.getImage().isError() && !sprite.getImage().isBackgroundLoading()) {
+				g.drawImage(sprite.getImage(), sprite.getPos().getX(), sprite.getPos().getY(), 1, 1);
+			}
+		}else{
+			//TODO image null, draw place holder
 		}
+
 		
 	}
 

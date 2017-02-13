@@ -7,11 +7,9 @@ import edu.mscd.thesis.controller.Observer;
 import edu.mscd.thesis.controller.UserData;
 import edu.mscd.thesis.model.Model;
 import edu.mscd.thesis.model.Pos2D;
-import edu.mscd.thesis.model.World;
 import edu.mscd.thesis.model.zones.ZoneType;
 import edu.mscd.thesis.util.Rules;
 import edu.mscd.thesis.util.Util;
-import javafx.application.Application;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
@@ -33,8 +31,8 @@ import javafx.scene.transform.Affine;
 import javafx.scene.transform.NonInvertibleTransformException;
 import javafx.stage.Stage;
 
-public class GUI implements View {
-	private Collection<Observer> observers = new ArrayList<Observer>();
+public class GUI implements View<UserData> {
+	private Collection<Observer<UserData>> observers = new ArrayList<Observer<UserData>>();
 	private Renderer<Model> renderer = new ModelRenderer();
 	private GraphicsContext gc;
 
@@ -48,7 +46,7 @@ public class GUI implements View {
 	private static UserData selection = new UserData();
 
 	@Override
-	public void initView(Stage stage){
+	public void initView(Stage stage) {
 
 		Group root = new Group();
 
@@ -121,7 +119,7 @@ public class GUI implements View {
 				double dy = pt.getY();
 				Pos2D modelCoordinate = new Pos2D(dx, dy);
 				selection.setClickLocation(modelCoordinate);
-				if(Util.isValidPos2D(modelCoordinate, Rules.WORLD_X, Rules.WORLD_Y)){
+				if (Util.isValidPos2D(modelCoordinate, Rules.WORLD_X, Rules.WORLD_Y)) {
 					notifyObserver();
 				}
 				if (SCREENSHOT) {
@@ -199,21 +197,21 @@ public class GUI implements View {
 	}
 
 	@Override
-	public void attachObserver(Observer obs) {
+	public void attachObserver(Observer<UserData> obs) {
 		this.observers.add(obs);
 
 	}
 
 	@Override
-	public void detachObserver(Observer obs) {
+	public void detachObserver(Observer<UserData> obs) {
 		this.observers.remove(obs);
 
 	}
 
 	@Override
 	public void notifyObserver() {
-		for (Observer o : observers) {
-			o.notifyUserDataChange(selection);
+		for (Observer<UserData> o : observers) {
+			o.notifyNewData(selection);
 		}
 
 	}
@@ -221,7 +219,7 @@ public class GUI implements View {
 	@Override
 	public void renderView(Model model) {
 		this.renderer.draw(model, this.gc);
-		
+
 	}
 
 }

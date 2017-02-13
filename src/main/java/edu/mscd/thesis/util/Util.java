@@ -16,6 +16,11 @@ import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.image.WritableImage;
 import javafx.stage.Stage;
 
+/**
+ * Other misc functionality not game-related.
+ * Data-cleaning, validation, safety-checking, or utilities.
+ * @author Mike
+ */
 public class Util {
 	private static Random random = new Random();
 	private static DateFormat df = new SimpleDateFormat("yyMMdd_HHmmss");

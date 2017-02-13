@@ -4,6 +4,11 @@ import edu.mscd.thesis.model.TileType;
 import edu.mscd.thesis.model.World;
 import edu.mscd.thesis.model.zones.ZoneType;
 
+/**
+ * Game constants, methods, rules and behaviors
+ * @author Mike
+ *
+ */
 public class Rules {
 	public static final int WORLD_X = 20;
 	public static final int WORLD_Y = 15;

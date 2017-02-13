@@ -2,6 +2,7 @@ package edu.mscd.thesis.main;
 
 import edu.mscd.thesis.controller.Controller;
 import edu.mscd.thesis.controller.GameLoop;
+import edu.mscd.thesis.controller.UserData;
 import edu.mscd.thesis.model.Model;
 import edu.mscd.thesis.model.WorldImpl;
 import edu.mscd.thesis.util.Rules;
@@ -10,8 +11,14 @@ import edu.mscd.thesis.view.View;
 import javafx.application.Application;
 import javafx.stage.Stage;
 
+/**
+ * JavaFX Application class to init all necessary objects
+ * 
+ * @author Mike
+ *
+ */
 public class Launcher extends Application {
-	View view;
+	View<UserData> view;
 	Model model;
 	Controller controller;
 
@@ -34,11 +41,11 @@ public class Launcher extends Application {
 		return new WorldImpl(Rules.WORLD_X, Rules.WORLD_Y);
 	}
 
-	private static Controller initController(Model model, View view) {
+	private static Controller initController(Model model, View<UserData> view) {
 		return new GameLoop(model, view);
 	}
 
-	private static View initView() {
+	private static View<UserData> initView() {
 		return new GUI();
 	}
 

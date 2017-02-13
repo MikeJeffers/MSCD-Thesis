@@ -4,15 +4,14 @@ import edu.mscd.thesis.model.zones.Density;
 import edu.mscd.thesis.model.zones.Zone;
 import edu.mscd.thesis.model.zones.ZoneFactory;
 import edu.mscd.thesis.model.zones.ZoneType;
-import edu.mscd.thesis.view.GUI;
-import javafx.scene.canvas.GraphicsContext;
+
 
 public class TileImpl implements Tile {
 	private Pos2D pos;
 	private TileType type;
 	private Zone zoning;
 	private ZoneFactory factory;
-	private boolean overFlag;
+
 
 	public TileImpl(Pos2D pos, TileType type, ZoneFactory factory) {
 		this.pos = pos;
@@ -79,19 +78,11 @@ public class TileImpl implements Tile {
 		return false;
 	}
 
-
-
 	@Override
 	public String toString() {
 		return "Tile{at=" + this.getPos() + ", type=" + this.type.toString() + ", zone=" + this.getZone().toString() + "}";
 	}
 
-	@Override
-	public void setMouseOver(boolean over) {
-		this.overFlag = over;
-		
-	}
-	
 	@Override
 	public boolean equals(Object other){
 		if(other instanceof Tile){
@@ -100,7 +91,5 @@ public class TileImpl implements Tile {
 		}
 		return false;
 	}
-
-
 
 }

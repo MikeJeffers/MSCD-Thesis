@@ -4,7 +4,6 @@ import edu.mscd.thesis.model.Pos2D;
 import edu.mscd.thesis.model.Tile;
 import edu.mscd.thesis.model.bldgs.Building;
 import edu.mscd.thesis.util.Rules;
-import javafx.scene.canvas.GraphicsContext;
 
 public abstract class AbstractZone implements Zone {
 	private Pos2D pos;

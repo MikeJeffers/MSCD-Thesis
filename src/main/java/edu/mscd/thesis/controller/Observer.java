@@ -1,7 +1,13 @@
 package edu.mscd.thesis.controller;
 
-public interface Observer {
+/**
+ * Observer for event-based notification
+ * @author Mike
+ *
+ * @param <T> Type of data to notify observer with
+ */
+public interface Observer<T> {
 	
-	public void notifyUserDataChange(UserData data);
+	public void notifyNewData(T data);
 
 }
