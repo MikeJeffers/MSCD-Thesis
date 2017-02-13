@@ -1,47 +1,56 @@
 package edu.mscd.thesis.controller;
 
-import edu.mscd.thesis.model.World;
+import edu.mscd.thesis.model.Model;
+import edu.mscd.thesis.view.View;
 import javafx.animation.AnimationTimer;
-import javafx.scene.canvas.GraphicsContext;
 
-public class GameLoop extends AnimationTimer {
-	private GraphicsContext graphics;
-	private World world;
-	private boolean gameStep;
-	private boolean stepMode;
+public class GameLoop extends AnimationTimer implements Controller{
+	private Model model;
+	private View<UserData> view;
+	private UserData currentSelection = new UserData();
+	private boolean step = true;
 
-	public GameLoop(World w, GraphicsContext gc) {
-		this.graphics = gc;
-		this.world = w;
+	public GameLoop(Model model, View<UserData> view) {
+		this.model = model;
+		this.view = view;
+		view.attachObserver(this);
+		
 	}
 
 	@Override
 	public void handle(long now) {
 		
-		
-		if(gameStep && stepMode){
-			gameStep=false;
-			world.update();
-			world.draw(graphics);
-			
+		if(currentSelection.isStepMode() && step){
+			step = false;
+			model.update();
+			view.renderView(model);
 			
 		}
+		
 	}
 	
-	public void setStepMode(boolean isStepMode){
-		this.stepMode = isStepMode;
+	@Override
+	public void start(){
+		super.start();
 	}
 	
-	public void step(){
-		this.gameStep = true;
+	@Override
+	public void stop(){
+		super.stop();
+	}
+
+	@Override
+	public void run() {
+		this.start();
+	}
+
+	@Override
+	public synchronized void notifyNewData(UserData data) {
+		this.currentSelection = data;
+		model.userStateChange(data);
+		step = true;
 	}
 	
-	public World getWorld(){
-		return this.world;
-	}
 	
-	public GraphicsContext getGraphics(){
-		return this.graphics;
-	}
 
 }

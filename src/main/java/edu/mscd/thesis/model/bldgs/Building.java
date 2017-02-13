@@ -5,7 +5,6 @@ import java.util.Collection;
 import edu.mscd.thesis.model.Person;
 import edu.mscd.thesis.model.Pos2D;
 import edu.mscd.thesis.model.zones.Density;
-import edu.mscd.thesis.model.zones.Zone;
 import edu.mscd.thesis.view.Sprite;
 
 public interface Building extends Sprite{

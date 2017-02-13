@@ -4,7 +4,6 @@ import edu.mscd.thesis.model.Pos2D;
 import edu.mscd.thesis.model.Tile;
 import edu.mscd.thesis.model.bldgs.Building;
 import edu.mscd.thesis.util.Rules;
-import javafx.scene.canvas.GraphicsContext;
 
 public abstract class AbstractZone implements Zone {
 	private Pos2D pos;
@@ -47,13 +46,6 @@ public abstract class AbstractZone implements Zone {
 		return this.pos.copy();
 	}
 
-	@Override
-	public void draw(GraphicsContext g) {
-		g.fillRect(this.getPos().getX(), this.getPos().getY(), 1, 1);
-		if (building != null) {
-			building.render(g);
-		}
-	}
 
 	@Override
 	public String toString() {
