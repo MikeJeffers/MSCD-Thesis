@@ -88,12 +88,7 @@ public class WorldImpl implements World {
 		}
 
 		tileUpdater.runUpdates();
-		
-		for (int i = 0; i < tiles.length; i++) {
-		//	tiles[i].update();
-		}
 		city.update();
-
 	}
 
 	private Building findClosestOpenHome(Tile t) {

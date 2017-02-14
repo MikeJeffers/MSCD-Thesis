@@ -26,8 +26,6 @@ public class RecursiveTileUpdater extends RecursiveTask<Tile[]>{
 			}
 			return tiles;
 		}
-		
-		
 		int mid = low + (high - low) / 2;
 		RecursiveTileUpdater left  = new RecursiveTileUpdater(tiles, low, mid);
 		RecursiveTileUpdater right = new RecursiveTileUpdater(tiles, mid, high);
