@@ -65,8 +65,10 @@ public class JavaFXThreadingRule implements TestRule {
                         statement.evaluate();
                     } catch (Throwable e) {
                         rethrownException = e;
+                    }finally{
+                    	countDownLatch.countDown();
                     }
-                    countDownLatch.countDown();
+                    
                 }});
             
             countDownLatch.await();
