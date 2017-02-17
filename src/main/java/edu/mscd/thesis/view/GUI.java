@@ -65,7 +65,13 @@ public class GUI implements View<UserData> {
 			zonePanel.getChildren().add(button);
 		}
 		Button step = new Button("STEP");
-		step.setOnAction(e -> this.notifyObserver());
+		step.setOnAction(new EventHandler<ActionEvent>(){
+			@Override
+			public void handle(ActionEvent event) {
+				selection.setTakeStep(true);
+				notifyObserver();
+			}
+		});
 		zonePanel.getChildren().add(step);
 		Button brushShape = new Button("Circle");
 		brushShape.setOnAction(new EventHandler<ActionEvent>() {
