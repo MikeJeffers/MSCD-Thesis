@@ -10,7 +10,7 @@ addons:
       - oracle-java8-installer
 
 script:
-- gradle check
-- gradle assemble
+- gradle check --debug
+- gradle assemble --debug
 - gradle build --debug
 - gradle test --debug
