@@ -25,9 +25,7 @@ public class TestPerson {
 	
 	@BeforeClass
 	public static void runOnceBeforeClass() {
-		
-		
-		
+			
 
 	}
 
