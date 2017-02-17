@@ -12,7 +12,9 @@ public class UserData {
 	private boolean isSquare;
 	private ZoneType zoneSelection;
 	private boolean isStepMode;
+	private boolean takeStep;
 	private Pos2D clickLocation;
+	private boolean drawFlag;
 
 	public UserData() {
 		setDefault();
@@ -25,6 +27,8 @@ public class UserData {
 		setClickLocation(new Pos2D(0,0));
 		setStepMode(true);
 		setZoneSelection(ZoneType.EMPTY);
+		setDrawFlag(true);
+		setTakeStep(true);
 	}
 
 	/**
@@ -103,8 +107,41 @@ public class UserData {
 		sb.append(radius);
 		sb.append(" StepMode?:");
 		sb.append(isStepMode);
+		sb.append(" TakeTurn?:");
+		sb.append(takeStep);
+		sb.append(" ForceDraw?:");
+		sb.append(drawFlag);
 		sb.append("");
 		return sb.toString();
+	}
+	
+	public UserData copy(){
+		UserData data = new UserData();
+		data.setSquare(this.isSquare);
+		data.setRadius(this.radius);
+		data.setClickLocation(this.clickLocation.copy());
+		data.setStepMode(this.isStepMode);
+		data.setZoneSelection(this.zoneSelection);
+		data.setDrawFlag(this.drawFlag);
+		data.setTakeStep(this.takeStep);
+		return data;
+		
+	}
+
+	public boolean isDrawFlag() {
+		return drawFlag;
+	}
+
+	public void setDrawFlag(boolean drawFlag) {
+		this.drawFlag = drawFlag;
+	}
+
+	public boolean isTakeStep() {
+		return takeStep;
+	}
+
+	public void setTakeStep(boolean takeStep) {
+		this.takeStep = takeStep;
 	}
 
 }

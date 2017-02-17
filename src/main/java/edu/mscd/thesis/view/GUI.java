@@ -118,8 +118,9 @@ public class GUI implements View<UserData> {
 				double dx = pt.getX();
 				double dy = pt.getY();
 				Pos2D modelCoordinate = new Pos2D(dx, dy);
-				selection.setClickLocation(modelCoordinate);
 				if (Util.isValidPos2D(modelCoordinate, Rules.WORLD_X, Rules.WORLD_Y)) {
+					selection.setTakeStep(true);
+					selection.setClickLocation(modelCoordinate);
 					notifyObserver();
 				}
 				if (SCREENSHOT) {
@@ -189,6 +190,10 @@ public class GUI implements View<UserData> {
 	private void redraw(GraphicsContext gc) {
 		gc.setFill(Color.DARKGRAY);
 		gc.fillRect(0, 0, gc.getCanvas().getWidth(), gc.getCanvas().getHeight());
+		selection.setDrawFlag(true);
+		selection.setTakeStep(false);
+		notifyObserver();
+		
 	}
 
 	private void setSelectedTypeTo(ZoneType zType) {

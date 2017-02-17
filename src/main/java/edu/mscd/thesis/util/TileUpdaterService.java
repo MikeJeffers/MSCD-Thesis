@@ -16,11 +16,7 @@ public class TileUpdaterService{
 
 	public void runUpdates() {
 		Tile[] tiles = w.getTiles();
-		
 		tiles = pool.invoke(new RecursiveTileUpdater(tiles, 0, tiles.length));
-		System.out.println("done?");
-			
-		
 	}
 	
 	

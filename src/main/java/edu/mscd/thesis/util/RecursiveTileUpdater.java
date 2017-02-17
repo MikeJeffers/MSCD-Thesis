@@ -5,6 +5,7 @@ import java.util.concurrent.RecursiveTask;
 import edu.mscd.thesis.model.Tile;
 
 public class RecursiveTileUpdater extends RecursiveTask<Tile[]>{
+	private static final long serialVersionUID = 1L;
 	int low;
     int high;
     Tile[] tiles;
@@ -20,7 +21,6 @@ public class RecursiveTileUpdater extends RecursiveTask<Tile[]>{
 	protected Tile[] compute() {
 		int diff = high-low;
 		if(diff<Util.MAX_SEQUENTIAL){
-			System.out.println("Executing update on tiles["+low +", "+high+"]");
 			for(int i=low; i<high; i++){
 				tiles[i].update();
 			}
