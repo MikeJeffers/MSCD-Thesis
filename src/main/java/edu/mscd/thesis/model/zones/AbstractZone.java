@@ -27,6 +27,7 @@ public abstract class AbstractZone implements Zone {
 
 	@Override
 	public void deltaValue(double v) {
+		
 		this.value += v;
 		Math.max(this.value, Rules.MAX);
 	}
@@ -63,6 +64,8 @@ public abstract class AbstractZone implements Zone {
 
 	@Override
 	public void update() {
+		double newValue = Rules.getValueForZoneTypeWithEffects(this.getTile(), this.getZoneType());
+		this.setValue(newValue);
 		if(this.building!=null){
 			this.setValue(this.building.update(this.getValue()));
 		}

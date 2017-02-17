@@ -3,9 +3,10 @@ package edu.mscd.thesis.view;
 import javafx.scene.canvas.GraphicsContext;
 
 public class SpriteRenderer implements Renderer<Sprite>{
+	private RenderMode renderMode;
 	
-	public SpriteRenderer(){
-		
+	public SpriteRenderer(RenderMode mode){
+		this.renderMode = mode;
 	}
 
 	@Override
@@ -19,6 +20,11 @@ public class SpriteRenderer implements Renderer<Sprite>{
 		}
 
 		
+	}
+
+	@Override
+	public void changeMode(RenderMode mode) {
+		this.renderMode = mode;
 	}
 
 }

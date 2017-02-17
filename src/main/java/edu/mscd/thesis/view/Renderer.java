@@ -22,5 +22,9 @@ public interface Renderer<T> {
 	 *            - JavaFX graphics context, Canvas
 	 */
 	public void draw(T model, GraphicsContext g);
+	
+	
+	public void changeMode(RenderMode mode);
+	
 
 }

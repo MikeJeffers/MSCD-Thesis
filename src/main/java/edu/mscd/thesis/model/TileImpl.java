@@ -5,6 +5,7 @@ import edu.mscd.thesis.model.zones.Zone;
 import edu.mscd.thesis.model.zones.ZoneFactory;
 import edu.mscd.thesis.model.zones.ZoneType;
 import edu.mscd.thesis.util.Rules;
+import edu.mscd.thesis.util.Util;
 
 
 public class TileImpl implements Tile {
@@ -37,11 +38,14 @@ public class TileImpl implements Tile {
 	}
 	
 	private double pollutionDecay(double pollution){
-		return Math.max(0, pollution-(pollution/(2*Rules.POLLUTION_HALFLIFE)));
+		double value = pollution-(pollution/(2*Rules.POLLUTION_HALFLIFE));
+		return Util.boundValue(value, 0, Rules.MAX);
+		
 	}
 	
 	private double landValueDecay(double currentValue){
-		return Math.max(this.baseLandValue(), currentValue - (currentValue/(Rules.LANDVALUE_DECAY)));
+		double value = currentValue - (currentValue/(Rules.LANDVALUE_DECAY));
+		return Util.boundValue(value, this.baseLandValue(), Rules.MAX);
 	}
 	
 	@Override
@@ -96,7 +100,21 @@ public class TileImpl implements Tile {
 
 	@Override
 	public String toString() {
-		return "Tile{at=" + this.getPos() + ", type=" + this.type.toString() + ", zone=" + this.getZone().toString() + "}";
+		StringBuilder sb = new StringBuilder();
+		sb.append("Tile{");
+		sb.append(this.type.toString());
+		sb.append(" zonetype:");
+		sb.append(this.getZone().getZoneType());
+		sb.append(" MaterialValue:");
+		sb.append(this.materialValue());
+		sb.append(" LandValue:");
+		sb.append(this.landValue);
+		sb.append(" pollution:");
+		sb.append(this.pollution);
+		sb.append(" at:");
+		sb.append(this.getPos());
+		sb.append(" }");
+		return sb.toString();
 	}
 
 	@Override
@@ -110,25 +128,23 @@ public class TileImpl implements Tile {
 
 	@Override
 	public double getPollution() {
-		// TODO Auto-generated method stub
-		return 0;
+		return this.pollution;
 	}
 
 	@Override
 	public void pollute(double pollution) {
-		// TODO Auto-generated method stub
+		this.pollution+=pollution;
 		
 	}
 
 	@Override
 	public double getCurrentLandValue() {
-		// TODO Auto-generated method stub
-		return 0;
+		return this.landValue;
 	}
 
 	@Override
 	public void modifyLandValue(double factor) {
-		// TODO Auto-generated method stub
+		this.landValue+=landValue;
 		
 	}
 

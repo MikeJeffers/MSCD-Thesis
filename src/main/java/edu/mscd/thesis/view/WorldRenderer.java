@@ -7,9 +7,11 @@ import javafx.scene.paint.Color;
 
 public class WorldRenderer implements Renderer<World>{
 	private Renderer<Tile> tileRender;
+	private RenderMode renderMode;
 	
-	public WorldRenderer(){
-		tileRender = new TileRenderer();
+	public WorldRenderer(RenderMode mode){
+		tileRender = new TileRenderer(mode);
+		this.renderMode = mode;
 	}
 
 	@Override
@@ -20,6 +22,12 @@ public class WorldRenderer implements Renderer<World>{
 		for (int i = 0; i <tiles.length; i++) {
 			tileRender.draw(tiles[i], g);
 		}
+	}
+
+	@Override
+	public void changeMode(RenderMode mode) {
+		this.renderMode = mode;
+		this.tileRender.changeMode(mode);
 	}
 
 }

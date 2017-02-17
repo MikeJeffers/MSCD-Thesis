@@ -12,6 +12,7 @@ import edu.mscd.thesis.util.Rules;
 import edu.mscd.thesis.util.Util;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -22,6 +23,8 @@ import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.SingleSelectionModel;
 import javafx.scene.control.Spinner;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.FlowPane;
@@ -33,7 +36,7 @@ import javafx.stage.Stage;
 
 public class GUI implements View<UserData> {
 	private Collection<Observer<UserData>> observers = new ArrayList<Observer<UserData>>();
-	private Renderer<Model> renderer = new ModelRenderer();
+	private Renderer<Model> renderer = new ModelRenderer(RenderMode.NORMAL);
 	private GraphicsContext gc;
 
 	private static final boolean SCREENSHOT = false;
@@ -90,10 +93,25 @@ public class GUI implements View<UserData> {
 		FlowPane cameraControls = new FlowPane();
 		makeControlButtons(cameraControls, gc);
 
+		FlowPane renderModeControls = new FlowPane();
+		ComboBox<RenderMode> combo = new ComboBox<RenderMode>();
+		combo.getItems().setAll(RenderMode.values());
+		combo.setValue(RenderMode.NORMAL);
+		combo.valueProperty().addListener(new ChangeListener<RenderMode>() {
+			@Override
+			public void changed(ObservableValue<? extends RenderMode> observable, RenderMode oldValue,
+					RenderMode newValue) {
+				renderer.changeMode(newValue);
+				redraw(gc);
+			}
+		});
+		renderModeControls.getChildren().add(combo);
+
 		controlPane.setLayoutX(SCREEN_WIDTH);
 
 		controlPane.getChildren().add(zonePanel);
 		controlPane.getChildren().add(cameraControls);
+		controlPane.getChildren().add(renderModeControls);
 
 		root.getChildren().add(canvas);
 		root.getChildren().add(controlPane);
@@ -193,7 +211,7 @@ public class GUI implements View<UserData> {
 		selection.setDrawFlag(true);
 		selection.setTakeStep(false);
 		notifyObserver();
-		
+
 	}
 
 	private void setSelectedTypeTo(ZoneType zType) {

@@ -45,6 +45,10 @@ public class Util {
 	public static int getRandomBetween(int minInclusive, int maxExclusive){
 		return minInclusive+Util.random.nextInt(maxExclusive);
 	}
+	
+	public static double boundValue(double value, double min, double max){
+		return Math.min(min, Math.max(max, value));
+	}
 
 	/**
 	 * Returns the minimum uniform scale factor such that @param xToScale
