@@ -14,11 +14,13 @@ public class Citizen implements Person {
 	private int id;
 	private int happiness;
 	private int money;
+	private int age;
 
 	public Citizen(int _id) {
 		this.id = _id;
 		this.money = Util.getRandomBetween(1, 55);
 		this.happiness = Util.getRandomBetween(1, 55);
+		this.age = Util.getRandomBetween(1, 2);
 	}
 
 	@Override
@@ -98,6 +100,7 @@ public class Citizen implements Person {
 
 	@Override
 	public void update() {
+		age++;
 		if(this.employed()){
 			this.money++;
 		}else{
@@ -134,6 +137,11 @@ public class Citizen implements Person {
 		sb.append("}");
 		return sb.toString();
 		
+	}
+
+	@Override
+	public int getAge() {
+		return this.age;
 	}
 
 

@@ -143,6 +143,8 @@ public class CityImpl implements City {
 			p.update();
 			if (p.getHappiness() < 0 && p.getMoney() < 0 && !p.employed() && p.homeless()) {
 				toRemove.add(p);
+			}else if(p.getAge()>Rules.LIFE_SPAN){
+				toRemove.add(p);
 			} else if (p.employed() && !p.homeless()) {
 				int rand = Util.getRandomBetween(0, 100);
 				if (rand < Rules.BIRTH_RATE) {

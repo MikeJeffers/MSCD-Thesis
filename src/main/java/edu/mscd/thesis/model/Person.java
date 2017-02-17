@@ -21,6 +21,7 @@ public interface Person {
 
 	int getMoney();
 	int getID();
+	int getAge();
 	void update();
 	
 }
