@@ -23,17 +23,21 @@ public class Launcher extends Application {
 	Controller controller;
 
 	public Launcher() {
+	}
+	
+	@Override
+	public void init(){
 		model = initModel();
 		view = initView();
 		controller = initController(model, view);
-		Thread t = new Thread(controller);
-		t.run();
-
+		
 	}
 
 	@Override
 	public void start(Stage primaryStage) throws Exception {
 		view.initView(primaryStage);
+		Thread t = new Thread(controller);
+		t.run();
 	}
 
 	private static Model initModel() {

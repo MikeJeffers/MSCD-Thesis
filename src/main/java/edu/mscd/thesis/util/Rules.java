@@ -14,12 +14,19 @@ import edu.mscd.thesis.model.zones.ZoneType;
 public class Rules {
 	public static final int WORLD_X = 20;
 	public static final int WORLD_Y = 15;
+	//Game Constants and factors
 	public static final int MAX = 255;
+	//Zone growth factors
 	public static final int GROWTH_THRESHOLD = 100;
 	public static final int BASE_GROWTH_COST = 10;
+	//City population and Person constants
 	public static final int STARTING_POPULATION = 100;
 	public static final int BIRTH_RATE = 3;
+	public static final int LIFE_SPAN = 100;
+	//Tile effect factors
+	public static final int POLLUTION_UNIT = 2;
 	public static final int POLLUTION_HALFLIFE = 10;
+	public static final int LANDVALUE_UNIT = 1;
 	public static final int LANDVALUE_DECAY = 10;
 
 	public static double getValueForZoneTypeWithEffects(Tile t, ZoneType z) {
