@@ -12,5 +12,5 @@ addons:
 script:
 - gradle check
 - gradle assemble
-- gradle build
-- gradle test
+- gradle build --debug
+- gradle test --debug
