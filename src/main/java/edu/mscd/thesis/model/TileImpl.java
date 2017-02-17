@@ -134,6 +134,7 @@ public class TileImpl implements Tile {
 	@Override
 	public void pollute(double pollution) {
 		this.pollution+=pollution;
+		Util.boundValue(pollution, 0, Rules.MAX);
 		
 	}
 
@@ -145,6 +146,7 @@ public class TileImpl implements Tile {
 	@Override
 	public void modifyLandValue(double factor) {
 		this.landValue+=landValue;
+		Util.boundValue(landValue, this.baseLandValue(), Rules.MAX);
 		
 	}
 

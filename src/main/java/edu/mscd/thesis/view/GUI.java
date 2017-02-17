@@ -50,6 +50,7 @@ public class GUI implements View<UserData> {
 
 	@Override
 	public void initView(Stage stage) {
+		renderer.changeMode(RenderMode.NORMAL);
 
 		Group root = new Group();
 

@@ -21,6 +21,7 @@ public class ZoneRenderer implements Renderer<Zone> {
 		Building b = zone.getBuilding();
 		if (b != null) {
 			buildingRenderer.draw(b, g);
+			System.out.println(b.getImage());
 		}
 
 	}

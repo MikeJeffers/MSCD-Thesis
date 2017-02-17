@@ -4,6 +4,7 @@ import edu.mscd.thesis.model.Pos2D;
 import edu.mscd.thesis.model.Tile;
 import edu.mscd.thesis.model.bldgs.Building;
 import edu.mscd.thesis.util.Rules;
+import edu.mscd.thesis.util.Util;
 
 public abstract class AbstractZone implements Zone {
 	private Pos2D pos;
@@ -29,7 +30,8 @@ public abstract class AbstractZone implements Zone {
 	public void deltaValue(double v) {
 		
 		this.value += v;
-		Math.max(this.value, Rules.MAX);
+		Util.boundValue(value, Rules.getValueForZoneOnTile(tile.getType(), this.getZoneType()), Rules.MAX);
+		System.out.println(value);
 	}
 
 	@Override
@@ -39,7 +41,8 @@ public abstract class AbstractZone implements Zone {
 
 	public void setValue(double v) {
 		this.value = v;
-		Math.max(this.value, Rules.MAX);
+		Util.boundValue(value, Rules.getValueForZoneOnTile(tile.getType(), this.getZoneType()), Rules.MAX);
+		System.out.println(value);
 	}
 
 	@Override

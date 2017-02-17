@@ -3,7 +3,8 @@ package edu.mscd.thesis.view;
 public enum RenderMode {
 	NORMAL("Normal"),
 	POLLUTION("Pollution"),
-	LANDVALUE("Landvalues");
+	LANDVALUE("Landvalues"),
+	DENSITY("Density");
 	
 	private String shortName;
 	private RenderMode(String id){

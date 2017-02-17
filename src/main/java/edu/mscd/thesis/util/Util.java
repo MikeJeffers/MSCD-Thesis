@@ -47,7 +47,7 @@ public class Util {
 	}
 	
 	public static double boundValue(double value, double min, double max){
-		return Math.min(min, Math.max(max, value));
+		return Math.min(max, Math.max(min, value));
 	}
 
 	/**

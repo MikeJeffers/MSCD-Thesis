@@ -18,8 +18,6 @@ public class SpriteRenderer implements Renderer<Sprite>{
 		}else{
 			//TODO image null, draw place holder
 		}
-
-		
 	}
 
 	@Override
