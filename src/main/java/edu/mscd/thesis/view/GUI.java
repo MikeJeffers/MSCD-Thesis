@@ -38,13 +38,7 @@ public class GUI implements View<UserData> {
 	private Collection<Observer<UserData>> observers = new ArrayList<Observer<UserData>>();
 	private Renderer<Model> renderer = new ModelRenderer(RenderMode.NORMAL);
 	private GraphicsContext gc;
-
-	private static final boolean SCREENSHOT = false;
-
-	private static final int SCREEN_WIDTH = 800;
-	private static final int SCREEN_HEIGHT = 600;
-	public static final double SCALE_FACTOR = Util.getScaleFactor(Rules.WORLD_X, Rules.WORLD_Y, SCREEN_WIDTH,
-			SCREEN_HEIGHT);
+	
 	// User selections on UI elements
 	private static UserData selection = new UserData();
 
@@ -54,7 +48,7 @@ public class GUI implements View<UserData> {
 
 		Group root = new Group();
 
-		Canvas canvas = new Canvas(SCREEN_WIDTH, SCREEN_HEIGHT);
+		Canvas canvas = new Canvas(Util.WINDOW_WIDTH, Util.WINDOW_HEIGHT);
 		gc = canvas.getGraphicsContext2D();
 
 		FlowPane controlPane = new FlowPane();
@@ -114,7 +108,7 @@ public class GUI implements View<UserData> {
 		});
 		renderModeControls.getChildren().add(combo);
 
-		controlPane.setLayoutX(SCREEN_WIDTH);
+		controlPane.setLayoutX(Util.WINDOW_WIDTH);
 
 		controlPane.getChildren().add(zonePanel);
 		controlPane.getChildren().add(cameraControls);
@@ -124,7 +118,7 @@ public class GUI implements View<UserData> {
 		root.getChildren().add(controlPane);
 
 		Affine transformMatrix = gc.getTransform();
-		transformMatrix.appendScale(SCALE_FACTOR, SCALE_FACTOR);
+		transformMatrix.appendScale(Util.SCALE_FACTOR, Util.SCALE_FACTOR);
 		gc.setTransform(transformMatrix);
 
 		Scene mainScene = new Scene(root, Color.WHITE);
@@ -148,12 +142,10 @@ public class GUI implements View<UserData> {
 					selection.setClickLocation(modelCoordinate);
 					notifyObserver();
 				}
-				if (SCREENSHOT) {
+				if (Util.SCREENSHOT) {
 					Util.takeScreenshot(stage);
 				}
-
 			}
-
 		});
 		stage.show();
 	}
@@ -207,7 +199,7 @@ public class GUI implements View<UserData> {
 	private void resetMatrix(GraphicsContext gc) {
 		redraw(gc);
 		Affine identityMatrix = new Affine();
-		identityMatrix.appendScale(SCALE_FACTOR, SCALE_FACTOR);
+		identityMatrix.appendScale(Util.SCALE_FACTOR, Util.SCALE_FACTOR);
 		gc.setTransform(identityMatrix);
 		redraw(gc);
 	}

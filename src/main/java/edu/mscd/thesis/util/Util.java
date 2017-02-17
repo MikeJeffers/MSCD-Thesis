@@ -26,6 +26,12 @@ public class Util {
 	 * TODO this should scale with available cores.. at least its relative to world size..
 	 */
 	public static final int MAX_SEQUENTIAL = (Rules.WORLD_X*Rules.WORLD_Y)/8;
+	//GUI constants
+	public static final int WINDOW_WIDTH = 800;
+	public static final int WINDOW_HEIGHT = 600;
+	public static final double SCALE_FACTOR = Util.getScaleFactor(Rules.WORLD_X, Rules.WORLD_Y, WINDOW_WIDTH,
+			WINDOW_HEIGHT);
+	public static final boolean SCREENSHOT = false;
 	private static Random random = new Random();
 	private static DateFormat df = new SimpleDateFormat("yyMMdd_HHmmss");
 
