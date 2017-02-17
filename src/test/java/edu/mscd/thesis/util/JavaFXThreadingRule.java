@@ -48,11 +48,9 @@ public class JavaFXThreadingRule implements TestRule {
 			statement = aStatement;
 		}
 
-		private Throwable rethrownException = null;
 
 		@Override
 		public void evaluate() throws Throwable {
-
 			if (!jfxIsSetup) {
 				System.out.println("javaFX is not setup");
 				setupJavaFX();
@@ -60,47 +58,7 @@ public class JavaFXThreadingRule implements TestRule {
 
 				jfxIsSetup = true;
 			}
-
-			final CountDownLatch countDownLatch = new CountDownLatch(1);
-			Thread t = new Thread(new Runnable() {
-				@Override
-				public void run() {
-					try {
-						statement.evaluate();
-					} catch (Throwable e) {
-						System.out.println("error on statment.eval!");
-						rethrownException = e;
-					} finally {
-						countDownLatch.countDown();
-					}
-
-				}
-			});
-			t.start();
-			/*
-			Platform.runLater(new Runnable() {
-				@Override
-				public void run() {
-					try {
-						statement.evaluate();
-					} catch (Throwable e) {
-						System.out.println("error on statment.eval!");
-						rethrownException = e;
-					} finally {
-						countDownLatch.countDown();
-					}
-
-				}
-			});*/
-			System.out.println("await countdownlatch");
-			countDownLatch.await();
-			System.out.println("applying rule");
-
-			// if an exception was thrown by the statement during evaluation,
-			// then re-throw it to fail the test
-			if (rethrownException != null) {
-				throw rethrownException;
-			}
+			statement.evaluate();
 		}
 
 		protected void setupJavaFX() throws InterruptedException {
