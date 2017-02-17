@@ -145,7 +145,7 @@ public class TileImpl implements Tile {
 
 	@Override
 	public void modifyLandValue(double factor) {
-		this.landValue+=landValue;
+		this.landValue+=factor;
 		Util.boundValue(landValue, this.baseLandValue(), Rules.MAX);
 		
 	}

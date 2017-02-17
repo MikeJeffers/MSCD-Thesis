@@ -5,7 +5,6 @@ import java.util.concurrent.RecursiveTask;
 import edu.mscd.thesis.model.Tile;
 
 public class RecursiveTileUpdater extends RecursiveTask<Tile[]>{
-	private static final long serialVersionUID = 1L;
 	int low;
     int high;
     Tile[] tiles;

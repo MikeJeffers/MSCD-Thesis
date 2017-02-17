@@ -20,7 +20,7 @@ public class Rules {
 	public static final int STARTING_POPULATION = 100;
 	public static final int BIRTH_RATE = 3;
 	public static final int POLLUTION_HALFLIFE = 10;
-	public static final int LANDVALUE_DECAY = 5;
+	public static final int LANDVALUE_DECAY = 10;
 
 	public static double getValueForZoneTypeWithEffects(Tile t, ZoneType z) {
 		double value = getValueForZoneOnTile(t.getType(), z);

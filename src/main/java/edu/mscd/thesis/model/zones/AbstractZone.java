@@ -30,8 +30,7 @@ public abstract class AbstractZone implements Zone {
 	public void deltaValue(double v) {
 		
 		this.value += v;
-		Util.boundValue(value, Rules.getValueForZoneOnTile(tile.getType(), this.getZoneType()), Rules.MAX);
-		System.out.println(value);
+		Util.boundValue(value, 0, Rules.MAX);
 	}
 
 	@Override
@@ -41,8 +40,7 @@ public abstract class AbstractZone implements Zone {
 
 	public void setValue(double v) {
 		this.value = v;
-		Util.boundValue(value, Rules.getValueForZoneOnTile(tile.getType(), this.getZoneType()), Rules.MAX);
-		System.out.println(value);
+		Util.boundValue(value, 0, Rules.MAX);
 	}
 
 	@Override
