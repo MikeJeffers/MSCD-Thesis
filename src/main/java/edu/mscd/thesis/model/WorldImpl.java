@@ -45,6 +45,15 @@ public class WorldImpl implements World {
 	@Override
 	public void update() {
 		//System.out.println(city);
+		
+		//Method to apply Pollution/local effects to neighbor tiles
+		for(int i=0; i<tiles.length; i++){
+			if(tiles[i].getZone().getZoneType()==ZoneType.INDUSTRIAL){
+				pollute(tiles[i]);
+			}else if(tiles[i].getZone().getZoneType()==ZoneType.RESIDENTIAL){
+				growLandValue(tiles[i]);
+			}
+		}
 
 		// TODO
 		// iterate through all zones: incr/decr value based on conditions
@@ -89,6 +98,27 @@ public class WorldImpl implements World {
 
 		tileUpdater.runUpdates();
 		city.update();
+	}
+	
+	
+	private void pollute(Tile origin){
+		int intensity = origin.getZone().getBuilding().getDensity().getDensityLevel()+1;
+		List<Tile>tilesInRange = getNeighborsCircularDist(origin, intensity);
+		for(Tile t: tilesInRange){
+			double dist = Math.max(t.getPos().distBetween(origin.getPos()), 0.1);//TODO arbitrary minimum factor
+			double pollutionAmount = intensity*(1-(dist/intensity));
+			t.pollute(pollutionAmount);
+		}
+	}
+	
+	private void growLandValue(Tile origin){
+		int intensity = origin.getZone().getBuilding().getDensity().getDensityLevel()+1;
+		List<Tile>tilesInRange = getNeighborsCircularDist(origin, intensity);
+		for(Tile t: tilesInRange){
+			double dist = Math.max(t.getPos().distBetween(origin.getPos()), 0.1);//TODO arbitrary minimum factor
+			double landValueIncr = intensity*(1-(dist/intensity));
+			t.modifyLandValue(landValueIncr);
+		}
 	}
 
 	private Building findClosestOpenHome(Tile t) {
