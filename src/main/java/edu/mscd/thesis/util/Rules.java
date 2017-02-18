@@ -17,8 +17,8 @@ public class Rules {
 	//Game Constants and factors
 	public static final int MAX = 255;
 	//Zone growth factors
-	public static final int GROWTH_THRESHOLD = 100;
-	public static final int BASE_GROWTH_COST = 10;
+	public static final int GROWTH_THRESHOLD = 125;
+	public static final int BASE_GROWTH_COST = 25;
 	//City population and Person constants
 	public static final int STARTING_POPULATION = 100;
 	public static final int BIRTH_RATE = 3;

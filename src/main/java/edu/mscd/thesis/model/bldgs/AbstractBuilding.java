@@ -10,6 +10,7 @@ import edu.mscd.thesis.model.Pos2D;
 import edu.mscd.thesis.model.TileType;
 import edu.mscd.thesis.model.zones.Density;
 import edu.mscd.thesis.model.zones.ZoneType;
+import edu.mscd.thesis.util.Rules;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.image.Image;
 
@@ -34,6 +35,24 @@ public abstract class AbstractBuilding implements Building {
 		this.changeDensity(density);
 	}
 
+	@Override
+	public double update(double growthValue) {
+		int tileMaxDensity = this.getTileType().getMaxDensity().getDensityLevel();
+		int currentDensityLevel = this.getDensity().getDensityLevel();
+		int currentOccupancy = this.currentOccupancy();
+		int maxOccupancy = this.getMaxOccupants();
+		if(currentOccupancy>=maxOccupancy && (growthValue-Rules.BASE_GROWTH_COST)>Rules.GROWTH_THRESHOLD && tileMaxDensity>currentDensityLevel){
+			this.changeDensity(getDensity().getNextLevel());
+			return growthValue - Rules.BASE_GROWTH_COST;
+		}else if(currentDensityLevel==0 && (growthValue-Rules.BASE_GROWTH_COST)>Rules.GROWTH_THRESHOLD){
+			this.changeDensity(getDensity().getNextLevel());
+			return growthValue - Rules.BASE_GROWTH_COST;
+		}else if(growthValue<Rules.GROWTH_THRESHOLD){
+			this.changeDensity(getDensity().getPrevLevel());
+			return growthValue;
+		}
+		return growthValue;
+	}
 
 
 	@Override

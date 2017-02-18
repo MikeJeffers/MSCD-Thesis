@@ -17,25 +17,6 @@ public abstract class PlaceOfWork extends AbstractBuilding {
 
 	}
 
-	@Override
-	public double update(double growthValue) {
-		int tileMaxDensity = this.getTileType().getMaxDensity().getDensityLevel();
-		int currentDensityLevel = this.getDensity().getDensityLevel();
-		int currentOccupancy = this.currentOccupancy();
-		int maxOccupancy = this.getMaxOccupants();
-		if (currentOccupancy >= maxOccupancy && growthValue > Rules.GROWTH_THRESHOLD
-				&& tileMaxDensity > currentDensityLevel) {
-			this.changeDensity(getDensity().getNextLevel());
-			return growthValue - Rules.BASE_GROWTH_COST;
-		} else if (currentDensityLevel == 0 && growthValue > Rules.GROWTH_THRESHOLD) {
-			this.changeDensity(getDensity().getNextLevel());
-			return growthValue - Rules.BASE_GROWTH_COST;
-		} else if (growthValue > Rules.GROWTH_THRESHOLD) {
-			this.changeDensity(getDensity().getPrevLevel());
-			return growthValue + Rules.BASE_GROWTH_COST*2;
-		}
-		return growthValue;
-	}
 
 	@Override
 	public void setMaxOccupancy(int max) {
