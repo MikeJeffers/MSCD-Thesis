@@ -47,15 +47,6 @@ public class WorldImpl implements World {
 	public void update() {
 		//System.out.println(city);
 		
-		//Method to apply Pollution/local effects to neighbor tiles
-		for(int i=0; i<tiles.length; i++){
-			ZoneType zt = tiles[i].getZone().getZoneType();
-			if(zt==ZoneType.INDUSTRIAL){
-				pollute(tiles[i]);
-			}else if(zt==ZoneType.RESIDENTIAL||zt==ZoneType.COMMERICAL){
-				growLandValue(tiles[i]);
-			}
-		}
 
 		// TODO
 		// iterate through all zones: incr/decr value based on conditions
@@ -100,28 +91,6 @@ public class WorldImpl implements World {
 
 		tileUpdater.runUpdates();
 		city.update();
-	}
-	
-	
-	private void pollute(Tile origin){
-		int intensity = origin.getZone().getBuilding().getDensity().getDensityLevel()+1;
-		List<Tile>tilesInRange = getNeighborsCircularDist(origin, intensity);
-		for(Tile t: tilesInRange){
-			double dist = Math.max(t.getPos().distBetween(origin.getPos()), 0.1);//TODO arbitrary minimum factor
-			double pollutionAmount = Rules.POLLUTION_UNIT*(intensity*(1-(dist/intensity)));
-			t.pollute(pollutionAmount);
-			t.modifyLandValue(-pollutionAmount);
-		}
-	}
-	
-	private void growLandValue(Tile origin){
-		int intensity = origin.getZone().getBuilding().getDensity().getDensityLevel()+1;
-		List<Tile>tilesInRange = getNeighborsCircularDist(origin, intensity);
-		for(Tile t: tilesInRange){
-			double dist = Math.max(t.getPos().distBetween(origin.getPos()), 0.1);//TODO arbitrary minimum factor
-			double landValueIncr = Rules.LANDVALUE_UNIT*(intensity*(1-(dist/intensity)));
-			t.modifyLandValue(landValueIncr);
-		}
 	}
 
 	private Building findClosestOpenHome(Tile t) {
@@ -189,9 +158,9 @@ public class WorldImpl implements World {
 		}
 		List<Tile> tilesInRange;
 		if (squareSelect) {
-			tilesInRange = getNeighborsManhattanDist(t, radius);
+			tilesInRange = Util.getNeighborsManhattanDist(t, tiles, radius, cols, rows);
 		} else {
-			tilesInRange = getNeighborsCircularDist(t, radius);
+			tilesInRange = Util.getNeighborsCircularDist(t, tiles, radius);
 		}
 		for (Tile reZone : tilesInRange) {
 			reZone.setZone(zt);
@@ -199,55 +168,6 @@ public class WorldImpl implements World {
 		return true;
 	}
 
-
-	private List<Tile> getNeighborsCircularDist(Tile origin, int radius) {
-		int index = getIndexOfTile(origin);
-		List<Tile> neighbors = new ArrayList<Tile>();
-		if (index == -1) {
-			return neighbors;
-		}
-		Pos2D originPt = origin.getPos();
-		for (int i = 0; i < tiles.length; i++) {
-			if (tiles[i].getPos().distBetween(originPt) <= radius) {
-				neighbors.add(tiles[i]);
-			}
-		}
-		return neighbors;
-	}
-
-	private List<Tile> getNeighborsManhattanDist(Tile origin, int radius) {
-		int index = getIndexOfTile(origin);
-		List<Tile> neighbors = new ArrayList<Tile>();
-		if (index == -1) {
-			return neighbors;
-		}
-
-		for (int j = -radius; j <= radius; j++) {
-			for (int k = -radius; k <= radius; k++) {
-				int indexOfNeighbor = index + (k * cols) + (j);
-				if (indexOfNeighbor >= tiles.length || indexOfNeighbor < 0) {
-					continue;
-				}
-				int expectedCol = (index % cols) + j;
-				int expectedRow = (int) (index / cols) + k;
-				int actualCol = indexOfNeighbor % cols;
-				int actualRow = indexOfNeighbor / cols;
-				if (actualRow == expectedRow && actualCol == expectedCol) {
-					neighbors.add(tiles[indexOfNeighbor]);
-				}
-			}
-		}
-		return neighbors;
-	}
-
-	private int getIndexOfTile(Tile t) {
-		for (int i = 0; i < tiles.length; i++) {
-			if (tiles[i].equals(t)) {
-				return i;
-			}
-		}
-		return -1;
-	}
 	
 	@Override
 	public Tile[] getTiles(){
