@@ -54,9 +54,18 @@ public class TestWorld {
 		World w = new WorldImpl(5, 5);
 		Zone zoneAtTarg = w.getZoneAt(target);
 		assertTrue(ZoneType.EMPTY==zoneAtTarg.getZoneType());
-		w.setZoneAt(target, ZoneType.RESIDENTIAL);
-		zoneAtTarg = w.getZoneAt(target);
-		//assertTrue(ZoneType.RESIDENTIAL==zoneAtTarg.getZoneType());
+		boolean success = w.setZoneAt(target, ZoneType.RESIDENTIAL);
+		if(success){//if zoning successful, tile is valid zonable tile
+			Zone reZoned = w.getZoneAt(target);
+			assertTrue(ZoneType.RESIDENTIAL==reZoned.getZoneType());
+			Tile t = w.getTileAt(target);
+			assertTrue(t.getType().isZonable());
+		}else{ //tile is a non-zonable type
+			Tile t = w.getTileAt(target);
+			assertNotNull(t);
+			assertFalse(t.getType().isZonable());
+		}
+		
 
 	}
 }
