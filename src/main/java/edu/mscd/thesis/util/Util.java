@@ -38,7 +38,7 @@ public class Util {
 			WINDOW_HEIGHT);
 	public static final boolean SCREENSHOT = false;
 	private static Random random = new Random();
-	private static DateFormat df = new SimpleDateFormat("yyMMdd_HHmmss");
+	private static DateFormat df = new SimpleDateFormat("yyMMdd_HHmmss_SSS");
 
 	/**
 	 * Get all Tiles in tile array that are within ManhattanDistance of
@@ -179,13 +179,15 @@ public class Util {
 		WritableImage img = stage.getScene().snapshot(null);
 		Date date = Calendar.getInstance().getTime();
 		String stamp = df.format(date);
-
+		System.out.print("Taking Screen @"+stamp+"....");
 		File file = new File("screenshots/screen" + stamp + ".png");
 
 		try {
 			RenderedImage renderedImage = SwingFXUtils.fromFXImage(img, null);
 			ImageIO.write(renderedImage, "png", file);
+			System.out.println("Success!");
 		} catch (IOException e) {
+			System.out.println("Fail!");
 			System.err.println("Failed to save screenshot");
 			e.printStackTrace();
 		}

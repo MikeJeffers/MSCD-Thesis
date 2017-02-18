@@ -64,6 +64,7 @@ public class GUI implements View<UserData> {
 			public void handle(ActionEvent event) {
 				selection.setTakeStep(true);
 				notifyObserver();
+				Util.takeScreenshot(stage);
 			}
 		});
 		zonePanel.getChildren().add(step);
