@@ -49,9 +49,10 @@ public class WorldImpl implements World {
 		
 		//Method to apply Pollution/local effects to neighbor tiles
 		for(int i=0; i<tiles.length; i++){
-			if(tiles[i].getZone().getZoneType()==ZoneType.INDUSTRIAL){
+			ZoneType zt = tiles[i].getZone().getZoneType();
+			if(zt==ZoneType.INDUSTRIAL){
 				pollute(tiles[i]);
-			}else if(tiles[i].getZone().getZoneType()==ZoneType.RESIDENTIAL){
+			}else if(zt==ZoneType.RESIDENTIAL||zt==ZoneType.COMMERICAL){
 				growLandValue(tiles[i]);
 			}
 		}
