@@ -16,7 +16,4 @@ public class Commercial extends AbstractZone {
 		return ZoneType.COMMERICAL;
 	}
 
-
-
-
 }

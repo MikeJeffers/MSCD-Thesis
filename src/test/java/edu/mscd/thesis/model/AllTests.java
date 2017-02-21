@@ -6,7 +6,8 @@ import org.junit.runners.Suite;
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
   TestWorld.class,
-  TestPos2D.class
+  TestPos2D.class,
+  TestPerson.class
   
 })
 

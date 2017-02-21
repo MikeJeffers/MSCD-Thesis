@@ -20,7 +20,6 @@ public class RecursiveTileUpdater extends RecursiveTask<Tile[]>{
 	protected Tile[] compute() {
 		int diff = high-low;
 		if(diff<Util.MAX_SEQUENTIAL){
-			System.out.println("Executing update on tiles["+low +", "+high+"]");
 			for(int i=low; i<high; i++){
 				tiles[i].update();
 			}

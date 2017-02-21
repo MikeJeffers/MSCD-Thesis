@@ -4,6 +4,8 @@ import edu.mscd.thesis.model.zones.Density;
 import edu.mscd.thesis.model.zones.Zone;
 import edu.mscd.thesis.model.zones.ZoneFactory;
 import edu.mscd.thesis.model.zones.ZoneType;
+import edu.mscd.thesis.util.Rules;
+import edu.mscd.thesis.util.Util;
 
 
 public class TileImpl implements Tile {
@@ -11,6 +13,8 @@ public class TileImpl implements Tile {
 	private TileType type;
 	private Zone zoning;
 	private ZoneFactory factory;
+	private double landValue;
+	private double pollution;
 
 
 	public TileImpl(Pos2D pos, TileType type, ZoneFactory factory) {
@@ -18,6 +22,8 @@ public class TileImpl implements Tile {
 		this.type = type;
 		this.factory = factory;
 		this.zoning = this.factory.createZone(ZoneType.EMPTY, pos, this);
+		this.landValue = this.baseLandValue();
+		this.pollution = 0;
 	}
 	
 	@Override
@@ -25,7 +31,21 @@ public class TileImpl implements Tile {
 		if(zoning!=null){
 			zoning.update();
 		}
+		this.pollution = pollutionDecay(this.pollution);
+		this.landValue = landValueDecay(this.landValue);
 		
+		
+	}
+	
+	private double pollutionDecay(double pollution){
+		double value = pollution-(pollution/(2*Rules.POLLUTION_HALFLIFE));
+		return Util.boundValue(value, 0, Rules.MAX);
+		
+	}
+	
+	private double landValueDecay(double currentValue){
+		double value = currentValue - (currentValue/(Rules.LANDVALUE_DECAY));
+		return Util.boundValue(value, this.baseLandValue(), Rules.MAX);
 	}
 	
 	@Override
@@ -80,7 +100,21 @@ public class TileImpl implements Tile {
 
 	@Override
 	public String toString() {
-		return "Tile{at=" + this.getPos() + ", type=" + this.type.toString() + ", zone=" + this.getZone().toString() + "}";
+		StringBuilder sb = new StringBuilder();
+		sb.append("Tile{");
+		sb.append(this.type.toString());
+		sb.append(" zonetype:");
+		sb.append(this.getZone().getZoneType());
+		sb.append(" MaterialValue:");
+		sb.append(this.materialValue());
+		sb.append(" LandValue:");
+		sb.append(this.landValue);
+		sb.append(" pollution:");
+		sb.append(this.pollution);
+		sb.append(" at:");
+		sb.append(this.getPos());
+		sb.append(" }");
+		return sb.toString();
 	}
 
 	@Override
@@ -90,6 +124,30 @@ public class TileImpl implements Tile {
 			return o.getPos().equals(this.getPos())&&o.getZone().equals(this.getZone())&&this.getType()==o.getType();
 		}
 		return false;
+	}
+
+	@Override
+	public double getPollution() {
+		return this.pollution;
+	}
+
+	@Override
+	public synchronized void pollute(double pollution) {
+		this.pollution+=pollution;
+		Util.boundValue(pollution, 0, Rules.MAX);
+		
+	}
+
+	@Override
+	public double getCurrentLandValue() {
+		return this.landValue;
+	}
+
+	@Override
+	public synchronized void modifyLandValue(double factor) {
+		this.landValue+=factor;
+		Util.boundValue(landValue, this.baseLandValue(), Rules.MAX);
+		
 	}
 
 }

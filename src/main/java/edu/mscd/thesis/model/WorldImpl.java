@@ -11,6 +11,7 @@ import edu.mscd.thesis.model.zones.Zone;
 import edu.mscd.thesis.model.zones.ZoneFactory;
 import edu.mscd.thesis.model.zones.ZoneFactoryImpl;
 import edu.mscd.thesis.model.zones.ZoneType;
+import edu.mscd.thesis.util.Rules;
 import edu.mscd.thesis.util.TileUpdaterService;
 import edu.mscd.thesis.util.Util;
 
@@ -45,6 +46,7 @@ public class WorldImpl implements World {
 	@Override
 	public void update() {
 		//System.out.println(city);
+		
 
 		// TODO
 		// iterate through all zones: incr/decr value based on conditions
@@ -156,9 +158,9 @@ public class WorldImpl implements World {
 		}
 		List<Tile> tilesInRange;
 		if (squareSelect) {
-			tilesInRange = getNeighborsManhattanDist(t, radius);
+			tilesInRange = Util.getNeighborsManhattanDist(t, tiles, radius, cols, rows);
 		} else {
-			tilesInRange = getNeighborsCircularDist(t, radius);
+			tilesInRange = Util.getNeighborsCircularDist(t, tiles, radius);
 		}
 		for (Tile reZone : tilesInRange) {
 			reZone.setZone(zt);
@@ -166,55 +168,6 @@ public class WorldImpl implements World {
 		return true;
 	}
 
-
-	private List<Tile> getNeighborsCircularDist(Tile origin, int radius) {
-		int index = getIndexOfTile(origin);
-		List<Tile> neighbors = new ArrayList<Tile>();
-		if (index == -1) {
-			return neighbors;
-		}
-		Pos2D originPt = origin.getPos();
-		for (int i = 0; i < tiles.length; i++) {
-			if (tiles[i].getPos().distBetween(originPt) <= radius) {
-				neighbors.add(tiles[i]);
-			}
-		}
-		return neighbors;
-	}
-
-	private List<Tile> getNeighborsManhattanDist(Tile origin, int radius) {
-		int index = getIndexOfTile(origin);
-		List<Tile> neighbors = new ArrayList<Tile>();
-		if (index == -1) {
-			return neighbors;
-		}
-
-		for (int j = -radius; j <= radius; j++) {
-			for (int k = -radius; k <= radius; k++) {
-				int indexOfNeighbor = index + (k * cols) + (j);
-				if (indexOfNeighbor >= tiles.length || indexOfNeighbor < 0) {
-					continue;
-				}
-				int expectedCol = (index % cols) + j;
-				int expectedRow = (int) (index / cols) + k;
-				int actualCol = indexOfNeighbor % cols;
-				int actualRow = indexOfNeighbor / cols;
-				if (actualRow == expectedRow && actualCol == expectedCol) {
-					neighbors.add(tiles[indexOfNeighbor]);
-				}
-			}
-		}
-		return neighbors;
-	}
-
-	private int getIndexOfTile(Tile t) {
-		for (int i = 0; i < tiles.length; i++) {
-			if (tiles[i].equals(t)) {
-				return i;
-			}
-		}
-		return -1;
-	}
 	
 	@Override
 	public Tile[] getTiles(){

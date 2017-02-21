@@ -12,6 +12,7 @@ import edu.mscd.thesis.util.Rules;
 import edu.mscd.thesis.util.Util;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -22,6 +23,8 @@ import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.SingleSelectionModel;
 import javafx.scene.control.Spinner;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.FlowPane;
@@ -33,24 +36,19 @@ import javafx.stage.Stage;
 
 public class GUI implements View<UserData> {
 	private Collection<Observer<UserData>> observers = new ArrayList<Observer<UserData>>();
-	private Renderer<Model> renderer = new ModelRenderer();
+	private Renderer<Model> renderer = new ModelRenderer(RenderMode.NORMAL);
 	private GraphicsContext gc;
-
-	private static final boolean SCREENSHOT = false;
-
-	private static final int SCREEN_WIDTH = 800;
-	private static final int SCREEN_HEIGHT = 600;
-	public static final double SCALE_FACTOR = Util.getScaleFactor(Rules.WORLD_X, Rules.WORLD_Y, SCREEN_WIDTH,
-			SCREEN_HEIGHT);
+	
 	// User selections on UI elements
 	private static UserData selection = new UserData();
 
 	@Override
 	public void initView(Stage stage) {
+		renderer.changeMode(RenderMode.NORMAL);
 
 		Group root = new Group();
 
-		Canvas canvas = new Canvas(SCREEN_WIDTH, SCREEN_HEIGHT);
+		Canvas canvas = new Canvas(Util.WINDOW_WIDTH, Util.WINDOW_HEIGHT);
 		gc = canvas.getGraphicsContext2D();
 
 		FlowPane controlPane = new FlowPane();
@@ -61,7 +59,14 @@ public class GUI implements View<UserData> {
 			zonePanel.getChildren().add(button);
 		}
 		Button step = new Button("STEP");
-		step.setOnAction(e -> this.notifyObserver());
+		step.setOnAction(new EventHandler<ActionEvent>(){
+			@Override
+			public void handle(ActionEvent event) {
+				selection.setTakeStep(true);
+				notifyObserver();
+				Util.takeScreenshot(stage);
+			}
+		});
 		zonePanel.getChildren().add(step);
 		Button brushShape = new Button("Circle");
 		brushShape.setOnAction(new EventHandler<ActionEvent>() {
@@ -90,16 +95,31 @@ public class GUI implements View<UserData> {
 		FlowPane cameraControls = new FlowPane();
 		makeControlButtons(cameraControls, gc);
 
-		controlPane.setLayoutX(SCREEN_WIDTH);
+		FlowPane renderModeControls = new FlowPane();
+		ComboBox<RenderMode> combo = new ComboBox<RenderMode>();
+		combo.getItems().setAll(RenderMode.values());
+		combo.setValue(RenderMode.NORMAL);
+		combo.valueProperty().addListener(new ChangeListener<RenderMode>() {
+			@Override
+			public void changed(ObservableValue<? extends RenderMode> observable, RenderMode oldValue,
+					RenderMode newValue) {
+				renderer.changeMode(newValue);
+				redraw(gc);
+			}
+		});
+		renderModeControls.getChildren().add(combo);
+
+		controlPane.setLayoutX(Util.WINDOW_WIDTH);
 
 		controlPane.getChildren().add(zonePanel);
 		controlPane.getChildren().add(cameraControls);
+		controlPane.getChildren().add(renderModeControls);
 
 		root.getChildren().add(canvas);
 		root.getChildren().add(controlPane);
 
 		Affine transformMatrix = gc.getTransform();
-		transformMatrix.appendScale(SCALE_FACTOR, SCALE_FACTOR);
+		transformMatrix.appendScale(Util.SCALE_FACTOR, Util.SCALE_FACTOR);
 		gc.setTransform(transformMatrix);
 
 		Scene mainScene = new Scene(root, Color.WHITE);
@@ -118,16 +138,15 @@ public class GUI implements View<UserData> {
 				double dx = pt.getX();
 				double dy = pt.getY();
 				Pos2D modelCoordinate = new Pos2D(dx, dy);
-				selection.setClickLocation(modelCoordinate);
 				if (Util.isValidPos2D(modelCoordinate, Rules.WORLD_X, Rules.WORLD_Y)) {
+					selection.setTakeStep(true);
+					selection.setClickLocation(modelCoordinate);
 					notifyObserver();
 				}
-				if (SCREENSHOT) {
+				if (Util.SCREENSHOT) {
 					Util.takeScreenshot(stage);
 				}
-
 			}
-
 		});
 		stage.show();
 	}
@@ -181,7 +200,7 @@ public class GUI implements View<UserData> {
 	private void resetMatrix(GraphicsContext gc) {
 		redraw(gc);
 		Affine identityMatrix = new Affine();
-		identityMatrix.appendScale(SCALE_FACTOR, SCALE_FACTOR);
+		identityMatrix.appendScale(Util.SCALE_FACTOR, Util.SCALE_FACTOR);
 		gc.setTransform(identityMatrix);
 		redraw(gc);
 	}
@@ -189,6 +208,10 @@ public class GUI implements View<UserData> {
 	private void redraw(GraphicsContext gc) {
 		gc.setFill(Color.DARKGRAY);
 		gc.fillRect(0, 0, gc.getCanvas().getWidth(), gc.getCanvas().getHeight());
+		selection.setDrawFlag(true);
+		selection.setTakeStep(false);
+		notifyObserver();
+
 	}
 
 	private void setSelectedTypeTo(ZoneType zType) {

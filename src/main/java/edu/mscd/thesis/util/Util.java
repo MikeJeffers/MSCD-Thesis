@@ -5,29 +5,133 @@ import java.io.File;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.Random;
 
 import javax.imageio.ImageIO;
 
 import edu.mscd.thesis.model.Pos2D;
+import edu.mscd.thesis.model.Tile;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.image.WritableImage;
 import javafx.stage.Stage;
 
 /**
- * Other misc functionality not game-related.
- * Data-cleaning, validation, safety-checking, or utilities.
+ * Other misc functionality not game-related. Data-cleaning, validation,
+ * safety-checking, or utilities.
+ * 
  * @author Mike
  */
 public class Util {
 	/*
-	 * TODO this should scale with available cores.. at least its relative to world size..
+	 * TODO this should scale with available cores.. at least its relative to
+	 * world size..
 	 */
-	public static final int MAX_SEQUENTIAL = (Rules.WORLD_X*Rules.WORLD_Y)/8;
+	public static final int MAX_SEQUENTIAL = (Rules.WORLD_X * Rules.WORLD_Y) / 8;
+	// GUI constants
+	public static final int WINDOW_WIDTH = 800;
+	public static final int WINDOW_HEIGHT = 600;
+	public static final double SCALE_FACTOR = Util.getScaleFactor(Rules.WORLD_X, Rules.WORLD_Y, WINDOW_WIDTH,
+			WINDOW_HEIGHT);
+	public static final boolean SCREENSHOT = false;
 	private static Random random = new Random();
-	private static DateFormat df = new SimpleDateFormat("yyMMdd_HHmmss");
+	private static DateFormat df = new SimpleDateFormat("yyMMdd_HHmmss_SSS");
+
+	/**
+	 * Get all Tiles in tile array that are within ManhattanDistance of
+	 * distance<=radius, including origin REQUIRES: tiles is single dimensional
+	 * array that represents 2D matrix of width=cols; height=rows;
+	 * 
+	 * @param origin
+	 *            - Tile from which to search
+	 * @param tiles
+	 *            - Single dimensional array that contains Origin, that
+	 *            represents 2D matrix of width=cols; height=rows;
+	 * @param radius
+	 *            - Radius of manhattanDistance
+	 * @param cols
+	 *            - width of 2D matrix
+	 * @param rows
+	 *            - height of 2D matrix
+	 * @return Tiles found within manhattanDistance of radius of origin, else
+	 *         will be empty list if radius<0, or origin not in tiles[]
+	 */
+	public static List<Tile> getNeighborsManhattanDist(Tile origin, Tile[] tiles, int radius, int cols, int rows) {
+		int index = Util.getIndexOf(origin, tiles);
+		List<Tile> neighbors = new ArrayList<Tile>();
+		if (index == -1) {
+			return neighbors;
+		}
+
+		for (int j = -radius; j <= radius; j++) {
+			for (int k = -radius; k <= radius; k++) {
+				int indexOfNeighbor = index + (k * cols) + (j);
+				if (indexOfNeighbor >= tiles.length || indexOfNeighbor < 0) {
+					continue;
+				}
+				int expectedCol = (index % cols) + j;
+				int expectedRow = (int) (index / cols) + k;
+				int actualCol = indexOfNeighbor % cols;
+				int actualRow = indexOfNeighbor / cols;
+				if (actualRow == expectedRow && actualCol == expectedCol) {
+					neighbors.add(tiles[indexOfNeighbor]);
+				}
+			}
+		}
+		return neighbors;
+	}
+
+	/**
+	 * Get List of all Tiles, including origin, inside of radius from origin
+	 * tile Pos
+	 * 
+	 * @param origin
+	 *            - Tile from which to search
+	 * @param tiles
+	 *            - Tile[] to search
+	 * @param radius
+	 *            - radius from origin from which to search and include in
+	 *            returned collection
+	 * @return List<Tile> where all members are <=radius in distance from origin
+	 *         Tile returns empty list if tiles array does not contain origin,
+	 *         or radius is <0
+	 */
+	public static List<Tile> getNeighborsCircularDist(Tile origin, Tile[] tiles, int radius) {
+		int index = Util.getIndexOf(origin, tiles);
+		List<Tile> neighbors = new ArrayList<Tile>();
+		if (index == -1) {
+			return neighbors;
+		}
+		Pos2D originPt = origin.getPos();
+		for (int i = 0; i < tiles.length; i++) {
+			if (tiles[i].getPos().distBetween(originPt) <= radius) {
+				neighbors.add(tiles[i]);
+			}
+		}
+		return neighbors;
+	}
+
+	/**
+	 * Find the index of some object of type T in unsorted array of type T
+	 * 
+	 * @param obj
+	 *            -T object to find by EQUALITY (requires equals method)
+	 * @param arr
+	 *            - Array of T objects
+	 * @return if array is empty or object is not in array, return -1 else
+	 *         returns index of obj in array
+	 */
+	public static <T> int getIndexOf(T obj, T[] arr) {
+		for (int i = 0; i < arr.length; i++) {
+			if (arr[i].equals(obj)) {
+				return i;
+			}
+		}
+		return -1;
+	}
 
 	public static boolean isValidPos2D(Pos2D p, double xMax, double yMax) {
 		if (p == null) {
@@ -41,9 +145,13 @@ public class Util {
 		}
 
 	}
-	
-	public static int getRandomBetween(int minInclusive, int maxExclusive){
-		return minInclusive+Util.random.nextInt(maxExclusive);
+
+	public static int getRandomBetween(int minInclusive, int maxExclusive) {
+		return minInclusive + Util.random.nextInt(maxExclusive);
+	}
+
+	public static double boundValue(double value, double min, double max) {
+		return Math.min(max, Math.max(min, value));
 	}
 
 	/**
@@ -66,19 +174,20 @@ public class Util {
 		double yScale = ((double) (yBound)) / yToScale;
 		return Math.min(xScale, yScale);
 	}
-	
-	
-	public static void takeScreenshot(Stage stage){
+
+	public static void takeScreenshot(Stage stage) {
 		WritableImage img = stage.getScene().snapshot(null);
 		Date date = Calendar.getInstance().getTime();
 		String stamp = df.format(date);
-		
-		File file = new File("screenshots/screen"+stamp+".png");
-		
+		System.out.print("Taking Screen @"+stamp+"....");
+		File file = new File("screenshots/screen" + stamp + ".png");
+
 		try {
 			RenderedImage renderedImage = SwingFXUtils.fromFXImage(img, null);
 			ImageIO.write(renderedImage, "png", file);
+			System.out.println("Success!");
 		} catch (IOException e) {
+			System.out.println("Fail!");
 			System.err.println("Failed to save screenshot");
 			e.printStackTrace();
 		}
