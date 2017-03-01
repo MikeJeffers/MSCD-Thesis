@@ -207,4 +207,14 @@ public class WorldImpl implements World {
 		return this;
 	}
 
+	@Override
+	public int width() {
+		return this.cols;
+	}
+
+	@Override
+	public int height() {
+		return this.rows;
+	}
+
 }
