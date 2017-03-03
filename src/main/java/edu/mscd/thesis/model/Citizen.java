@@ -116,8 +116,8 @@ public class Citizen implements Person {
 		}
 		happiness = Math.min(Rules.MAX, happiness);
 		money = Math.min(Rules.MAX, money);
-		happiness = Math.max(-100, happiness);
-		money = Math.max(-100, money);
+		happiness = Math.max(-Rules.MAX, happiness);
+		money = Math.max(-Rules.MAX, money);
 	}
 	
 	@Override

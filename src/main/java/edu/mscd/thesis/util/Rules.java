@@ -1,8 +1,15 @@
 package edu.mscd.thesis.util;
 
+import java.util.Collection;
+
+import edu.mscd.thesis.model.City;
+import edu.mscd.thesis.model.Model;
+import edu.mscd.thesis.model.Person;
 import edu.mscd.thesis.model.Tile;
 import edu.mscd.thesis.model.TileType;
 import edu.mscd.thesis.model.World;
+import edu.mscd.thesis.model.bldgs.Building;
+import edu.mscd.thesis.model.zones.Density;
 import edu.mscd.thesis.model.zones.ZoneType;
 
 /**
@@ -61,6 +68,41 @@ public class Rules {
 			return Math.min(MAX, value);
 		}
 		return 0;
+	}
+	
+	
+	public static double score(Model m){
+		World w = m.getWorld();
+		City c = w.getCity();
+		Collection<Person>people = c.getPopulation();
+		double cityScore = 0;
+		for(Person p: people){
+			cityScore+=p.getHappiness()/MAX;
+			cityScore+=p.getMoney()/MAX;
+			if(p.employed()){
+				cityScore++;
+			}else{
+				cityScore--;
+			}
+			if(p.homeless()){
+				cityScore--;
+			}else{
+				cityScore++;
+			}
+		}
+		cityScore = cityScore/people.size();
+		Tile[] tiles = w.getTiles();
+		double tileScore = 0;
+		for(int i=0; i<tiles.length;i++){
+			tileScore+=tiles[i].getCurrentLandValue()/MAX;
+			tileScore-=tiles[i].getPollution()/MAX;
+			Building b = tiles[i].getZone().getBuilding();
+			if(b!=null){
+				tileScore+=b.getDensity().getDensityLevel()/Density.VERYHIGH.getDensityLevel();
+			}
+		}
+		tileScore = tileScore/tiles.length;
+		return tileScore+cityScore;
 	}
 
 }

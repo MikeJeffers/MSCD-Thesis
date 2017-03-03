@@ -91,6 +91,8 @@ public class WorldImpl implements World {
 
 		tileUpdater.runUpdates();
 		city.update();
+		double score = Rules.score(this);
+		System.out.println(score);
 	}
 
 	private Building findClosestOpenHome(Tile t) {
