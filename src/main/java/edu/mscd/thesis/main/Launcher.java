@@ -5,6 +5,8 @@ import edu.mscd.thesis.controller.GameLoop;
 import edu.mscd.thesis.controller.UserData;
 import edu.mscd.thesis.model.Model;
 import edu.mscd.thesis.model.WorldImpl;
+import edu.mscd.thesis.nn.AI;
+import edu.mscd.thesis.nn.NeuralNet;
 import edu.mscd.thesis.util.Rules;
 import edu.mscd.thesis.view.GUI;
 import edu.mscd.thesis.view.View;
@@ -21,6 +23,7 @@ public class Launcher extends Application {
 	View<UserData> view;
 	Model model;
 	Controller controller;
+	AI ai;
 
 	public Launcher() {
 	}
@@ -30,6 +33,7 @@ public class Launcher extends Application {
 		model = initModel();
 		view = initView();
 		controller = initController(model, view);
+		ai = new NeuralNet(model);
 		
 	}
 

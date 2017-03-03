@@ -1,6 +1,6 @@
 package edu.mscd.thesis.model;
 
-import java.util.ArrayList;
+
 import java.util.Collection;
 import java.util.List;
 import java.util.Random;
@@ -15,11 +15,11 @@ import edu.mscd.thesis.util.Rules;
 import edu.mscd.thesis.util.TileUpdaterService;
 import edu.mscd.thesis.util.Util;
 
-public class WorldImpl implements World {
+public class WorldImpl implements World{
 	private Tile[] tiles;
 	private int cols, rows;
 	private City city;
-	private TileUpdaterService tileUpdater;
+	private transient TileUpdaterService tileUpdater;
 
 	public WorldImpl(int sizeX, int sizeY) {
 		int size = sizeX * sizeY;

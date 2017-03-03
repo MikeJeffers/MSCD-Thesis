@@ -1,11 +1,13 @@
 package edu.mscd.thesis.model;
 
+import java.io.Serializable;
+
 import edu.mscd.thesis.model.zones.Density;
 import edu.mscd.thesis.model.zones.Zone;
 import edu.mscd.thesis.model.zones.ZoneType;
 
 
-public interface Tile {
+public interface Tile extends Serializable{
 	Pos2D getPos();
 
 	Zone getZone();

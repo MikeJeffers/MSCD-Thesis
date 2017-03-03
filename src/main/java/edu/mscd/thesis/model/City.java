@@ -1,10 +1,11 @@
 package edu.mscd.thesis.model;
 
+import java.io.Serializable;
 import java.util.Collection;
 
 import edu.mscd.thesis.model.zones.ZoneType;
 
-public interface City {
+public interface City extends Serializable{
 	Collection<Person> getPopulation();
 	int totalPopulation();
 	double percentageHomeless();
