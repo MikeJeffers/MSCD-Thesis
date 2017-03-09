@@ -20,20 +20,22 @@ import javafx.stage.Stage;
  *
  */
 public class Launcher extends Application {
-	View<UserData> view;
-	Model model;
-	Controller controller;
-	AI ai;
+	private View<UserData> view;
+	private Model model;
+	private Controller controller;
+	private AI ai;
 
 	public Launcher() {
 	}
 	
 	@Override
 	public void init(){
+		
 		model = initModel();
-		view = initView();
-		controller = initController(model, view);
 		ai = new NeuralNet(model);
+		view = initView();
+		controller = initController(model, view, ai);
+		
 		
 	}
 
@@ -48,8 +50,8 @@ public class Launcher extends Application {
 		return new WorldImpl(Rules.WORLD_X, Rules.WORLD_Y);
 	}
 
-	private static Controller initController(Model model, View<UserData> view) {
-		return new GameLoop(model, view);
+	private static Controller initController(Model model, View<UserData> view, AI ai) {
+		return new GameLoop(model, view, ai);
 	}
 
 	private static View<UserData> initView() {

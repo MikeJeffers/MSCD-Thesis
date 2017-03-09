@@ -1,10 +1,9 @@
 package edu.mscd.thesis.model;
 
-import java.io.Serializable;
 
 import edu.mscd.thesis.model.bldgs.Building;
 
-public interface Person extends Serializable{
+public interface Person{
 	Pos2D getCurrentPos();
 
 	Building getHome();

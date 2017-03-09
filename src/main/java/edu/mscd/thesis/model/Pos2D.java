@@ -1,11 +1,11 @@
 package edu.mscd.thesis.model;
 
-import java.io.Serializable;
+
 import java.util.Objects;
 
 import javafx.geometry.Point2D;
 
-public class Pos2D implements Serializable{
+public class Pos2D{
 	private double x;
 	private double y;
 

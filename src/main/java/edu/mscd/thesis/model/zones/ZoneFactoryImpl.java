@@ -11,6 +11,9 @@ public class ZoneFactoryImpl implements ZoneFactory {
 			return null;
 		}
 		Zone z = new EmptyZone(pos, tile);
+		if(!tile.isZonable()){
+			return z;
+		}
 		switch (zType) {
 		case RESIDENTIAL:
 			z = new Residential(pos, tile);
