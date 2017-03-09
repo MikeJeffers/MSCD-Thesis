@@ -9,6 +9,8 @@ public interface City{
 	int totalPopulation();
 	double percentageHomeless();
 	double percentageUnemployed();
+	double averageHappiness();
+	double averageWealth();
 	Collection<Person> getUnemployed();
 	Collection<Person> getHomeless();
 

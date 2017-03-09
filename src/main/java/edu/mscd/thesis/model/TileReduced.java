@@ -86,6 +86,12 @@ public class TileReduced implements Tile {
 	public TileType getType() {
 		return this.type;
 	}
+	
+	@Override
+	public boolean setZone(ZoneType ztype) {
+		this.zoneType =ztype;
+		return true;
+	}
 
 	@Override
 	public void modifyLandValue(double factor) {
@@ -100,12 +106,6 @@ public class TileReduced implements Tile {
 	@Override
 	public void pollute(double pollution) {
 		// TODO should fail; does nothing
-	}
-
-	@Override
-	public boolean setZone(ZoneType ztype) {
-		// TODO should fail
-		return false;
 	}
 
 	@Override

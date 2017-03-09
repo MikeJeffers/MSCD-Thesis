@@ -70,39 +70,35 @@ public class Rules {
 		return 0;
 	}
 	
-	
+	/**
+	 * Produces score on Model state
+	 * REQUIRES: Model is reduced form
+	 * @param m - Model THAT HAS BEEN REDUCED
+	 * @return double score that is some value based on success metrics
+	 */
 	public static double score(Model m){
 		World w = m.getWorld();
 		City c = w.getCity();
-		Collection<Person>people = c.getPopulation();
+		
 		double cityScore = 0;
-		for(Person p: people){
-			cityScore+=p.getHappiness()/MAX;
-			cityScore+=p.getMoney()/MAX;
-			if(p.employed()){
-				cityScore++;
-			}else{
-				cityScore--;
-			}
-			if(p.homeless()){
-				cityScore--;
-			}else{
-				cityScore++;
-			}
-		}
-		cityScore = cityScore/people.size();
+		cityScore+=c.averageHappiness()/MAX;
+		cityScore+=c.averageWealth()/MAX;
+		cityScore+=(1-c.percentageHomeless());
+		cityScore+=(1-c.percentageUnemployed());
+		cityScore = cityScore/4.0;
+		
 		Tile[] tiles = w.getTiles();
-		double tileScore = 0;
+		double tilesTotalScore = 0;
 		for(int i=0; i<tiles.length;i++){
+			double tileScore = 0;
 			tileScore+=tiles[i].getCurrentLandValue()/MAX;
 			tileScore-=tiles[i].getPollution()/MAX;
-			Building b = tiles[i].getZone().getBuilding();
-			if(b!=null){
-				tileScore+=b.getDensity().getDensityLevel()/Density.VERYHIGH.getDensityLevel();
-			}
+			tileScore+=tiles[i].getZoneDensity().getDensityLevel()/Density.VERYHIGH.getDensityLevel();
+			tileScore = tileScore/3.0;
+			tilesTotalScore+=tileScore;
 		}
-		tileScore = tileScore/tiles.length;
-		return tileScore+cityScore;
+		tilesTotalScore = tilesTotalScore/tiles.length;
+		return tilesTotalScore+cityScore;
 	}
 
 }

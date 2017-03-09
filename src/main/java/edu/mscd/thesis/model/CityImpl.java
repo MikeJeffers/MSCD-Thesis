@@ -60,6 +60,33 @@ public class CityImpl implements City {
 
 		return this.population.size();
 	}
+	
+	@Override
+	public double averageHappiness() {
+		double total = totalPopulation();
+		double happiness = 0.0;
+		for (Person p : population) {
+			happiness +=p.getHappiness();
+		}
+		if (total < 1) {
+			return 0;
+		}
+		return happiness/total;
+	}
+
+	@Override
+	public double averageWealth() {
+		double total = totalPopulation();
+		double money = 0.0;
+		for (Person p : population) {
+			money +=p.getMoney();
+		}
+		if (total < 1) {
+			return 0;
+		}
+		return money/total;
+	}
+	
 
 	@Override
 	public double percentageHomeless() {
@@ -179,5 +206,7 @@ public class CityImpl implements City {
 		sb.append("}}");
 		return sb.toString();
 	}
+
+
 
 }

@@ -10,6 +10,8 @@ public class CityReduced implements City{
 	private int iDemand;
 	private double homelessnessRate;
 	private double unemploymentRate;
+	private double averageHappy;
+	private double averageMoney;
 
 	public CityReduced(City original) {
 		cDemand = original.commercialDemand();
@@ -17,38 +19,36 @@ public class CityReduced implements City{
 		iDemand = original.industrialDemand();
 		homelessnessRate = original.percentageHomeless();
 		unemploymentRate = original.percentageUnemployed();
-
+		averageMoney = original.averageWealth();
+		averageHappy = original.averageHappiness();
 		this.populationSize = original.totalPopulation();
 
 	}
 
+	
 	@Override
-	public Collection<Person> getPopulation() {
-		return null;
+	public double averageHappiness() {
+		return this.averageHappy;
+	}
+
+	@Override
+	public double averageWealth() {
+		return this.averageMoney;
 	}
 
 	@Override
 	public int residentialDemand() {
-		// TODO Auto-generated method stub
 		return rDemand;
 	}
 
 	@Override
 	public int commercialDemand() {
-		// TODO Auto-generated method stub
 		return cDemand;
 	}
 
 	@Override
 	public int industrialDemand() {
-		// TODO Auto-generated method stub
 		return iDemand;
-	}
-
-	@Override
-	public int zoneCount(ZoneType zType) {
-		// TODO Auto-generated method stub
-		return 0;
 	}
 
 	@Override
@@ -67,22 +67,6 @@ public class CityReduced implements City{
 	}
 
 	@Override
-	public Collection<Person> getUnemployed() {
-		return null;
-	}
-
-	@Override
-	public Collection<Person> getHomeless() {
-		return null;
-	}
-
-
-	@Override
-	public void update() {
-
-	}
-
-	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("REDUCEDCITY:{");
@@ -92,9 +76,40 @@ public class CityReduced implements City{
 		sb.append(this.percentageUnemployed());
 		sb.append("homelessRate=");
 		sb.append(this.percentageHomeless());
-		sb.append(" population:");
-		
+		sb.append(" populationCount:");
+		sb.append(this.totalPopulation());
 		sb.append("}");
 		return sb.toString();
 	}
+	
+	@Override
+	public Collection<Person> getPopulation() {
+		//TODO should fail; does nothing
+		return null;
+	}
+	
+	@Override
+	public void update() {
+		//TODO should fail; does nothing
+	}
+	
+	@Override
+	public Collection<Person> getUnemployed() {
+		//TODO should fail; does nothing
+		return null;
+	}
+
+	@Override
+	public Collection<Person> getHomeless() {
+		//TODO should fail; does nothing
+		return null;
+	}
+	
+	@Override
+	public int zoneCount(ZoneType zType) {
+		//TODO should fail; does nothing
+		return 0;
+	}
+
+
 }
