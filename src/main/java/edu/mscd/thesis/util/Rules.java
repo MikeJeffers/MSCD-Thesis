@@ -1,14 +1,11 @@
 package edu.mscd.thesis.util;
 
-import java.util.Collection;
 
 import edu.mscd.thesis.model.City;
 import edu.mscd.thesis.model.Model;
-import edu.mscd.thesis.model.Person;
 import edu.mscd.thesis.model.Tile;
 import edu.mscd.thesis.model.TileType;
 import edu.mscd.thesis.model.World;
-import edu.mscd.thesis.model.bldgs.Building;
 import edu.mscd.thesis.model.zones.Density;
 import edu.mscd.thesis.model.zones.ZoneType;
 
