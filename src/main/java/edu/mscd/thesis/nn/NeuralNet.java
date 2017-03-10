@@ -17,6 +17,7 @@ import org.encog.neural.networks.layers.BasicLayer;
 import org.encog.neural.networks.training.propagation.back.Backpropagation;
 import org.encog.neural.networks.training.propagation.resilient.ResilientPropagation;
 
+import edu.mscd.thesis.controller.UserData;
 import edu.mscd.thesis.model.Model;
 import edu.mscd.thesis.model.Pos2D;
 import edu.mscd.thesis.model.Tile;
@@ -31,9 +32,11 @@ public class NeuralNet implements AI {
 	public static final BasicNetwork network = new BasicNetwork();
 	public static final MLDataSet DATASET = new BasicMLDataSet();
 	private Model state;
+	private Model trueModel;
 	private Random random = new Random();
 
 	public NeuralNet(Model model) {
+		trueModel = model;
 		this.state =  ModelStripper.reducedCopy(model);
 		initNetwork();
 		initTrainingDataSet();
@@ -80,7 +83,7 @@ public class NeuralNet implements AI {
 			train.iteration();
 			System.out.println("Epoch #" + epoch + " Error:" + train.getError());
 			epoch++;
-		} while (train.getError() > 0.01 && epoch < 10);
+		} while (train.getError() > 0.01 && epoch < 50);
 		train.finishTraining();
 
 		// test the neural network
@@ -122,18 +125,32 @@ public class NeuralNet implements AI {
 		//evaluate a finite set of random actions
 		//pick one with highest value outcome
 		World w = this.state.getWorld();
-		int possibleActions = 10;
+		int possibleActions = 20;
 		Pos2D[] locations = new Pos2D[possibleActions];
 		ZoneType[] zTypes = new ZoneType[possibleActions];
 		double[] results = new double[possibleActions];
+		int maxIndex = 0;
+		double maxScore = 0;
 		for(int i=0; i<possibleActions; i++){
 			locations[i] = randomPos();
 			zTypes[i] = randomZone();
 			w.setZoneAt(locations[i], zTypes[i]);
 			results[i] = getOutput(getInputArrayFromWorld(w));
+			if(results[i]>maxScore){
+				maxScore = results[i];
+				maxIndex=i;
+			}
 		}
 		System.out.println(Arrays.toString(results));
 		//Rules.score(state);
+		UserData fake = new UserData();
+		fake.setClickLocation(locations[maxIndex]);
+		fake.setZoneSelection(zTypes[maxIndex]);
+		fake.setRadius(1);
+		fake.setSquare(true);
+		fake.setTakeStep(false);
+		fake.setDrawFlag(true);
+		this.trueModel.userStateChange(fake);
 		
 
 	}
@@ -172,20 +189,6 @@ public class NeuralNet implements AI {
 		return vals;
 	}
 
-	private double[][] getInputFromWorld(World w) {
-		int rows = w.height();
-		int cols = w.width();
-		Tile[] tiles = w.getTiles();
-		double[][] inputMap = new double[rows][cols];
-		int row = -1;
-		for (int i = 0; i < tiles.length; i++) {
-			if (i % cols == 0) {
-				row++;
-			}
-			inputMap[row][i % cols] = getInputValueFromTile(tiles[i]);
-		}
-		return inputMap;
-	}
 
 	private double getInputValueFromTile(Tile t) {
 		return (double) t.getCurrentLandValue() / (double) Rules.MAX;
