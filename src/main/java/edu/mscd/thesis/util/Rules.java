@@ -82,20 +82,27 @@ public class Rules {
 		cityScore+=c.averageWealth()/MAX;
 		cityScore+=(1-c.percentageHomeless());
 		cityScore+=(1-c.percentageUnemployed());
-		cityScore = cityScore/4.0;
+		cityScore+=Math.min((c.totalPopulation()/w.getTiles().length), 1.0);
+		cityScore = cityScore/5.0;
 		
 		Tile[] tiles = w.getTiles();
 		double tilesTotalScore = 0;
 		for(int i=0; i<tiles.length;i++){
-			double tileScore = 0;
-			tileScore+=tiles[i].getCurrentLandValue()/MAX;
-			tileScore-=tiles[i].getPollution()/MAX;
-			tileScore+=tiles[i].getZoneDensity().getDensityLevel()/Density.VERYHIGH.getDensityLevel();
-			tileScore = tileScore/3.0;
+			double tileScore = score(tiles[i]);
 			tilesTotalScore+=tileScore;
 		}
 		tilesTotalScore = tilesTotalScore/tiles.length;
 		return tilesTotalScore+cityScore;
+	}
+	
+	public static double score(Tile t){
+		double tileScore = 0;
+		tileScore+=t.getCurrentLandValue()/MAX;
+		tileScore-=t.getPollution()/MAX;
+		tileScore+=t.getZoneDensity().getDensityLevel()/Density.VERYHIGH.getDensityLevel();
+		tileScore = tileScore/3.0;
+		return tileScore;
+		
 	}
 
 }

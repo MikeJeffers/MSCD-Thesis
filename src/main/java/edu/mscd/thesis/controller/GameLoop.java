@@ -3,6 +3,7 @@ package edu.mscd.thesis.controller;
 import edu.mscd.thesis.model.Model;
 import edu.mscd.thesis.model.Pos2D;
 import edu.mscd.thesis.nn.AI;
+import edu.mscd.thesis.util.ModelStripper;
 import edu.mscd.thesis.util.Rules;
 import edu.mscd.thesis.view.View;
 import javafx.animation.AnimationTimer;
@@ -13,6 +14,11 @@ public class GameLoop extends AnimationTimer implements Controller {
 	private UserData currentSelection = new UserData();
 	private boolean step = true;
 	private boolean draw = true;
+	private boolean aiMode = true;
+	private int aiObserveCounter;
+	private UserData aiActionPrev;
+	private Model prevModelState;
+	
 	private AI ai;
 
 	public GameLoop(Model model, View<UserData> view, AI ai) {
@@ -20,7 +26,7 @@ public class GameLoop extends AnimationTimer implements Controller {
 		this.view = view;
 		view.attachObserver(this);
 		this.ai = ai;
-		System.out.println(ai);
+		this.prevModelState = ModelStripper.reducedCopy(model);
 
 	}
 
@@ -28,12 +34,17 @@ public class GameLoop extends AnimationTimer implements Controller {
 	public void handle(long now) {
 
 		if (currentSelection.isStepMode() && step) {
+			aiObserveCounter++;
 			step = false;
 			model.update();
 			view.renderView(model);
-			if (ai != null) {
-				ai.takeNextAction();
-				ai.addCase(model, Rules.score(model));
+			ai.setWorldState(model);
+			if (ai != null && aiMode && aiObserveCounter>10) {
+				aiActionPrev = ai.takeNextAction();
+				
+				ai.addCase(model, prevModelState);
+				aiObserveCounter=0;
+				this.makeAIMove(aiActionPrev);
 			}
 
 		} else if (draw) {
@@ -56,6 +67,14 @@ public class GameLoop extends AnimationTimer implements Controller {
 	@Override
 	public void run() {
 		this.start();
+	}
+	
+	private void makeAIMove(UserData action){
+		prevModelState = ModelStripper.reducedCopy(model);
+		model.userStateChange(action);
+		step = action.isTakeStep();
+		draw = action.isDrawFlag();
+	
 	}
 
 	@Override
