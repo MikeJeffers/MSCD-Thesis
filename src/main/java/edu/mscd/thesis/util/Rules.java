@@ -76,14 +76,14 @@ public class Rules {
 	public static double score(Model m){
 		World w = m.getWorld();
 		City c = w.getCity();
-		
+		double weightSum = 10.0;
 		double cityScore = 0;
-		cityScore+=c.averageHappiness()/MAX;
-		cityScore+=c.averageWealth()/MAX;
-		cityScore+=(1-c.percentageHomeless());
-		cityScore+=(1-c.percentageUnemployed());
-		cityScore+=Math.min((c.totalPopulation()/w.getTiles().length), 1.0);
-		cityScore = cityScore/5.0;
+		cityScore+=(c.averageHappiness()/MAX)*((3*weightSum)/10);
+		cityScore+=(c.averageWealth()/MAX)*((4*weightSum)/10);
+		cityScore+=(1-c.percentageHomeless())*((1*weightSum)/10);
+		cityScore+=(1-c.percentageUnemployed())*((1*weightSum)/10);
+		cityScore+=Math.min((c.totalPopulation()/w.getTiles().length), 1.0)*((1*weightSum)/10);
+		cityScore = cityScore/(5.0*weightSum);
 		
 		Tile[] tiles = w.getTiles();
 		double tilesTotalScore = 0;
@@ -97,10 +97,11 @@ public class Rules {
 	
 	public static double score(Tile t){
 		double tileScore = 0;
-		tileScore+=t.getCurrentLandValue()/MAX;
-		tileScore-=t.getPollution()/MAX;
-		tileScore+=t.getZoneDensity().getDensityLevel()/Density.VERYHIGH.getDensityLevel();
-		tileScore = tileScore/3.0;
+		double weightSum = 10.0;
+		tileScore+=(t.getCurrentLandValue()/MAX)*((2*weightSum)/8);
+		tileScore-=(t.getPollution()/MAX)*((2*weightSum)/8);
+		tileScore+=(t.getZoneDensity().getDensityLevel()/Density.VERYHIGH.getDensityLevel())*((4*weightSum)/8);
+		tileScore = tileScore/(3.0*weightSum);
 		return tileScore;
 		
 	}

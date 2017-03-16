@@ -39,7 +39,7 @@ public class GameLoop extends AnimationTimer implements Controller {
 			model.update();
 			view.renderView(model);
 			ai.setWorldState(model);
-			if (ai != null && aiMode && aiObserveCounter>10) {
+			if (ai != null && aiMode && aiObserveCounter>5) {
 				aiActionPrev = ai.takeNextAction();
 				
 				ai.addCase(model, prevModelState);

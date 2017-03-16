@@ -4,7 +4,10 @@ import java.util.Arrays;
 import java.util.Random;
 
 import org.encog.Encog;
+import org.encog.engine.network.activation.ActivationElliott;
+import org.encog.engine.network.activation.ActivationLOG;
 import org.encog.engine.network.activation.ActivationLinear;
+import org.encog.engine.network.activation.ActivationSIN;
 import org.encog.engine.network.activation.ActivationSigmoid;
 import org.encog.engine.network.activation.ActivationTANH;
 import org.encog.ml.data.MLData;
@@ -83,9 +86,9 @@ public class NeuralNet implements AI {
 
 	private void initNetwork() {
 		network.addLayer(new BasicLayer(null, true, state.getWorld().height() * state.getWorld().width()));
-		network.addLayer(new BasicLayer(new ActivationTANH(), true, 25));
-		network.addLayer(new BasicLayer(new ActivationTANH(), true, 15));
-		network.addLayer(new BasicLayer(new ActivationSigmoid(), false, 1));
+		network.addLayer(new BasicLayer(new ActivationLOG(), true, 64));
+		network.addLayer(new BasicLayer(new ActivationLOG(), true, 16));
+		network.addLayer(new BasicLayer(new ActivationElliott(), false, 1));
 		network.getStructure().finalizeStructure();
 		network.reset();
 	}
@@ -139,8 +142,9 @@ public class NeuralNet implements AI {
 				zoneCounter++;
 			}
 		}
-		
-		
+		System.out.println(Arrays.toString(locations));
+		System.out.println(Arrays.toString(zTypes));
+		System.out.println(Arrays.toString(results));
 		/* --Random--
 		for(int i=0; i<possibleActions; i++){
 			locations[i] = randomPos();
@@ -201,8 +205,8 @@ public class NeuralNet implements AI {
 		MLData trainingIn = new BasicMLData(getInputArrayFromWorld(state.getWorld()));
 		MLData idealOut = new BasicMLData(new double[]{currentScore});
 		DATASET.add(trainingIn, idealOut);
-		this.trainBackProp();
-		//this.trainResilient();
+		//this.trainBackProp();
+		this.trainResilient();
 		if(currentScore>prevScore){
 			System.out.println("AI move improvedScore! " +currentScore+" from "+prevScore);
 			
@@ -224,7 +228,7 @@ public class NeuralNet implements AI {
 
 	private double getInputValueFromTile(Tile t) {
 		double numTypes = ZoneType.values().length;
-		return t.getZoneType().ordinal()/numTypes;
+		return (Rules.score(t)+t.getZoneType().ordinal()/numTypes)/2.0;
 	}
 	
 	
