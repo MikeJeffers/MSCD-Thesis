@@ -68,7 +68,7 @@ media/
 
 #java and eclipse
 bin/
-lib/
+docs/
 libs/
 resources/
 .classpath
