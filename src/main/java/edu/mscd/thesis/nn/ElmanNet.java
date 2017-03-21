@@ -180,10 +180,6 @@ public class ElmanNet implements AI {
 		return ZoneType.values()[random.nextInt(ZoneType.values().length)];
 	}
 
-	@Override
-	public void train() {
-
-	}
 
 	@Override
 	public void addCase(Model state, Model prev) {

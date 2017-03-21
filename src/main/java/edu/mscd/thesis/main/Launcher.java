@@ -34,7 +34,7 @@ public class Launcher extends Application {
 	public void init(){
 		
 		model = initModel();
-		ai = new MLPlocal(model);
+		ai = new NeuralNet(model);
 		view = initView();
 		controller = initController(model, view, ai);
 		

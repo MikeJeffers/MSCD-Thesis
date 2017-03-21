@@ -176,21 +176,6 @@ public class MLPlocal implements AI {
 
 	}
 
-	private Pos2D randomPos() {
-		int x = random.nextInt(state.getWorld().width());
-		int y = random.nextInt(state.getWorld().height());
-		return new Pos2D(x, y);
-	}
-
-	private ZoneType randomZone() {
-		return ZoneType.values()[random.nextInt(ZoneType.values().length)];
-	}
-
-	@Override
-	public void train() {
-
-	}
-
 	@Override
 	public void addCase(Model state, Model prev) {
 		double currentScore = Rules.score(state);
