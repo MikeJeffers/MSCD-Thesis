@@ -6,6 +6,8 @@ import edu.mscd.thesis.controller.UserData;
 import edu.mscd.thesis.model.Model;
 import edu.mscd.thesis.model.WorldImpl;
 import edu.mscd.thesis.nn.AI;
+import edu.mscd.thesis.nn.ElmanNet;
+import edu.mscd.thesis.nn.MLPlocal;
 import edu.mscd.thesis.nn.NeuralNet;
 import edu.mscd.thesis.util.Rules;
 import edu.mscd.thesis.view.GUI;
@@ -32,7 +34,7 @@ public class Launcher extends Application {
 	public void init(){
 		
 		model = initModel();
-		ai = new NeuralNet(model);
+		ai = new MLPlocal(model);
 		view = initView();
 		controller = initController(model, view, ai);
 		

@@ -6,16 +6,12 @@ mainClassName = "edu.mscd.thesis.main.Main"
 
 
 repositories {
-	flatDir{
-		dirs 'lib'
-	}
   mavenCentral()
 }
 
 dependencies {
   compile group: 'org.encog', name: 'encog-core', version: '3.3.0'
   testCompile group: 'junit', name: 'junit', version: '4.+'
-  compile name: 'jaRBM_v1.1'
 }
 
 

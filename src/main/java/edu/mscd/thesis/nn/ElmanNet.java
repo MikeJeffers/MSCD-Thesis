@@ -4,7 +4,10 @@ import java.util.Arrays;
 import java.util.Random;
 
 import org.encog.Encog;
+import org.encog.engine.network.activation.ActivationElliott;
+import org.encog.engine.network.activation.ActivationLOG;
 import org.encog.engine.network.activation.ActivationLinear;
+import org.encog.engine.network.activation.ActivationSIN;
 import org.encog.engine.network.activation.ActivationSigmoid;
 import org.encog.engine.network.activation.ActivationTANH;
 import org.encog.ml.data.MLData;
@@ -16,6 +19,7 @@ import org.encog.neural.networks.BasicNetwork;
 import org.encog.neural.networks.layers.BasicLayer;
 import org.encog.neural.networks.training.propagation.back.Backpropagation;
 import org.encog.neural.networks.training.propagation.resilient.ResilientPropagation;
+import org.encog.neural.pattern.ElmanPattern;
 
 import edu.mscd.thesis.controller.UserData;
 import edu.mscd.thesis.model.Model;
@@ -27,36 +31,25 @@ import edu.mscd.thesis.util.ModelStripper;
 import edu.mscd.thesis.util.Rules;
 import edu.mscd.thesis.util.Util;
 
-public class MLPlocal implements AI {
-	/**
-	 * input layer is 9-cell neighborhood including center tile, and Moore's
-	 * Neighbors output layer is 1 value which is predictive Q-lookup of
-	 * eventual game-score as result of action on state score estimate will be
-	 * tile-based only, no city data
-	 */
+public class ElmanNet implements AI {
 
-	public static final BasicNetwork network = new BasicNetwork();
-	public static final MLDataSet DATASET = new BasicMLDataSet();
+	public static BasicNetwork network = new BasicNetwork();
+	public static MLDataSet DATASET = new BasicMLDataSet();
 	private Model state;
+	private Model trueModel;
 	private Random random = new Random();
 
-	public MLPlocal(Model model) {
-		this.state = ModelStripper.reducedCopy(model);
+	public ElmanNet(Model model) {
+		trueModel = model;
+		this.state =  ModelStripper.reducedCopy(model);
 		initNetwork();
 		initTrainingDataSet();
 		trainBackProp();
 	}
-
+	
 	private void initTrainingDataSet(){
-		//getInputAroundTile
-		Tile[] tiles = state.getWorld().getTiles();
-		
-		double[][] input = new double[tiles.length][9];
-		double[][] idealout = new double[tiles.length][1];
-		for(int i=0; i<input.length; i++){
-			input[i] = this.getInputAroundTile(state.getWorld(), tiles[i].getPos());
-			idealout[i]=new double[]{Rules.score(tiles[i])};
-		}
+		double[][] input = {this.getInputArrayFromWorld(state.getWorld())};
+		double[][] idealout = {{Rules.score(state)}};
 		for (int i = 0; i < input.length; i++) {
 			MLData trainingIn = new BasicMLData(input[i]);
 			MLData idealOut = new BasicMLData(idealout[i]);
@@ -77,15 +70,14 @@ public class MLPlocal implements AI {
 
 		Encog.getInstance().shutdown();
 	}
-
+	
 	private void trainResilient() {
 		ResilientPropagation train = new ResilientPropagation(network, DATASET);
 		int epoch = 1;
 
 		do {
 			train.iteration();
-			// System.out.println("Epoch #" + epoch + " Error:" +
-			// train.getError());
+			//System.out.println("Epoch #" + epoch + " Error:" + train.getError());
 			epoch++;
 		} while (train.getError() > 0.01 && epoch < 50);
 		train.finishTraining();
@@ -94,11 +86,12 @@ public class MLPlocal implements AI {
 	}
 
 	private void initNetwork() {
-		network.addLayer(new BasicLayer(null, true, 9));
-		network.addLayer(new BasicLayer(new ActivationSigmoid(), true, 32));
-		network.addLayer(new BasicLayer(new ActivationSigmoid(), true, 15));
-		network.addLayer(new BasicLayer(new ActivationSigmoid(), false, 1));
-		network.getStructure().finalizeStructure();
+		ElmanPattern pattern = new ElmanPattern();
+		pattern.setActivationFunction(new ActivationSigmoid());
+		pattern.setInputNeurons(state.getWorld().height() * state.getWorld().width());
+		pattern.addHiddenLayer(64);
+		pattern.setOutputNeurons(1);
+		network = (BasicNetwork)pattern.generate();
 		network.reset();
 	}
 
@@ -139,7 +132,7 @@ public class MLPlocal implements AI {
 				locations[index] = pos;
 				zTypes[index] = zt;
 				w.setAllZonesAround(locations[index], zTypes[index], 1, true);
-				results[index] = getOutput(getInputAroundTile(w, pos));
+				results[index] = getOutput(getInputArrayFromWorld(w));
 				if(results[index]>maxScore){
 					maxScore = results[index];
 					maxIndex=index;
@@ -173,16 +166,17 @@ public class MLPlocal implements AI {
 		fake.setDrawFlag(true);
 		fake.setAI(true);
 		return fake;
+		
 
 	}
-
-	private Pos2D randomPos() {
+	
+	private Pos2D randomPos(){
 		int x = random.nextInt(state.getWorld().width());
 		int y = random.nextInt(state.getWorld().height());
 		return new Pos2D(x, y);
 	}
-
-	private ZoneType randomZone() {
+	
+	private ZoneType randomZone(){
 		return ZoneType.values()[random.nextInt(ZoneType.values().length)];
 	}
 
@@ -196,52 +190,35 @@ public class MLPlocal implements AI {
 		double currentScore = Rules.score(state);
 		double prevScore = Rules.score(prev);
 		MLData trainingIn = new BasicMLData(getInputArrayFromWorld(state.getWorld()));
-		MLData idealOut = new BasicMLData(new double[] { currentScore });
+		MLData idealOut = new BasicMLData(new double[]{currentScore});
 		DATASET.add(trainingIn, idealOut);
-		this.trainBackProp();
-		// this.trainResilient();
-		if (currentScore > prevScore) {
-			System.out.println("AI move improvedScore! " + currentScore + " from " + prevScore);
-
-		} else {
-			System.out.println("AI move dropped score =( " + currentScore + " from " + prevScore);
+		//this.trainBackProp();
+		this.trainResilient();
+		if(currentScore>prevScore){
+			System.out.println("AI move improvedScore! " +currentScore+" from "+prevScore);
+			
+		}else{
+			System.out.println("AI move dropped score =( " +currentScore+" from "+prevScore);
 		}
 
 	}
-
-	private double[] getInputAroundTile(World w, Pos2D p) {
-		Tile[] tiles = new Tile[9];
-		int index = 0;
-		for (int i = -1; i < 2; i++) {
-			for (int j = -1; j < 2; j++) {
-				Pos2D nLoc = new Pos2D(p.getX() + i, p.getY() + j);
-				tiles[index] = w.getTileAt(nLoc);
-				index++;
-			}
-		}
-		double[] vals = new double[tiles.length];
-		for (int i = 0; i < tiles.length; i++) {
-			vals[i] = getInputValueFromTile(tiles[i]);
-		}
-		return vals;
-	}
-
-	private double[] getInputArrayFromWorld(World w) {
+	
+	private double[] getInputArrayFromWorld(World w){
 		Tile[] tiles = w.getTiles();
 		double[] vals = new double[tiles.length];
-		for (int i = 0; i < tiles.length; i++) {
+		for(int i=0; i<tiles.length; i++){
 			vals[i] = getInputValueFromTile(tiles[i]);
 		}
 		return vals;
 	}
 
+
 	private double getInputValueFromTile(Tile t) {
-		if (t == null) {
-			return 0;
-		}
 		double numTypes = ZoneType.values().length;
 		return (Rules.score(t)+t.getZoneType().ordinal()/numTypes)/2.0;
 	}
+	
+	
 	
 
 }
