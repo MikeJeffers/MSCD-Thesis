@@ -42,7 +42,8 @@ public class NeuralNet implements AI {
 	
 	//TODO nested nets
 	private AI zonePicker;
-	public static AutoEncoder encoder;
+	private AutoEncoder encoder;
+	private MapEncoder mapper;
 
 	public NeuralNet(Model model) {
 		trueModel = model;
@@ -56,6 +57,7 @@ public class NeuralNet implements AI {
 		trainBackProp();
 		
 		this.zonePicker = new ZoneDecider(this.state);
+		this.mapper = new MapEncoder(this.state);
 	}
 
 	private void initEncoder() {
@@ -142,6 +144,7 @@ public class NeuralNet implements AI {
 	public void setWorldState(Model state) {
 		this.state = ModelStripper.reducedCopy(state);
 		this.zonePicker.setWorldState(state);
+		this.mapper.learn(state);
 
 	}
 
@@ -182,17 +185,47 @@ public class NeuralNet implements AI {
 				zoneCounter++;
 			}
 		}
-		System.out.println("Possible actions Score domain["+results[minIndex]+","+results[maxIndex]+"]");
+		
+		System.out.println("Possible actions based on some bullshit Score domain["+results[minIndex]+","+results[maxIndex]+"]");
 		System.out.print("Best move:{");
 		System.out.print(locations[maxIndex]);
 		System.out.println(" " + zTypes[maxIndex]);
 		System.out.print("Worst move:{");
 		System.out.print(locations[minIndex]);
 		System.out.println(" " + zTypes[minIndex]);
+		
+		
+		double[] map = this.mapper.scoreWorldState(this.state);
+		
+		maxIndex = 0;
+		minIndex = 0;
+		maxScore = 0;
+		minScore = Rules.MAX;
+		for(int i=0; i<map.length; i++){
+			if(map[i]<minScore){
+				minScore = map[i];
+				minIndex = i;
+			}
+			if(map[i]>maxScore){
+				maxScore = map[i];
+				maxIndex = i;
+			}
+		}
+		
+		System.out.println("Possible actions based on Mapped Score domain["+map[minIndex]+","+map[maxIndex]+"]");
+		System.out.print("Best move:{");
+		System.out.print(locations[maxIndex]);
+		System.out.println(" " + zTypes[maxIndex]);
+		System.out.print("Worst move:{");
+		System.out.print(locations[minIndex]);
+		System.out.println(" " + zTypes[minIndex]);
+		
 		if(results[minIndex]==results[maxIndex]){
 			System.out.println("AI does not make move!");
 			return null;
 		}
+		
+		
 
 		UserData zoneChoice = this.zonePicker.takeNextAction();
 		zoneChoice.getZoneSelection();

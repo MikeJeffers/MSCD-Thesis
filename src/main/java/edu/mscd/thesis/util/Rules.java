@@ -107,6 +107,9 @@ public class Rules {
 	}
 	
 	public static double score(Tile t){
+		if(t==null){
+			return 0;
+		}
 		double tileScore = 0;
 		double weightSum = 10.0;
 		tileScore+=(t.getCurrentLandValue()/MAX)*((2*weightSum)/8);

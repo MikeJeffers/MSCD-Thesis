@@ -15,7 +15,6 @@ public class CityImpl implements City {
 	private static int ID_COUNTER = 0;
 	private World world;
 	private int[] zoneCounts = new int[ZoneType.values().length];
-	private int numTiles = Rules.WORLD_X*Rules.WORLD_Y;
 
 	public CityImpl(World w) {
 		this.world = w;

@@ -25,8 +25,8 @@ import edu.mscd.thesis.util.Rules;
 public class ZoneDecider implements AI{
 	private Model state;
 	
-	public static BasicNetwork network = new BasicNetwork();
-	public static MLDataSet DATASET = new BasicMLDataSet();
+	public final static BasicNetwork network = new BasicNetwork();
+	public final static MLDataSet DATASET = new BasicMLDataSet();
 	
 	
 	
@@ -152,8 +152,8 @@ public class ZoneDecider implements AI{
 		MLData trainingIn = new BasicMLData(input);
 		MLData idealOut = new BasicMLData(new double[] { currentScore });
 		DATASET.add(trainingIn, idealOut);
-		this.trainBackProp();
-		// this.trainResilient();
+		//this.trainBackProp();
+		this.trainResilient();
 		if (currentScore > prevScore) {
 			System.out.println("AI move improvedScore! " + currentScore + " from " + prevScore);
 
