@@ -13,8 +13,13 @@ public class CityImpl implements City {
 
 	private Set<Person> population;
 	private static int ID_COUNTER = 0;
+	private World world;
+	private int[] zoneCounts = new int[ZoneType.values().length];
+	private int numTiles = Rules.WORLD_X*Rules.WORLD_Y;
 
-	public CityImpl() {
+	public CityImpl(World w) {
+		this.world = w;
+		countZones();
 
 		this.population = new HashSet<Person>();
 		for (int i = 0; i < Rules.STARTING_POPULATION; i++) {
@@ -27,33 +32,9 @@ public class CityImpl implements City {
 
 	@Override
 	public Collection<Person> getPopulation() {
-		// TODO Auto-generated method stub
 		return this.population;
 	}
 
-	@Override
-	public int residentialDemand() {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public int commercialDemand() {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public int industrialDemand() {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public int zoneCount(ZoneType zType) {
-		// TODO Auto-generated method stub
-		return 0;
-	}
 
 	@Override
 	public int totalPopulation() {
@@ -186,6 +167,10 @@ public class CityImpl implements City {
 		for (int i = 0; i < toAddCounter; i++) {
 			addPerson();
 		}
+		if(this.population.isEmpty()){
+			addPerson();
+		}
+		countZones();
 	}
 
 	@Override
@@ -207,6 +192,36 @@ public class CityImpl implements City {
 		return sb.toString();
 	}
 
+
+
+	private void countZones(){
+		for(int i=0; i<zoneCounts.length; i++){
+			zoneCounts[i]=0;
+		}
+		for(Tile t: this.world.getTiles()){
+			zoneCounts[t.getZoneType().ordinal()]++;
+		}
+	}
+
+	@Override
+	public double residentialDemand() {
+		return Rules.getDemandForZoneType(ZoneType.RESIDENTIAL, this.world);
+	}
+
+	@Override
+	public double commercialDemand() {
+		return Rules.getDemandForZoneType(ZoneType.COMMERICAL, this.world);
+	}
+
+	@Override
+	public double industrialDemand() {
+		return Rules.getDemandForZoneType(ZoneType.INDUSTRIAL, this.world);
+	}
+
+	@Override
+	public int getZoneCount(ZoneType zt) {
+		return this.zoneCounts[zt.ordinal()];
+	}
 
 
 }

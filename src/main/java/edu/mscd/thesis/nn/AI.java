@@ -9,6 +9,6 @@ public interface AI {
 
 	UserData takeNextAction();
 
-	void addCase(Model state, Model prev);
+	void addCase(Model state, Model prev, UserData action);
 
 }

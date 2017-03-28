@@ -34,11 +34,15 @@ public class NeuralNet implements AI {
 
 	public static final BasicNetwork network = new BasicNetwork();
 	public static final MLDataSet DATASET = new BasicMLDataSet();
-	public static AutoEncoder encoder;
+	
 	private int INPUT_SIZE;
 	private Model state;
 	private Model trueModel;
 	private Random random = new Random();
+	
+	//TODO nested nets
+	private AI zonePicker;
+	public static AutoEncoder encoder;
 
 	public NeuralNet(Model model) {
 		trueModel = model;
@@ -50,6 +54,8 @@ public class NeuralNet implements AI {
 		initNetwork();
 		initTrainingDataSet();
 		trainBackProp();
+		
+		this.zonePicker = new ZoneDecider(this.state);
 	}
 
 	private void initEncoder() {
@@ -135,6 +141,7 @@ public class NeuralNet implements AI {
 	@Override
 	public void setWorldState(Model state) {
 		this.state = ModelStripper.reducedCopy(state);
+		this.zonePicker.setWorldState(state);
 
 	}
 
@@ -187,11 +194,15 @@ public class NeuralNet implements AI {
 			return null;
 		}
 
-		;
+		UserData zoneChoice = this.zonePicker.takeNextAction();
+		zoneChoice.getZoneSelection();
+		System.out.print("ZoneDecider picked:{");
+		System.out.print(zoneChoice.getZoneSelection()+" vs ");
+		System.out.println(zTypes[maxIndex]+"}");
 		// Rules.score(state);
 		UserData fake = new UserData();
 		fake.setClickLocation(locations[maxIndex]);
-		fake.setZoneSelection(zTypes[maxIndex]);
+		fake.setZoneSelection(zoneChoice.getZoneSelection());
 		fake.setRadius(1);
 		fake.setSquare(true);
 		fake.setTakeStep(false);
@@ -203,7 +214,8 @@ public class NeuralNet implements AI {
 
 
 	@Override
-	public void addCase(Model state, Model prev) {
+	public void addCase(Model state, Model prev, UserData action) {
+		this.zonePicker.addCase(state, prev, action);
 		double currentScore = Rules.score(state);
 		double prevScore = Rules.score(prev);
 		MLData trainingIn = new BasicMLData(getInputArrayFromWorld(state.getWorld()));

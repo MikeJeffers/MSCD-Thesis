@@ -16,8 +16,9 @@ import edu.mscd.thesis.model.zones.ZoneType;
  *
  */
 public class Rules {
-	public static final int WORLD_X = 10;
-	public static final int WORLD_Y = 8;
+	public static final int WORLD_X = 15;
+	public static final int WORLD_Y = 10;
+	public static final int TILE_COUNT = WORLD_X*WORLD_Y;
 	//Game Constants and factors
 	public static final int MAX = 255;
 	//Zone growth factors
@@ -27,6 +28,7 @@ public class Rules {
 	public static final int STARTING_POPULATION = 100;
 	public static final int BIRTH_RATE = 3;
 	public static final int LIFE_SPAN = 100;
+	public static final double R_DEMAND_BASE = 0.05;
 	//Tile effect factors
 	public static final int POLLUTION_UNIT = 2;
 	public static final int POLLUTION_HALFLIFE = 10;
@@ -46,13 +48,22 @@ public class Rules {
 	}
 
 	public static double getDemandForZoneType(ZoneType zt, World w) {
-		int r = w.getCity().zoneCount(ZoneType.RESIDENTIAL);
-		int c = w.getCity().zoneCount(ZoneType.COMMERICAL);
-		int i = w.getCity().zoneCount(ZoneType.INDUSTRIAL);
-		// double currentRC =
-		return -1;
+		int r = w.getCity().getZoneCount(ZoneType.RESIDENTIAL);
+		int c = w.getCity().getZoneCount(ZoneType.COMMERICAL);
+		int i = w.getCity().getZoneCount(ZoneType.INDUSTRIAL);
+		if(zt==ZoneType.RESIDENTIAL){
+			return Math.min(w.getCity().percentageHomeless(), R_DEMAND_BASE);
+		}else if(zt==ZoneType.COMMERICAL){
+			return Math.min(w.getCity().percentageUnemployed()/2.0, 0);
+		}else if(zt==ZoneType.INDUSTRIAL){
+			int zoneDiff = c/TILE_COUNT-i/TILE_COUNT;
+			zoneDiff = Math.max(zoneDiff, 0);
+			return Math.min(w.getCity().percentageUnemployed()/2.0, zoneDiff);
+		}
+		return 0;
 	}
-
+	
+	
 	public static double getValueForZoneOnTile(TileType t, ZoneType z) {
 		if (z == ZoneType.COMMERICAL) {
 			double value = (t.getBaseLandValue() * 3 + t.getMaterialValue()) / 4;

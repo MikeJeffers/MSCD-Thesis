@@ -5,9 +5,9 @@ import edu.mscd.thesis.model.zones.ZoneType;
 
 public class CityReduced implements City{
 	private int populationSize;
-	private int rDemand;
-	private int cDemand;
-	private int iDemand;
+	private double rDemand;
+	private double cDemand;
+	private double iDemand;
 	private double homelessnessRate;
 	private double unemploymentRate;
 	private double averageHappy;
@@ -37,17 +37,17 @@ public class CityReduced implements City{
 	}
 
 	@Override
-	public int residentialDemand() {
+	public double residentialDemand() {
 		return rDemand;
 	}
 
 	@Override
-	public int commercialDemand() {
+	public double commercialDemand() {
 		return cDemand;
 	}
 
 	@Override
-	public int industrialDemand() {
+	public double industrialDemand() {
 		return iDemand;
 	}
 
@@ -104,12 +104,13 @@ public class CityReduced implements City{
 		//TODO should fail; does nothing
 		return null;
 	}
-	
+
+
 	@Override
-	public int zoneCount(ZoneType zType) {
-		//TODO should fail; does nothing
+	public int getZoneCount(ZoneType zt) {
+		//TODO should throw exception, dont call this
 		return 0;
 	}
-
+	
 
 }

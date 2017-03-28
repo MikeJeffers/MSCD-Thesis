@@ -27,7 +27,7 @@ public class WorldImpl implements World{
 		this.rows = sizeY;
 		this.cols = sizeX;
 		this.worldInit();
-		this.city = new CityImpl();
+		this.city = new CityImpl(this);
 		tileUpdater = new TileUpdaterService(this);
 	}
 

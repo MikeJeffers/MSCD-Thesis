@@ -182,7 +182,7 @@ public class ElmanNet implements AI {
 
 
 	@Override
-	public void addCase(Model state, Model prev) {
+	public void addCase(Model state, Model prev, UserData action) {
 		double currentScore = Rules.score(state);
 		double prevScore = Rules.score(prev);
 		MLData trainingIn = new BasicMLData(getInputArrayFromWorld(state.getWorld()));
