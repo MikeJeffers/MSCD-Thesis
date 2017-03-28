@@ -54,7 +54,7 @@ public class NeuralNet implements AI {
 
 		initNetwork();
 		initTrainingDataSet();
-		trainBackProp();
+		//trainBackProp();
 		
 		this.zonePicker = new ZoneDecider(this.state);
 		this.mapper = new MapEncoder(this.state);

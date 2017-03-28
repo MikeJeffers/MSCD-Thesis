@@ -34,7 +34,7 @@ public class ZoneDecider implements AI{
 		this.state = ModelStripper.reducedCopy(initialState);
 		initNetwork();
 		initTrainingDataSet();
-		trainBackProp();
+		//trainBackProp();
 	}
 	
 	private void initTrainingDataSet(){
