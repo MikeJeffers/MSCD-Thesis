@@ -41,6 +41,14 @@ public class MapEncoder {
 		network.getStructure().finalizeStructure();
 		network.reset();
 	}
+	
+	private void initTraining(){
+		double [] input = new double[27];
+		input[0] = 1.0;
+		input[0] = 1.0;
+		input[0] = 1.0;
+		
+	}
 
 	public void learn(Model state) {
 		Tile[] tiles = state.getWorld().getTiles();
@@ -105,9 +113,9 @@ public class MapEncoder {
 		double[] vals = new double[tiles.length * 3];
 		for (int i = 0; i < tiles.length; i++) {
 			if(tiles[i]!=null){
-				vals[i + tiles.length*0] = tiles[i].getZoneValue();
-				vals[i + tiles.length*1] = tiles[i].getCurrentLandValue();
-				vals[i + tiles.length*2] = tiles[i].getPollution();
+				vals[i + tiles.length*0] = tiles[i].getZoneValue()/Rules.MAX;
+				vals[i + tiles.length*1] = tiles[i].getCurrentLandValue()/Rules.MAX;
+				vals[i + tiles.length*2] = tiles[i].getPollution()/Rules.MAX;
 			}else{
 				vals[i + tiles.length*0] = 0;
 				vals[i + tiles.length*1] = 0;

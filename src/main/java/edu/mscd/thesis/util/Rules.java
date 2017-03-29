@@ -52,13 +52,12 @@ public class Rules {
 		int c = w.getCity().getZoneCount(ZoneType.COMMERICAL);
 		int i = w.getCity().getZoneCount(ZoneType.INDUSTRIAL);
 		if(zt==ZoneType.RESIDENTIAL){
-			return Math.min(w.getCity().percentageHomeless(), R_DEMAND_BASE);
+			return Math.max(w.getCity().percentageHomeless(), R_DEMAND_BASE);
 		}else if(zt==ZoneType.COMMERICAL){
-			return Math.min(w.getCity().percentageUnemployed()/2.0, 0);
+			return Math.max(w.getCity().percentageUnemployed()/2.0, 0);
 		}else if(zt==ZoneType.INDUSTRIAL){
-			int zoneDiff = c/TILE_COUNT-i/TILE_COUNT;
-			zoneDiff = Math.max(zoneDiff, 0);
-			return Math.min(w.getCity().percentageUnemployed()/2.0, zoneDiff);
+			double commerceDemand = ((double)c)/((double)TILE_COUNT);
+			return Math.max((w.getCity().percentageUnemployed()+commerceDemand)/2.0, commerceDemand);
 		}
 		return 0;
 	}

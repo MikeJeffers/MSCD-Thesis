@@ -14,6 +14,7 @@ import org.encog.neural.networks.training.propagation.resilient.ResilientPropaga
 import org.encog.neural.pattern.JordanPattern;
 
 import edu.mscd.thesis.controller.UserData;
+import edu.mscd.thesis.model.City;
 import edu.mscd.thesis.model.Model;
 import edu.mscd.thesis.model.Pos2D;
 import edu.mscd.thesis.model.Tile;
@@ -34,43 +35,62 @@ public class ZoneDecider implements AI{
 		this.state = ModelStripper.reducedCopy(initialState);
 		initNetwork();
 		initTrainingDataSet();
-		//trainBackProp();
+		trainResilient();
 	}
+	
 	
 	private void initTrainingDataSet(){
 		
-		double[][] input = new double[2][8];
-		for(int i=0; i<ZoneType.values().length; i++){
-			input[0][i+4]= Rules.getDemandForZoneType(ZoneType.values()[i], this.state.getWorld());
-			input[0][i] = 0;
-		}
-		for(int i=0; i<ZoneType.values().length; i++){
-			input[1][i+4]= Rules.getDemandForZoneType(ZoneType.values()[i], this.state.getWorld());
-			input[1][i] = 0;
-		}
-		input[1][2] = 1;
-		double[][] idealout = new double[][]{{Rules.score(this.state)}, {Rules.score(this.state)*1.1}};
+		double[][] input = new double[4][4];
+		double[][] output = new double[4][4];
+		input[0][0] = 1.0;//R
+		input[0][1] = 0.0;//C
+		input[0][2] = 0.0;//I
+		input[0][3] = 0.0;//0
+		
+		output[0][0] = 1.0;//R
+		output[0][1] = 0.0;//C
+		output[0][2] = 0.0;//I
+		output[0][3] = 0.0;//0
+		
+		input[1][0] = 0.0;//R
+		input[1][1] = 1.0;//C
+		input[1][2] = 0.0;//I
+		input[1][3] = 0.0;//0
+		
+		output[1][0] = 0.0;//R
+		output[1][1] = 1.0;//C
+		output[1][2] = 0.0;//I
+		output[1][3] = 0.0;//0
+		
+		input[2][0] = 0.0;//R
+		input[2][1] = 0.0;//C
+		input[2][2] = 1.0;//I
+		input[2][3] = 0.0;//0
+		
+		output[2][0] = 0.0;//R
+		output[2][1] = 0.0;//C
+		output[2][2] = 1.0;//I
+		output[2][3] = 0.0;//0
+		
+		input[3][0] = 0.0;//R
+		input[3][1] = 0.0;//C
+		input[3][2] = 0.0;//I
+		input[3][3] = 1.0;//0
+		
+		output[3][0] = 0.0;//R
+		output[3][1] = 0.0;//C
+		output[3][2] = 0.0;//I
+		output[3][3] = 1.0;//0
+		
 
 		for (int i = 0; i < input.length; i++) {
 			MLData trainingIn = new BasicMLData(input[i]);
-			MLData idealOut = new BasicMLData(idealout[i]);
+			MLData idealOut = new BasicMLData(output[i]);
 			DATASET.add(trainingIn, idealOut);
 		}
 	}
 
-	private void trainBackProp() {
-		Backpropagation train = new Backpropagation(network, DATASET);
-		int epoch = 1;
-
-		do {
-			train.iteration();
-			System.out.println("Epoch #" + epoch + " Error:" + train.getError());
-			epoch++;
-		} while (train.getError() > 0.01 && epoch < 100);
-		train.finishTraining();
-
-		Encog.getInstance().shutdown();
-	}
 
 	private void trainResilient() {
 		ResilientPropagation train = new ResilientPropagation(network, DATASET);
@@ -78,8 +98,6 @@ public class ZoneDecider implements AI{
 
 		do {
 			train.iteration();
-			// System.out.println("Epoch #" + epoch + " Error:" +
-			// train.getError());
 			epoch++;
 		} while (train.getError() > 0.01 && epoch < 50);
 		train.finishTraining();
@@ -88,19 +106,17 @@ public class ZoneDecider implements AI{
 	}
 
 	private void initNetwork() {
-		network.addLayer(new BasicLayer(null, true, 8));
-		network.addLayer(new BasicLayer(new ActivationSigmoid(), true, 15));
-		network.addLayer(new BasicLayer(new ActivationSigmoid(), true, 3));
-		network.addLayer(new BasicLayer(new ActivationSigmoid(), false, 1));
+		network.addLayer(new BasicLayer(null, true, 4));
+		network.addLayer(new BasicLayer(new ActivationSigmoid(), true, 12));
+		network.addLayer(new BasicLayer(new ActivationSigmoid(), true, 7));
+		network.addLayer(new BasicLayer(new ActivationSigmoid(), false, 4));
 		network.getStructure().finalizeStructure();
 		network.reset();
 	}
 
-	private static double getOutput(double[] input) {
+	private static int getOutput(double[] input) {
 		MLData data = new BasicMLData(input);
-		MLData out = network.compute(data);
-		double[] output = out.getData();
-		return output[0];
+		return network.winner(data);
 	}
 
 	@Override
@@ -111,27 +127,23 @@ public class ZoneDecider implements AI{
 
 	@Override
 	public UserData takeNextAction() {
-		double[] outArray = new double[ZoneType.values().length];
-		for(ZoneType zt: ZoneType.values()){
-			double[] input = new double[8];
-			for(int i=0; i<ZoneType.values().length; i++){
-				input[i+4]= Rules.getDemandForZoneType(ZoneType.values()[i], state.getWorld());
-				input[i] = 0;
-			}
-			input[zt.ordinal()]=1;
-			outArray[zt.ordinal()] = getOutput(input);
+		City city = state.getWorld().getCity();
+		double r = city.residentialDemand();
+		double c = city.commercialDemand();
+		double indy = city.industrialDemand();
+		System.out.println("residential demand:"+r);
+		System.out.println("commercial demand:"+c);
+		System.out.println("industrial demand:"+indy);
+		double[] input = new double[4];
+		for(int i=0; i<ZoneType.values().length; i++){
+			input[i]= Rules.getDemandForZoneType(ZoneType.values()[i], state.getWorld());
+			System.out.println(ZoneType.values()[i]+" "+ input[i]);
 		}
-		ZoneType bestChoice = ZoneType.EMPTY;
-		double maxValue = 0;
-		for(ZoneType zt: ZoneType.values()){
-			if(outArray[zt.ordinal()]>maxValue){
-				bestChoice = zt;
-				maxValue = outArray[zt.ordinal()];
-			}
-		}
+		
+		ZoneType AIselection = ZoneType.values()[getOutput(input)];
 
 		UserData fake = new UserData();
-		fake.setZoneSelection(bestChoice);
+		fake.setZoneSelection(AIselection);
 		fake.setAI(true);
 		return fake;
 		
@@ -142,19 +154,22 @@ public class ZoneDecider implements AI{
 	public void addCase(Model state, Model prev, UserData action) {
 		double currentScore = Rules.score(state);
 		double prevScore = Rules.score(prev);
-		int zoneChoice = action.getZoneSelection().ordinal();
-		double[] input = new double[8];
-		for(int i=0; i<ZoneType.values().length; i++){
-			input[i+4]= Rules.getDemandForZoneType(ZoneType.values()[i], prev.getWorld());
-			input[i] = 0;
-		}
-		input[zoneChoice] = 1;
-		MLData trainingIn = new BasicMLData(input);
-		MLData idealOut = new BasicMLData(new double[] { currentScore });
-		DATASET.add(trainingIn, idealOut);
-		//this.trainBackProp();
-		this.trainResilient();
+		
+		//Train on positive cases,online learning
 		if (currentScore > prevScore) {
+			/*
+			int zoneChoice = action.getZoneSelection().ordinal();
+			double[] input = new double[4];
+			double[] output = new double[4];
+			for(int i=0; i<ZoneType.values().length; i++){
+				input[i]= Rules.getDemandForZoneType(ZoneType.values()[i], prev.getWorld());
+			}
+			output[zoneChoice] = 1;
+			MLData trainingIn = new BasicMLData(input);
+			MLData idealOut = new BasicMLData(output);
+			DATASET.add(trainingIn, idealOut);
+			this.trainResilient();
+			*/
 			System.out.println("AI move improvedScore! " + currentScore + " from " + prevScore);
 
 		} else {

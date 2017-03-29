@@ -12,16 +12,21 @@ public class CityReduced implements City{
 	private double unemploymentRate;
 	private double averageHappy;
 	private double averageMoney;
+	private int[] zoneCounts;
 
 	public CityReduced(City original) {
-		cDemand = original.commercialDemand();
-		rDemand = original.residentialDemand();
-		iDemand = original.industrialDemand();
-		homelessnessRate = original.percentageHomeless();
-		unemploymentRate = original.percentageUnemployed();
-		averageMoney = original.averageWealth();
-		averageHappy = original.averageHappiness();
+		this.cDemand = original.commercialDemand();
+		this.rDemand = original.residentialDemand();
+		this.iDemand = original.industrialDemand();
+		this.homelessnessRate = original.percentageHomeless();
+		this.unemploymentRate = original.percentageUnemployed();
+		this.averageMoney = original.averageWealth();
+		this.averageHappy = original.averageHappiness();
 		this.populationSize = original.totalPopulation();
+		this.zoneCounts = new int[ZoneType.values().length];
+		for(int i=0; i<ZoneType.values().length; i++){
+			zoneCounts[i]=original.getZoneCount(ZoneType.values()[i]);
+		}
 
 	}
 
@@ -107,9 +112,8 @@ public class CityReduced implements City{
 
 
 	@Override
-	public int getZoneCount(ZoneType zt) {
-		//TODO should throw exception, dont call this
-		return 0;
+	public int getZoneCount(ZoneType zt){
+		return this.zoneCounts[zt.ordinal()];
 	}
 	
 
