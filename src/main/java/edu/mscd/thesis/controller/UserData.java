@@ -154,6 +154,21 @@ public class UserData {
 	public void setAI(boolean isAI) {
 		this.isAI = isAI;
 	}
+	
+	public boolean equals(Object other){
+		if(other instanceof UserData){
+			UserData o = (UserData) other;
+			boolean eq = o.drawFlag==this.drawFlag;
+			eq = eq && o.isAI==this.isAI;
+			eq = eq && o.isSquare==this.isSquare;
+			eq = eq && o.isStepMode==this.isStepMode;
+			eq = eq && o.zoneSelection==this.zoneSelection;
+			eq = eq && o.clickLocation.equals(this.clickLocation);
+			eq = eq && o.radius==this.radius;
+			return eq;
+		}
+		return false;
+	}
 
 
 }

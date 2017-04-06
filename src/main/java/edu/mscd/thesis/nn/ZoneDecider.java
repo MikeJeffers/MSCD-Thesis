@@ -41,47 +41,51 @@ public class ZoneDecider implements AI{
 	
 	private void initTrainingDataSet(){
 		
-		double[][] input = new double[4][4];
-		double[][] output = new double[4][4];
-		input[0][0] = 1.0;//R
-		input[0][1] = 0.0;//C
-		input[0][2] = 0.0;//I
-		input[0][3] = 0.0;//0
+		double[][] input = new double[8][4];
+		double[][] output = new double[8][4];
+		for(int i=0; i<ZoneType.values().length; i++){
+			input[i] = WorldRepresentation.getZoneAsVector(ZoneType.values()[i]);
+			output[i]=WorldRepresentation.getZoneAsVector(ZoneType.values()[i]);
+		}
+		input[4][0] = 0.5;//R
+		input[4][1] = 0.5;//C
+		input[4][2] = 1.0;//I
+		input[4][3] = 0.0;//0
 		
-		output[0][0] = 1.0;//R
-		output[0][1] = 0.0;//C
-		output[0][2] = 0.0;//I
-		output[0][3] = 0.0;//0
+		output[4][0] = 0.0;//R
+		output[4][1] = 0.0;//C
+		output[4][2] = 1.0;//I
+		output[4][3] = 0.0;//0
 		
-		input[1][0] = 0.0;//R
-		input[1][1] = 1.0;//C
-		input[1][2] = 0.0;//I
-		input[1][3] = 0.0;//0
+		input[5][0] = 0.0;//R
+		input[5][1] = 1.0;//C
+		input[5][2] = 1.0;//I
+		input[5][3] = 0.0;//0
 		
-		output[1][0] = 0.0;//R
-		output[1][1] = 1.0;//C
-		output[1][2] = 0.0;//I
-		output[1][3] = 0.0;//0
+		output[5][0] = 0.0;//R
+		output[5][1] = 0.0;//C
+		output[5][2] = 1.0;//I
+		output[5][3] = 0.0;//0
 		
-		input[2][0] = 0.0;//R
-		input[2][1] = 0.0;//C
-		input[2][2] = 1.0;//I
-		input[2][3] = 0.0;//0
+		input[6][0] = 0.0;//R
+		input[6][1] = 0.5;//C
+		input[6][2] = 1.0;//I
+		input[6][3] = 0.0;//0
 		
-		output[2][0] = 0.0;//R
-		output[2][1] = 0.0;//C
-		output[2][2] = 1.0;//I
-		output[2][3] = 0.0;//0
+		output[6][0] = 0.0;//R
+		output[6][1] = 0.0;//C
+		output[6][2] = 1.0;//I
+		output[6][3] = 0.0;//0
 		
-		input[3][0] = 0.0;//R
-		input[3][1] = 0.0;//C
-		input[3][2] = 0.0;//I
-		input[3][3] = 1.0;//0
+		input[7][0] = 0.2;//R
+		input[7][1] = 0.4;//C
+		input[7][2] = 0.4;//I
+		input[7][3] = 1.0;//0
 		
-		output[3][0] = 0.0;//R
-		output[3][1] = 0.0;//C
-		output[3][2] = 0.0;//I
-		output[3][3] = 1.0;//0
+		output[7][0] = 0.0;//R
+		output[7][1] = 0.0;//C
+		output[7][2] = 1.0;//I
+		output[7][3] = 0.0;//0
 		
 
 		for (int i = 0; i < input.length; i++) {

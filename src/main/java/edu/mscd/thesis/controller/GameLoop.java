@@ -45,9 +45,11 @@ public class GameLoop extends AnimationTimer implements Controller {
 					if (aiActionPrev != null) {
 						ai.addCase(model, prevModelState, aiActionPrev);
 					}
+					if(!nextAction.equals(aiActionPrev)){
+						this.makeAIMove(nextAction);
+						aiObserveCounter = 0;
+					}
 					aiActionPrev = nextAction;
-					aiObserveCounter = 0;
-					this.makeAIMove(aiActionPrev);
 				}
 			}
 
