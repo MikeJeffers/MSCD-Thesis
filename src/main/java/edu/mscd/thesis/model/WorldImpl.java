@@ -19,7 +19,7 @@ public class WorldImpl implements World{
 	private Tile[] tiles;
 	private int cols, rows;
 	private City city;
-	private transient TileUpdaterService tileUpdater;
+	private TileUpdaterService tileUpdater;
 
 	public WorldImpl(int sizeX, int sizeY) {
 		int size = sizeX * sizeY;

@@ -18,7 +18,7 @@ public class GameLoop extends AnimationTimer implements Controller {
 	private int aiObserveCounter;
 	private UserData aiActionPrev;
 	private Model prevModelState;
-	
+
 	private AI ai;
 
 	public GameLoop(Model model, View<UserData> view, AI ai) {
@@ -39,12 +39,14 @@ public class GameLoop extends AnimationTimer implements Controller {
 			model.update();
 			view.renderView(model);
 			ai.setWorldState(model);
-			if (ai != null && aiMode && aiObserveCounter>5) {
+			if (ai != null && aiMode && aiObserveCounter > 5) {
 				UserData nextAction = ai.takeNextAction();
-				if(nextAction!=null){
+				if (nextAction != null) {
+					if (aiActionPrev != null) {
+						ai.addCase(model, prevModelState, aiActionPrev);
+					}
 					aiActionPrev = nextAction;
-					ai.addCase(model, prevModelState, aiActionPrev);
-					aiObserveCounter=0;
+					aiObserveCounter = 0;
 					this.makeAIMove(aiActionPrev);
 				}
 			}
@@ -70,13 +72,13 @@ public class GameLoop extends AnimationTimer implements Controller {
 	public void run() {
 		this.start();
 	}
-	
-	private void makeAIMove(UserData action){
+
+	private void makeAIMove(UserData action) {
 		prevModelState = ModelStripper.reducedCopy(model);
 		model.userStateChange(action);
 		step = action.isTakeStep();
 		draw = action.isDrawFlag();
-	
+
 	}
 
 	@Override

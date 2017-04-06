@@ -114,7 +114,7 @@ public class Rules {
 		tileScore+=(t.getCurrentLandValue()/MAX)*((2*weightSum)/8);
 		tileScore-=(t.getPollution()/MAX)*((2*weightSum)/8);
 		tileScore+=(t.getZoneDensity().getDensityLevel()/Density.VERYHIGH.getDensityLevel())*((4*weightSum)/8);
-		tileScore = tileScore/(3.0*weightSum);
+		tileScore = tileScore/(weightSum);
 		return tileScore;
 		
 	}
