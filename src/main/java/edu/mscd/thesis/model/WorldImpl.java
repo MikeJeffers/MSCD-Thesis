@@ -1,6 +1,6 @@
 package edu.mscd.thesis.model;
 
-import java.util.ArrayList;
+
 import java.util.Collection;
 import java.util.List;
 import java.util.Random;
@@ -15,7 +15,7 @@ import edu.mscd.thesis.util.Rules;
 import edu.mscd.thesis.util.TileUpdaterService;
 import edu.mscd.thesis.util.Util;
 
-public class WorldImpl implements World {
+public class WorldImpl implements World{
 	private Tile[] tiles;
 	private int cols, rows;
 	private City city;
@@ -27,7 +27,7 @@ public class WorldImpl implements World {
 		this.rows = sizeY;
 		this.cols = sizeX;
 		this.worldInit();
-		this.city = new CityImpl();
+		this.city = new CityImpl(this);
 		tileUpdater = new TileUpdaterService(this);
 	}
 
@@ -205,6 +205,16 @@ public class WorldImpl implements World {
 	@Override
 	public World getWorld() {
 		return this;
+	}
+
+	@Override
+	public int width() {
+		return this.cols;
+	}
+
+	@Override
+	public int height() {
+		return this.rows;
 	}
 
 }

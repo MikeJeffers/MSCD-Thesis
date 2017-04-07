@@ -21,5 +21,7 @@ public interface View<T> {
 	public void notifyObserver();
 
 	public void renderView(Model model);
+	
+	public void screenShot();
 
 }

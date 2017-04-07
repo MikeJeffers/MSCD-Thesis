@@ -15,6 +15,7 @@ public class UserData {
 	private boolean takeStep;
 	private Pos2D clickLocation;
 	private boolean drawFlag;
+	private boolean isAI;
 
 	public UserData() {
 		setDefault();
@@ -29,6 +30,7 @@ public class UserData {
 		setZoneSelection(ZoneType.EMPTY);
 		setDrawFlag(true);
 		setTakeStep(true);
+		setAI(false);
 	}
 
 	/**
@@ -117,6 +119,7 @@ public class UserData {
 	
 	public UserData copy(){
 		UserData data = new UserData();
+		data.setAI(this.isAI);
 		data.setSquare(this.isSquare);
 		data.setRadius(this.radius);
 		data.setClickLocation(this.clickLocation.copy());
@@ -143,5 +146,29 @@ public class UserData {
 	public void setTakeStep(boolean takeStep) {
 		this.takeStep = takeStep;
 	}
+
+	public boolean isAI() {
+		return isAI;
+	}
+
+	public void setAI(boolean isAI) {
+		this.isAI = isAI;
+	}
+	
+	public boolean equals(Object other){
+		if(other instanceof UserData){
+			UserData o = (UserData) other;
+			boolean eq = o.drawFlag==this.drawFlag;
+			eq = eq && o.isAI==this.isAI;
+			eq = eq && o.isSquare==this.isSquare;
+			eq = eq && o.isStepMode==this.isStepMode;
+			eq = eq && o.zoneSelection==this.zoneSelection;
+			eq = eq && o.clickLocation.equals(this.clickLocation);
+			eq = eq && o.radius==this.radius;
+			return eq;
+		}
+		return false;
+	}
+
 
 }

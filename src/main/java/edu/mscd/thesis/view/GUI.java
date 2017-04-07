@@ -38,6 +38,7 @@ public class GUI implements View<UserData> {
 	private Collection<Observer<UserData>> observers = new ArrayList<Observer<UserData>>();
 	private Renderer<Model> renderer = new ModelRenderer(RenderMode.NORMAL);
 	private GraphicsContext gc;
+	private Stage stage;
 	
 	// User selections on UI elements
 	private static UserData selection = new UserData();
@@ -64,7 +65,9 @@ public class GUI implements View<UserData> {
 			public void handle(ActionEvent event) {
 				selection.setTakeStep(true);
 				notifyObserver();
-				Util.takeScreenshot(stage);
+				if(Util.SCREENSHOT){
+					Util.takeScreenshot(stage);
+				}	
 			}
 		});
 		zonePanel.getChildren().add(step);
@@ -148,6 +151,7 @@ public class GUI implements View<UserData> {
 				}
 			}
 		});
+		this.stage = stage;
 		stage.show();
 	}
 
@@ -243,6 +247,13 @@ public class GUI implements View<UserData> {
 	public void renderView(Model model) {
 		this.renderer.draw(model, this.gc);
 
+	}
+
+	@Override
+	public void screenShot() {
+		if (Util.SCREENSHOT) {
+			Util.takeScreenshot(this.stage);
+		}
 	}
 
 }

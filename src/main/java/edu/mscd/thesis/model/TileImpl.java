@@ -1,5 +1,6 @@
 package edu.mscd.thesis.model;
 
+import edu.mscd.thesis.model.bldgs.Building;
 import edu.mscd.thesis.model.zones.Density;
 import edu.mscd.thesis.model.zones.Zone;
 import edu.mscd.thesis.model.zones.ZoneFactory;
@@ -148,6 +149,25 @@ public class TileImpl implements Tile {
 		this.landValue+=factor;
 		Util.boundValue(landValue, this.baseLandValue(), Rules.MAX);
 		
+	}
+
+	@Override
+	public double getZoneValue() {
+		return this.getZone().getValue();
+	}
+
+	@Override
+	public Density getZoneDensity() {
+		Building b = this.getZone().getBuilding();
+		if(b==null){
+			return Density.NONE;
+		}
+		return b.getDensity();
+	}
+
+	@Override
+	public ZoneType getZoneType() {
+		return this.getZone().getZoneType();
 	}
 
 }

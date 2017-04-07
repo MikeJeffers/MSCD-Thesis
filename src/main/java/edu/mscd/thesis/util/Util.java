@@ -153,6 +153,35 @@ public class Util {
 	public static double boundValue(double value, double min, double max) {
 		return Math.min(max, Math.max(min, value));
 	}
+	
+	
+	public static double[] appendVectors(double[] a, double [] b){
+		double[] appended = new double[a.length+b.length];
+		for(int i=0; i<a.length; i++){
+			appended[i]=a[i];
+		}
+		for(int i=0; i<b.length; i++){
+			appended[i+a.length]=b[i];
+		}
+		return appended;
+	}
+	
+	/**
+	 * Map a given value from a known source range to a new target range, scaling the factor
+	 * @param value - value to remap
+	 * @param sourceDomain - double pair, where [0]=start, [1]=end of domain AND start<end
+	 * @param targetDomain - double pair, where [0]=start, [1]=end of domain AND start<end
+	 * @return mapped value
+	 */
+	public static double mapValue(double value, double[] sourceDomain, double[] targetDomain){
+		double temp = value-sourceDomain[0];
+		double rangeOfSource = sourceDomain[1]-sourceDomain[0];
+		double normalizedValue = temp/rangeOfSource;
+		double rangeOfTarget = targetDomain[1]-targetDomain[0];
+		double scaledValue = normalizedValue*rangeOfTarget;
+		double translatedValue = scaledValue+targetDomain[0];
+		return translatedValue;
+	}
 
 	/**
 	 * Returns the minimum uniform scale factor such that @param xToScale
@@ -192,5 +221,6 @@ public class Util {
 			e.printStackTrace();
 		}
 	}
+	
 
 }

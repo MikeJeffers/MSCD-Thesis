@@ -6,20 +6,29 @@ import edu.mscd.thesis.model.zones.ZoneType;
 
 public interface City {
 	Collection<Person> getPopulation();
+
 	int totalPopulation();
+
 	double percentageHomeless();
+
 	double percentageUnemployed();
+
+	double averageHappiness();
+
+	double averageWealth();
+
 	Collection<Person> getUnemployed();
+
 	Collection<Person> getHomeless();
 
-	int residentialDemand();
+	double residentialDemand();
 
-	int commercialDemand();
+	double commercialDemand();
 
-	int industrialDemand();
-
-	int zoneCount(ZoneType zType);
+	double industrialDemand();
 	
+	int getZoneCount(ZoneType zt);
+
 	void update();
 
 }

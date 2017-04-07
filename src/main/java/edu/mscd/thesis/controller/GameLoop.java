@@ -2,45 +2,85 @@ package edu.mscd.thesis.controller;
 
 import edu.mscd.thesis.model.Model;
 import edu.mscd.thesis.model.Pos2D;
+import edu.mscd.thesis.nn.AI;
+import edu.mscd.thesis.util.ModelStripper;
+import edu.mscd.thesis.util.Rules;
 import edu.mscd.thesis.view.View;
 import javafx.animation.AnimationTimer;
 
-public class GameLoop extends AnimationTimer implements Controller{
+public class GameLoop extends AnimationTimer implements Controller {
 	private Model model;
 	private View<UserData> view;
 	private UserData currentSelection = new UserData();
 	private boolean step = true;
 	private boolean draw = true;
+	private boolean aiMode = true;
+	private int aiObserveCounter;
+	private UserData aiActionPrev;
+	private Model prevModelState;
+	private long previousTime = System.currentTimeMillis();
+	private long timeStep = 500000000;
 
-	public GameLoop(Model model, View<UserData> view) {
+	private AI ai;
+
+	public GameLoop(Model model, View<UserData> view, AI ai) {
 		this.model = model;
 		this.view = view;
 		view.attachObserver(this);
-		
+		this.ai = ai;
+		this.prevModelState = ModelStripper.reducedCopy(model);
+
 	}
 
 	@Override
 	public void handle(long now) {
+		if(now-previousTime>timeStep){
+			System.out.println(now-previousTime);
+			step=true;
+			previousTime = now;
+		}
 		
-		if(currentSelection.isStepMode() && step){
+		
+
+		if (currentSelection.isStepMode() && step) {
+			aiObserveCounter++;
 			step = false;
 			model.update();
 			view.renderView(model);
-			
-		}else if(draw){
+			ai.setState(model);
+			if (ai != null && aiMode && aiObserveCounter > 5) {
+				UserData nextAction = ai.takeNextAction();
+				if (nextAction != null) {
+					if (aiActionPrev != null) {
+						ai.addCase(model, prevModelState, aiActionPrev, 0.5);
+					}
+					if(!nextAction.equals(aiActionPrev)){
+						this.makeAIMove(nextAction);
+						aiObserveCounter = 0;
+					}else{
+						System.out.println("AI repeat move ignored");
+					}
+					aiActionPrev = nextAction;
+				}
+			}
+			view.screenShot();
+
+		} else if (draw) {
 			draw = false;
 			view.renderView(model);
 		}
 		
+		
+
 	}
-	
+
 	@Override
-	public void start(){
+	public void start() {
 		super.start();
 	}
-	
+
 	@Override
-	public void stop(){
+	public void stop() {
 		super.stop();
 	}
 
@@ -49,19 +89,25 @@ public class GameLoop extends AnimationTimer implements Controller{
 		this.start();
 	}
 
+	private void makeAIMove(UserData action) {
+		prevModelState = ModelStripper.reducedCopy(model);
+		model.userStateChange(action);
+		step = action.isTakeStep();
+		draw = action.isDrawFlag();
+
+	}
+
 	@Override
 	public synchronized void notifyNewData(UserData data) {
 		Pos2D old = this.currentSelection.getClickLocation();
 		Pos2D newClick = data.getClickLocation();
-		//TODO this is messy, only update model on new canvas click?
-		if(!old.equals(newClick)){
+		// TODO this is messy, only update model on new canvas click?
+		if (!old.equals(newClick)) {
 			model.userStateChange(data);
 		}
 		this.currentSelection = data.copy();
 		step = data.isTakeStep();
 		draw = data.isDrawFlag();
 	}
-	
-	
 
 }

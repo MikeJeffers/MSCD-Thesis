@@ -1,10 +1,8 @@
 package edu.mscd.thesis.util;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.RecursiveTask;
 
-import edu.mscd.thesis.model.Pos2D;
 import edu.mscd.thesis.model.Tile;
 import edu.mscd.thesis.model.World;
 import edu.mscd.thesis.model.zones.ZoneType;

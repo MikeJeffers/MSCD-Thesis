@@ -16,5 +16,9 @@ public interface World extends Model {
 	City getCity();
 
 	Tile[] getTiles();
+	
+	int width();
+	
+	int height();
 
 }

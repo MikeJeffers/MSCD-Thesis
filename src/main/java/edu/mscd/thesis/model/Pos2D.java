@@ -1,10 +1,11 @@
 package edu.mscd.thesis.model;
 
+
 import java.util.Objects;
 
 import javafx.geometry.Point2D;
 
-public class Pos2D {
+public class Pos2D{
 	private double x;
 	private double y;
 

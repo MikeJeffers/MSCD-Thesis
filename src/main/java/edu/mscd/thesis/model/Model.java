@@ -1,8 +1,9 @@
 package edu.mscd.thesis.model;
 
+
 import edu.mscd.thesis.controller.UserData;
 
-public interface Model {
+public interface Model{
 	/**
 	 * Run internal model updates based on behaviors of model system
 	 */

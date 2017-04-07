@@ -5,6 +5,8 @@ import edu.mscd.thesis.controller.GameLoop;
 import edu.mscd.thesis.controller.UserData;
 import edu.mscd.thesis.model.Model;
 import edu.mscd.thesis.model.WorldImpl;
+import edu.mscd.thesis.nn.AI;
+import edu.mscd.thesis.nn.NN;
 import edu.mscd.thesis.util.Rules;
 import edu.mscd.thesis.view.GUI;
 import edu.mscd.thesis.view.View;
@@ -18,18 +20,22 @@ import javafx.stage.Stage;
  *
  */
 public class Launcher extends Application {
-	View<UserData> view;
-	Model model;
-	Controller controller;
+	private View<UserData> view;
+	private Model model;
+	private Controller controller;
+	private AI ai;
 
 	public Launcher() {
 	}
 	
 	@Override
 	public void init(){
+		
 		model = initModel();
+		ai = new NN(model);
 		view = initView();
-		controller = initController(model, view);
+		controller = initController(model, view, ai);
+		
 		
 	}
 
@@ -44,8 +50,8 @@ public class Launcher extends Application {
 		return new WorldImpl(Rules.WORLD_X, Rules.WORLD_Y);
 	}
 
-	private static Controller initController(Model model, View<UserData> view) {
-		return new GameLoop(model, view);
+	private static Controller initController(Model model, View<UserData> view, AI ai) {
+		return new GameLoop(model, view, ai);
 	}
 
 	private static View<UserData> initView() {
