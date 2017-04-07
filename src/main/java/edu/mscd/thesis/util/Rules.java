@@ -54,8 +54,8 @@ public class Rules {
 		if(zt==ZoneType.RESIDENTIAL){
 			return Math.max(w.getCity().percentageHomeless(), R_DEMAND_BASE);
 		}else if(zt==ZoneType.COMMERICAL){
-			double indyDemand = ((double)i)/((double)TILE_COUNT);
-			return Math.max((w.getCity().percentageUnemployed()+indyDemand)/1.5, 0);
+			double consumerDemand = ((double)r)/((double)TILE_COUNT);
+			return Math.max((w.getCity().percentageUnemployed()+consumerDemand)/1.5, 0);
 		}else if(zt==ZoneType.INDUSTRIAL){
 			double commerceDemand = ((double)c)/((double)TILE_COUNT);
 			return Math.max((w.getCity().percentageUnemployed()+commerceDemand)/1.5, commerceDemand);
