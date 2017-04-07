@@ -16,8 +16,8 @@ import edu.mscd.thesis.model.zones.ZoneType;
  *
  */
 public class Rules {
-	public static final int WORLD_X = 32;
-	public static final int WORLD_Y = 24;
+	public static final int WORLD_X = 16;
+	public static final int WORLD_Y = 12;
 	public static final int TILE_COUNT = WORLD_X*WORLD_Y;
 	//Game Constants and factors
 	public static final int MAX = 255;
@@ -54,7 +54,8 @@ public class Rules {
 		if(zt==ZoneType.RESIDENTIAL){
 			return Math.max(w.getCity().percentageHomeless(), R_DEMAND_BASE);
 		}else if(zt==ZoneType.COMMERICAL){
-			return Math.max(w.getCity().percentageUnemployed()/2.0, 0);
+			double indyDemand = ((double)i)/((double)TILE_COUNT);
+			return Math.max((w.getCity().percentageUnemployed()+indyDemand)/1.5, 0);
 		}else if(zt==ZoneType.INDUSTRIAL){
 			double commerceDemand = ((double)c)/((double)TILE_COUNT);
 			return Math.max((w.getCity().percentageUnemployed()+commerceDemand)/1.5, commerceDemand);

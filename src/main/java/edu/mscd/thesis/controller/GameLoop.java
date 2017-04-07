@@ -39,7 +39,8 @@ public class GameLoop extends AnimationTimer implements Controller {
 			step=true;
 			previousTime = now;
 		}
-			
+		
+		
 
 		if (currentSelection.isStepMode() && step) {
 			aiObserveCounter++;
@@ -62,11 +63,14 @@ public class GameLoop extends AnimationTimer implements Controller {
 					aiActionPrev = nextAction;
 				}
 			}
+			view.screenShot();
 
 		} else if (draw) {
 			draw = false;
 			view.renderView(model);
 		}
+		
+		
 
 	}
 

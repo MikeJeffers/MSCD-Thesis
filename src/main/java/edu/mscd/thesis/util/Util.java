@@ -36,7 +36,7 @@ public class Util {
 	public static final int WINDOW_HEIGHT = 600;
 	public static final double SCALE_FACTOR = Util.getScaleFactor(Rules.WORLD_X, Rules.WORLD_Y, WINDOW_WIDTH,
 			WINDOW_HEIGHT);
-	public static final boolean SCREENSHOT = false;
+	public static final boolean SCREENSHOT = true;
 	private static Random random = new Random();
 	private static DateFormat df = new SimpleDateFormat("yyMMdd_HHmmss_SSS");
 
