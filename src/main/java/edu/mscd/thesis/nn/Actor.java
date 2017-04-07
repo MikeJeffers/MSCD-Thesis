@@ -3,9 +3,10 @@ package edu.mscd.thesis.nn;
 import edu.mscd.thesis.controller.UserData;
 import edu.mscd.thesis.model.Model;
 
-public interface Mapper {
+public interface Actor {
 	
-
-	public double[] getMapOfValues(Model state, UserData action);
+	public UserData takeNextAction();
+	
+	public void setState(Model state);
 
 }

@@ -20,7 +20,7 @@ import edu.mscd.thesis.util.ModelStripper;
 import edu.mscd.thesis.util.Rules;
 import edu.mscd.thesis.util.Util;
 
-public class TileMapper implements AI, Mapper {
+public class TileMapper implements Learner, Mapper {
 	/**
 	 * input is a single Tile Representation(decomposition of its attributes) and a Zone vector
 	 * MLP follows the form of a Q-learning approximation function
@@ -33,14 +33,12 @@ public class TileMapper implements AI, Mapper {
 	private static final int OUTPUT_LAYER_SIZE = 1;
 	public static final BasicNetwork network = new BasicNetwork();
 	public static final MLDataSet DATASET = new BasicMLDataSet();
-	private Model state;
-	private ZoneType zone;
+
 
 
 	public TileMapper(Model state) {
-		this.state = ModelStripper.reducedCopy(state);
 		initNetwork();
-		initTraining();
+		initTraining(state);
 		trainResilient();
 	}
 
@@ -53,8 +51,8 @@ public class TileMapper implements AI, Mapper {
 		network.reset();
 	}
 
-	private void initTraining() {
-		Tile[] tiles = this.state.getWorld().getTiles();
+	private void initTraining(Model initialState) {
+		Tile[] tiles = initialState.getWorld().getTiles();
 		double[][] input = new double[tiles.length][INPUT_LAYER_SIZE];
 		double[][] output = new double[tiles.length][OUTPUT_LAYER_SIZE];
 		
@@ -82,38 +80,25 @@ public class TileMapper implements AI, Mapper {
 	private void trainResilient() {
 		ResilientPropagation train = new ResilientPropagation(network, DATASET);
 		int epoch = 1;
-
 		do {
 			train.iteration();
-			System.out.println("Epoch #" + epoch + " Error:" + train.getError());
 			epoch++;
 		} while (train.getError() > 0.01 && epoch < 50);
 		train.finishTraining();
-
 		Encog.getInstance().shutdown();
-	}
-
-	@Override
-	public void setWorldState(Model state) {
-		this.state = ModelStripper.reducedCopy(state);
-
 	}
 
 	private double getOutput(double[] input) {
 		MLData output = network.compute(new BasicMLData(input));
 		return output.getData()[0];
 	}
-	
-	public void setZoneOfAction(ZoneType zone){
-		this.zone = zone;
-	}
-	
+
 	
 	@Override
-	public double[] getMapOfValues() {
-		ZoneType zoneAction = this.zone;
+	public double[] getMapOfValues(Model state, UserData action) {
+		ZoneType zoneAction = action.getZoneSelection();
 		double[] zoneVector = WorldRepresentation.getZoneAsVector(zoneAction);
-		World w = this.state.getWorld();
+		World w = state.getWorld();
 		Tile[] tiles = w.getTiles();
 		double[] map = new double[tiles.length];
 		Pos2D[] locations = new Pos2D[tiles.length];
@@ -128,67 +113,10 @@ public class TileMapper implements AI, Mapper {
 		return map;
 	}
 
-	@Override
-	public UserData takeNextAction() {
-		ZoneType zoneAction = this.zone;
-		double[] zoneVector = WorldRepresentation.getZoneAsVector(zoneAction);
-		World w = this.state.getWorld();
-		Tile[] tiles = w.getTiles();
-		double[] map = new double[tiles.length];
-		Pos2D[] locations = new Pos2D[tiles.length];
-		for (int i = 0; i < tiles.length; i++) {
-			Pos2D p = tiles[i].getPos();
-			locations[i] = p;
-			double[] tileRepr =  WorldRepresentation.getTileAttributesAsVector(tiles[i]);
-			double[] input = Util.appendVectors(tileRepr, zoneVector);
-			double output = getOutput(input);
-			map[i]=output;
-		}
-		
-		int maxIndex = 0;
-		int minIndex = 0;
-		double maxScore = 0;
-		double minScore = Rules.MAX;
-		for(int i=0; i<map.length; i++){
-			if(map[i]<minScore){
-				minScore = map[i];
-				minIndex = i;
-			}
-			if(map[i]>maxScore){
-				maxScore = map[i];
-				maxIndex = i;
-			}
-		}
-		
-		System.out.println("Possible actions based on Mapped Score domain["+map[minIndex]+","+map[maxIndex]+"]");
-		System.out.print("Best move:{");
-		System.out.print(locations[maxIndex]);
-		System.out.println();
-		System.out.print("Worst move:{");
-		System.out.print(locations[minIndex]);
-		System.out.println();
-		
-		System.out.println("ZoneDecider picked:{"+zoneAction+"}");
-		if(minIndex==maxIndex){
-			System.out.println("AI can not find ideal move to make");
-			return null;
-		}
 
-		UserData fake = new UserData();
-		fake.setClickLocation(locations[maxIndex]);
-		fake.setZoneSelection(zoneAction);
-		fake.setRadius(0);
-		fake.setSquare(true);
-		fake.setTakeStep(false);
-		fake.setDrawFlag(true);
-		fake.setAI(true);
-		return fake;
-	}
 
 	@Override
-	public void addCase(Model state, Model prev, UserData action) {
-
-
+	public void addCase(Model state, Model prev, UserData action, double userRating) {
 		Pos2D pos = action.getClickLocation();
 		Tile targetTile = prev.getWorld().getTileAt(pos);
 		ZoneType zoneAct = action.getZoneSelection();
@@ -206,6 +134,7 @@ public class TileMapper implements AI, Mapper {
 		DATASET.add(trainingIn, idealOut);
 		trainResilient();
 	}
+
 
 
 

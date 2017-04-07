@@ -16,8 +16,8 @@ import edu.mscd.thesis.model.zones.ZoneType;
  *
  */
 public class Rules {
-	public static final int WORLD_X = 25;
-	public static final int WORLD_Y = 20;
+	public static final int WORLD_X = 32;
+	public static final int WORLD_Y = 24;
 	public static final int TILE_COUNT = WORLD_X*WORLD_Y;
 	//Game Constants and factors
 	public static final int MAX = 255;
@@ -38,7 +38,7 @@ public class Rules {
 	public static double getValueForZoneTypeWithEffects(Tile t, ZoneType z) {
 		double value = getValueForZoneOnTile(t.getType(), z);
 		if (z == ZoneType.COMMERICAL) {
-			value += (t.getCurrentLandValue() - t.getPollution());
+			value += (t.getCurrentLandValue() - t.getPollution()/4.0);
 		} else if (z == ZoneType.INDUSTRIAL) {
 			value += (t.getCurrentLandValue());
 		} else if (z == ZoneType.RESIDENTIAL) {
@@ -57,7 +57,7 @@ public class Rules {
 			return Math.max(w.getCity().percentageUnemployed()/2.0, 0);
 		}else if(zt==ZoneType.INDUSTRIAL){
 			double commerceDemand = ((double)c)/((double)TILE_COUNT);
-			return Math.max((w.getCity().percentageUnemployed()+commerceDemand)/2.0, commerceDemand);
+			return Math.max((w.getCity().percentageUnemployed()+commerceDemand)/1.5, commerceDemand);
 		}
 		return 0;
 	}

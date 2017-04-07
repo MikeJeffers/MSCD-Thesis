@@ -23,21 +23,13 @@ public class NN implements AI{
 	}
 
 	@Override
-	public void setWorldState(Model state) {
-		this.state = ModelStripper.reducedCopy(state);
-		this.tileMap.setWorldState(this.state);
-		this.zoneMap.setWorldState(this.state);
-		this.zoneDecider.setWorldState(this.state);
-	}
-
-	@Override
 	public UserData takeNextAction() {
-		ZoneType zoneAction = this.zoneDecider.takeNextAction().getZoneSelection();
-		this.tileMap.setZoneOfAction(zoneAction);
-		this.zoneMap.setZoneOfAction(zoneAction);
+		UserData zoneAction = this.zoneDecider.takeNextAction();
+		ZoneType zoneType = zoneAction.getZoneSelection();
+		int radius = zoneAction.getRadius();
 		Pos2D[] locations = new Pos2D[this.state.getWorld().getTiles().length];
-		double[] mapA = this.tileMap.getMapOfValues();
-		double[] mapB = this.zoneMap.getMapOfValues();
+		double[] mapA = this.tileMap.getMapOfValues(this.state, zoneAction);
+		double[] mapB = this.zoneMap.getMapOfValues(this.state, zoneAction);
 		double[] combined = new double[mapA.length];
 		double[] src = new double[]{0,2.0};
 		double[] targ = new double[]{0, 1.0};
@@ -67,7 +59,7 @@ public class NN implements AI{
 		System.out.print(locations[minIndex]);
 		System.out.println();
 		
-		System.out.println("ZoneDecider picked:{"+zoneAction+"}");
+		System.out.println("ZoneDecider picked:{"+zoneType+"}");
 		if(minIndex==maxIndex){
 			System.out.println("AI can not find ideal move to make");
 			return null;
@@ -75,8 +67,8 @@ public class NN implements AI{
 
 		UserData fake = new UserData();
 		fake.setClickLocation(locations[maxIndex]);
-		fake.setZoneSelection(zoneAction);
-		fake.setRadius(1);
+		fake.setZoneSelection(zoneType);
+		fake.setRadius(radius);
 		fake.setSquare(false);
 		fake.setTakeStep(false);
 		fake.setDrawFlag(true);
@@ -84,11 +76,19 @@ public class NN implements AI{
 		return fake;
 	}
 
+
 	@Override
-	public void addCase(Model state, Model prev, UserData action) {
-		this.zoneDecider.addCase(state, prev, action);
-		this.tileMap.addCase(state, prev, action);
-		this.zoneMap.addCase(state, prev, action);
+	public void addCase(Model prev, Model current, UserData action, double userRating) {
+		this.zoneDecider.addCase(state, prev, action, userRating);
+		this.tileMap.addCase(state, prev, action, userRating);
+		this.zoneMap.addCase(state, prev, action, userRating);
+		
+	}
+
+	@Override
+	public void setState(Model state) {
+		this.state = ModelStripper.reducedCopy(state);
+		this.zoneDecider.setState(this.state);
 		
 	}
 

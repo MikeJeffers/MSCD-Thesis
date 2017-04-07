@@ -19,7 +19,6 @@ public class GameLoop extends AnimationTimer implements Controller {
 	private UserData aiActionPrev;
 	private Model prevModelState;
 	private long previousTime = System.currentTimeMillis();
-	private long currentTime = previousTime;
 	private long timeStep = 500000000;
 
 	private AI ai;
@@ -47,16 +46,18 @@ public class GameLoop extends AnimationTimer implements Controller {
 			step = false;
 			model.update();
 			view.renderView(model);
-			ai.setWorldState(model);
+			ai.setState(model);
 			if (ai != null && aiMode && aiObserveCounter > 5) {
 				UserData nextAction = ai.takeNextAction();
 				if (nextAction != null) {
 					if (aiActionPrev != null) {
-						ai.addCase(model, prevModelState, aiActionPrev);
+						ai.addCase(model, prevModelState, aiActionPrev, 0.5);
 					}
 					if(!nextAction.equals(aiActionPrev)){
 						this.makeAIMove(nextAction);
 						aiObserveCounter = 0;
+					}else{
+						System.out.println("AI repeat move ignored");
 					}
 					aiActionPrev = nextAction;
 				}

@@ -22,14 +22,15 @@ import edu.mscd.thesis.util.ModelStripper;
 import edu.mscd.thesis.util.Rules;
 import edu.mscd.thesis.util.Util;
 
-public class ZoneMapper implements AI, Mapper{
-	/**
-	 * input layer is 9-cell moore's neighborhood via WorldRepresentation
-	 * ZoneVector as STATE And single ACTION repr'd as a single ZoneVector a
-	 * Q-score is produced then to indicate if the move will generally help or
-	 * hurt the world score
-	 * 
-	 */
+
+/**
+ * Input layer:[STATE(9xZoneVectors)+Action(ZoneVector)] where ZoneVector is signal[R,C,I,0] where only one input is 1.0
+ * Output is Q-score of (STATE, ACTION) pair
+ * @author Mike
+ *
+ */
+public class ZoneMapper implements Learner, Mapper{
+
 	private static final int ZONETYPES = ZoneType.values().length;
 	private static final int INPUT_LAYER_SIZE = 9 * ZONETYPES + ZONETYPES;
 	private static final int OUTPUT_LAYER_SIZE = 1;
@@ -53,7 +54,6 @@ public class ZoneMapper implements AI, Mapper{
 		network.addLayer(new BasicLayer(new ActivationSigmoid(), false, OUTPUT_LAYER_SIZE));
 		network.getStructure().finalizeStructure();
 		network.reset();
-		System.out.println(network);
 	}
 
 	private void initTraining() {
@@ -85,8 +85,6 @@ public class ZoneMapper implements AI, Mapper{
 		output[9] = new double[] { 1 };
 
 		for (int i = 0; i < input.length; i++) {
-			System.out.println(Arrays.toString(input[i]));
-			System.out.println(Arrays.toString(output[i]));
 			MLData trainingIn = new BasicMLData(input[i]);
 			MLData idealOut = new BasicMLData(output[i]);
 			DATASET.add(trainingIn, idealOut);
@@ -112,24 +110,12 @@ public class ZoneMapper implements AI, Mapper{
 	private void trainResilient() {
 		ResilientPropagation train = new ResilientPropagation(network, DATASET);
 		int epoch = 1;
-		for(int i=0; i<network.getLayerCount(); i++){
-			System.out.println(network.getLayerNeuronCount(i));
-		}
-
 		do {
 			train.iteration();
-			System.out.println("Epoch #" + epoch + " Error:" + train.getError());
 			epoch++;
 		} while (train.getError() > 0.01 && epoch < 45);
 		train.finishTraining();
-
 		Encog.getInstance().shutdown();
-	}
-
-	@Override
-	public void setWorldState(Model state) {
-		this.state = state;
-
 	}
 
 	private double getOutput(double[] input) {
@@ -138,10 +124,10 @@ public class ZoneMapper implements AI, Mapper{
 	}
 	
 	@Override
-	public double[] getMapOfValues() {
-		ZoneType zoneAction = this.zone;
+	public double[] getMapOfValues(Model state, UserData action) {
+		ZoneType zoneAction = action.getZoneSelection();
 		double[] zoneVector = WorldRepresentation.getZoneAsVector(zoneAction);
-		World w = this.state.getWorld();
+		World w = state.getWorld();
 		Tile[] tiles = w.getTiles();
 		double[] map = new double[tiles.length];
 		Pos2D[] locations = new Pos2D[tiles.length];
@@ -155,64 +141,9 @@ public class ZoneMapper implements AI, Mapper{
 		return map;
 	}
 
-	@Override
-	public UserData takeNextAction() {
-		ZoneType zoneAction = this.zone;
-		double[] zoneVector = WorldRepresentation.getZoneAsVector(zoneAction);
-		World w = this.state.getWorld();
-		Tile[] tiles = w.getTiles();
-		double[] map = new double[tiles.length];
-		Pos2D[] locations = new Pos2D[tiles.length];
-		for (int i = 0; i < tiles.length; i++) {
-			Pos2D p = tiles[i].getPos();
-			locations[i] = p;
-			double[] input = addActionVector(getInputAroundTile(w, p), zoneVector);
-			double output = getOutput(input);
-			map[i]=output;
-		}
-		
-		int maxIndex = 0;
-		int minIndex = 0;
-		double maxScore = 0;
-		double minScore = Rules.MAX;
-		for(int i=0; i<map.length; i++){
-			if(map[i]<minScore){
-				minScore = map[i];
-				minIndex = i;
-			}
-			if(map[i]>maxScore){
-				maxScore = map[i];
-				maxIndex = i;
-			}
-		}
-		
-		System.out.println("Possible actions based on Mapped Score domain["+map[minIndex]+","+map[maxIndex]+"]");
-		System.out.print("Best move:{");
-		System.out.print(locations[maxIndex]);
-		System.out.println();
-		System.out.print("Worst move:{");
-		System.out.print(locations[minIndex]);
-		System.out.println();
-		
-		System.out.println("ZoneDecider picked:{"+zoneAction+"}");
-		if(minIndex==maxIndex){
-			System.out.println("AI can not find ideal move to make");
-			return null;
-		}
-
-		UserData fake = new UserData();
-		fake.setClickLocation(locations[maxIndex]);
-		fake.setZoneSelection(zoneAction);
-		fake.setRadius(0);
-		fake.setSquare(true);
-		fake.setTakeStep(false);
-		fake.setDrawFlag(true);
-		fake.setAI(true);
-		return fake;
-	}
 
 	@Override
-	public void addCase(Model state, Model prev, UserData action) {
+	public void addCase(Model state, Model prev, UserData action, double userRating) {
 		Pos2D pos = action.getClickLocation();
 		ZoneType zoneAct = action.getZoneSelection();
 		double prevScore = Rules.score(prev.getWorld().getTileAt(pos));

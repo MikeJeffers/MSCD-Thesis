@@ -38,6 +38,22 @@ public class WorldRepresentation {
 		}
 		return repr;
 	}
+	
+	/**
+	 * Produce score of Tile's lack of potential density
+	 * Where 1.0 indicates a empty tile, 0 indicates a tile that is fully utilized.
+	 * @param t - Tile to produce value for
+	 * @return double value [0.0-1.0]
+	 */
+	public static double getTileDensityScore(Tile t){
+		if(t==null || !t.getType().isZonable()){
+			return 0;
+		}
+		int maxDensity = t.getType().getMaxDensity().getDensityLevel();
+		int currentDensity = t.getZoneDensity().getDensityLevel();
+		double densityScore = 1.0-((1.0*currentDensity)/(1.0*maxDensity));
+		return densityScore;
+	}
 
 	/**
 	 * Create NN input-layer friendly representation of Zonetypes from a given
@@ -67,7 +83,7 @@ public class WorldRepresentation {
 	
 	
 	public static double[] getTileAttributesAsVector(Tile t){
-		double[] attributes = new double[4];
+		double[] attributes = new double[5];
 		if(t==null){
 			return attributes;
 		}
@@ -77,6 +93,7 @@ public class WorldRepresentation {
 		attributes[1]=Util.mapValue(t.getCurrentLandValue(), srcDomain, normDomain);
 		attributes[2]=Util.mapValue(t.getPollution(), srcDomain, normDomain);
 		attributes[3]=Util.mapValue(t.materialValue(), srcDomain, normDomain);
+		attributes[4]=Util.mapValue(getTileDensityScore(t), srcDomain, normDomain);
 		return attributes;
 		
 	}

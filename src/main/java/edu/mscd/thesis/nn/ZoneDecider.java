@@ -22,8 +22,9 @@ import edu.mscd.thesis.model.World;
 import edu.mscd.thesis.model.zones.ZoneType;
 import edu.mscd.thesis.util.ModelStripper;
 import edu.mscd.thesis.util.Rules;
+import edu.mscd.thesis.util.Util;
 
-public class ZoneDecider implements AI{
+public class ZoneDecider implements Actor, Learner{
 	private Model state;
 	
 	public final static BasicNetwork network = new BasicNetwork();
@@ -41,51 +42,66 @@ public class ZoneDecider implements AI{
 	
 	private void initTrainingDataSet(){
 		
-		double[][] input = new double[8][4];
-		double[][] output = new double[8][4];
+		double[][] input = new double[15][4];
+		double[][] output = new double[15][4];
 		for(int i=0; i<ZoneType.values().length; i++){
 			input[i] = WorldRepresentation.getZoneAsVector(ZoneType.values()[i]);
 			output[i]=WorldRepresentation.getZoneAsVector(ZoneType.values()[i]);
 		}
-		input[4][0] = 0.5;//R
-		input[4][1] = 0.5;//C
+		input[4][0] = 0.77;//R
+		input[4][1] = 0.77;//C
 		input[4][2] = 1.0;//I
-		input[4][3] = 0.0;//0
-		
-		output[4][0] = 0.0;//R
-		output[4][1] = 0.0;//C
-		output[4][2] = 1.0;//I
-		output[4][3] = 0.0;//0
-		
-		input[5][0] = 0.0;//R
+		output[4] = WorldRepresentation.getZoneAsVector(ZoneType.INDUSTRIAL);
+
+		input[5][0] = 0.55;//R
 		input[5][1] = 1.0;//C
 		input[5][2] = 1.0;//I
-		input[5][3] = 0.0;//0
-		
-		output[5][0] = 0.0;//R
-		output[5][1] = 0.0;//C
-		output[5][2] = 1.0;//I
-		output[5][3] = 0.0;//0
+		output[5] = WorldRepresentation.getZoneAsVector(ZoneType.INDUSTRIAL);
 		
 		input[6][0] = 0.0;//R
 		input[6][1] = 0.5;//C
-		input[6][2] = 1.0;//I
-		input[6][3] = 0.0;//0
-		
-		output[6][0] = 0.0;//R
-		output[6][1] = 0.0;//C
-		output[6][2] = 1.0;//I
-		output[6][3] = 0.0;//0
+		input[6][2] = 0.6;//I
+		output[6] = WorldRepresentation.getZoneAsVector(ZoneType.INDUSTRIAL);
 		
 		input[7][0] = 0.2;//R
 		input[7][1] = 0.4;//C
 		input[7][2] = 0.4;//I
-		input[7][3] = 1.0;//0
+		output[7] = WorldRepresentation.getZoneAsVector(ZoneType.INDUSTRIAL);
 		
-		output[7][0] = 0.0;//R
-		output[7][1] = 0.0;//C
-		output[7][2] = 1.0;//I
-		output[7][3] = 0.0;//0
+		input[8][0] = 0.55;//R
+		input[8][1] = 0.4;//C
+		input[8][2] = 0.4;//I
+		output[8] = WorldRepresentation.getZoneAsVector(ZoneType.RESIDENTIAL);
+		
+		input[9][0] = 0.85;//R
+		input[9][1] = 0.7;//C
+		input[9][2] = 0.7;//I
+		output[9] = WorldRepresentation.getZoneAsVector(ZoneType.RESIDENTIAL);
+		
+		input[10][0] = 0.05;//R
+		input[10][1] = 0.15;//C
+		input[10][2] = 0.0;//I
+		output[10] = WorldRepresentation.getZoneAsVector(ZoneType.COMMERICAL);
+		
+		input[11][0] = 0.05;//R
+		input[11][1] = 0.55;//C
+		input[11][2] = 0.45;//I
+		output[11] = WorldRepresentation.getZoneAsVector(ZoneType.COMMERICAL);
+		
+		input[12][0] = 0.65;//R
+		input[12][1] = 0.55;//C
+		input[12][2] = 0.45;//I
+		output[12] = WorldRepresentation.getZoneAsVector(ZoneType.RESIDENTIAL);
+		
+		input[13][0] = 0.05;//R
+		input[13][1] = 0.10;//C
+		input[13][2] = 0.15;//I
+		output[13] = WorldRepresentation.getZoneAsVector(ZoneType.INDUSTRIAL);
+		
+		input[14][0] = 0.15;//R
+		input[14][1] = 0.25;//C
+		input[14][2] = 0.35;//I
+		output[14] = WorldRepresentation.getZoneAsVector(ZoneType.INDUSTRIAL);
 		
 
 		for (int i = 0; i < input.length; i++) {
@@ -118,16 +134,11 @@ public class ZoneDecider implements AI{
 		network.reset();
 	}
 
-	private static int getOutput(double[] input) {
+	private int getZoneIndex(double[] input) {
 		MLData data = new BasicMLData(input);
 		return network.winner(data);
 	}
 
-	@Override
-	public void setWorldState(Model state) {
-		this.state = ModelStripper.reducedCopy(state);
-
-	}
 
 	@Override
 	public UserData takeNextAction() {
@@ -144,10 +155,17 @@ public class ZoneDecider implements AI{
 			System.out.println(ZoneType.values()[i]+" "+ input[i]);
 		}
 		
-		ZoneType AIselection = ZoneType.values()[getOutput(input)];
+		MLData data = new BasicMLData(input);
+		int index = network.winner(data);
+		double indexValue = network.compute(data).getData(index);
+		
+		int strength = (int)Math.round(Util.mapValue(indexValue, new double[]{0,1}, new double[]{0,3}));
+		
+		ZoneType AIselection = ZoneType.values()[getZoneIndex(input)];
 
 		UserData fake = new UserData();
 		fake.setZoneSelection(AIselection);
+		fake.setRadius(strength);
 		fake.setAI(true);
 		return fake;
 		
@@ -155,7 +173,7 @@ public class ZoneDecider implements AI{
 	}
 
 	@Override
-	public void addCase(Model state, Model prev, UserData action) {
+	public void addCase(Model prev, Model current, UserData action, double userRating) {
 		double currentScore = Rules.score(state);
 		double prevScore = Rules.score(prev);
 		
@@ -180,6 +198,14 @@ public class ZoneDecider implements AI{
 			System.out.println("AI move dropped score =( " + currentScore + " from " + prevScore);
 		}
 
+	}
+
+
+
+	@Override
+	public void setState(Model state) {
+		this.state = state;
+		
 	}
 
 
