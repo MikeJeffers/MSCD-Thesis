@@ -5,6 +5,7 @@ import edu.mscd.thesis.model.TileType;
 import edu.mscd.thesis.model.World;
 import edu.mscd.thesis.model.zones.ZoneType;
 import edu.mscd.thesis.util.Rules;
+import edu.mscd.thesis.util.Util;
 
 public class WorldRepresentation {
 
@@ -62,6 +63,22 @@ public class WorldRepresentation {
 		double[] repr = new double[ZoneType.values().length];
 		repr[z.ordinal()] = 1.0;
 		return repr;
+	}
+	
+	
+	public static double[] getTileAttributesAsVector(Tile t){
+		double[] attributes = new double[4];
+		if(t==null){
+			return attributes;
+		}
+		double[]normDomain = new double[]{0.0, 1.0};
+		double[] srcDomain = new double[]{0, Rules.MAX};
+		attributes[0]=Util.mapValue(t.baseLandValue(), srcDomain, normDomain);
+		attributes[1]=Util.mapValue(t.getCurrentLandValue(), srcDomain, normDomain);
+		attributes[2]=Util.mapValue(t.getPollution(), srcDomain, normDomain);
+		attributes[3]=Util.mapValue(t.materialValue(), srcDomain, normDomain);
+		return attributes;
+		
 	}
 
 }

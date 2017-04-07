@@ -1,5 +1,7 @@
 package edu.mscd.thesis.nn;
 
+import java.util.Arrays;
+
 import org.encog.Encog;
 import org.encog.engine.network.activation.ActivationSigmoid;
 import org.encog.ml.data.MLData;
@@ -18,8 +20,9 @@ import edu.mscd.thesis.model.World;
 import edu.mscd.thesis.model.zones.ZoneType;
 import edu.mscd.thesis.util.ModelStripper;
 import edu.mscd.thesis.util.Rules;
+import edu.mscd.thesis.util.Util;
 
-public class MLPQLearner implements AI {
+public class ZoneMapper implements AI, Mapper{
 	/**
 	 * input layer is 9-cell moore's neighborhood via WorldRepresentation
 	 * ZoneVector as STATE And single ACTION repr'd as a single ZoneVector a
@@ -30,15 +33,14 @@ public class MLPQLearner implements AI {
 	private static final int ZONETYPES = ZoneType.values().length;
 	private static final int INPUT_LAYER_SIZE = 9 * ZONETYPES + ZONETYPES;
 	private static final int OUTPUT_LAYER_SIZE = 1;
-	public static final BasicNetwork network = new BasicNetwork();
-	public static final MLDataSet DATASET = new BasicMLDataSet();
+	private static final BasicNetwork network = new BasicNetwork();
+	private static final MLDataSet DATASET = new BasicMLDataSet();
 	private Model state;
 
-	private ZoneDecider zoner;
+	private ZoneType zone;
 
-	public MLPQLearner(Model state) {
-		this.state = ModelStripper.reducedCopy(state);
-		this.zoner = new ZoneDecider(this.state);
+	public ZoneMapper(Model state) {
+		this.state = state;
 		initNetwork();
 		initTraining();
 		trainResilient();
@@ -51,6 +53,7 @@ public class MLPQLearner implements AI {
 		network.addLayer(new BasicLayer(new ActivationSigmoid(), false, OUTPUT_LAYER_SIZE));
 		network.getStructure().finalizeStructure();
 		network.reset();
+		System.out.println(network);
 	}
 
 	private void initTraining() {
@@ -60,35 +63,37 @@ public class MLPQLearner implements AI {
 		double[] c = WorldRepresentation.getZoneAsVector(ZoneType.COMMERICAL);
 		double[] indy = WorldRepresentation.getZoneAsVector(ZoneType.INDUSTRIAL);
 		double[] empty = WorldRepresentation.getZoneAsVector(ZoneType.EMPTY);
-		input[0] = this.constructSampleInput(r, empty);
+		input[0] = constructSampleInput(r, empty);
 		output[0] = new double[] { 0 };
-		input[1] = this.constructSampleInput(c, empty);
+		input[1] = constructSampleInput(c, empty);
 		output[1] = new double[] { 0 };
-		input[2] = this.constructSampleInput(indy, empty);
+		input[2] = constructSampleInput(indy, empty);
 		output[2] = new double[] { 0.1 };
-		input[3] = this.constructSampleInput(empty, empty);
+		input[3] = constructSampleInput(empty, empty);
 		output[3] = new double[] { 0 };
-		input[4] = this.constructSampleInput(r, indy);
+		input[4] = constructSampleInput(r, indy);
 		output[4] = new double[] { 0.1 };
-		input[5] = this.constructSampleInput(indy, r);
+		input[5] = constructSampleInput(indy, r);
 		output[5] = new double[] { 0.9 };
-		input[6] = this.constructSampleInput(empty, r);
+		input[6] = constructSampleInput(empty, r);
 		output[6] = new double[] { 1 };
-		input[7] = this.constructSampleInput(empty, c);
+		input[7] = constructSampleInput(empty, c);
 		output[7] = new double[] { 1 };
-		input[8] = this.constructSampleInput(empty, indy);
+		input[8] = constructSampleInput(empty, indy);
 		output[8] = new double[] { 1 };
-		input[9] = this.constructSampleInput(indy, indy);
+		input[9] = constructSampleInput(indy, indy);
 		output[9] = new double[] { 1 };
 
 		for (int i = 0; i < input.length; i++) {
+			System.out.println(Arrays.toString(input[i]));
+			System.out.println(Arrays.toString(output[i]));
 			MLData trainingIn = new BasicMLData(input[i]);
 			MLData idealOut = new BasicMLData(output[i]);
 			DATASET.add(trainingIn, idealOut);
 		}
 
 	}
-
+	
 	private double[] constructSampleInput(double[] zoneVector, double[] action) {
 		double[] inputSet = new double[INPUT_LAYER_SIZE];
 		for (int cell = 0; cell < 9; cell++) {
@@ -102,15 +107,20 @@ public class MLPQLearner implements AI {
 		return inputSet;
 	}
 
+
+
 	private void trainResilient() {
 		ResilientPropagation train = new ResilientPropagation(network, DATASET);
 		int epoch = 1;
+		for(int i=0; i<network.getLayerCount(); i++){
+			System.out.println(network.getLayerNeuronCount(i));
+		}
 
 		do {
 			train.iteration();
 			System.out.println("Epoch #" + epoch + " Error:" + train.getError());
 			epoch++;
-		} while (train.getError() > 0.01 && epoch < 50);
+		} while (train.getError() > 0.01 && epoch < 45);
 		train.finishTraining();
 
 		Encog.getInstance().shutdown();
@@ -118,8 +128,7 @@ public class MLPQLearner implements AI {
 
 	@Override
 	public void setWorldState(Model state) {
-		this.state = ModelStripper.reducedCopy(state);
-		this.zoner.setWorldState(this.state);
+		this.state = state;
 
 	}
 
@@ -127,10 +136,28 @@ public class MLPQLearner implements AI {
 		MLData output = network.compute(new BasicMLData(input));
 		return output.getData()[0];
 	}
+	
+	@Override
+	public double[] getMapOfValues() {
+		ZoneType zoneAction = this.zone;
+		double[] zoneVector = WorldRepresentation.getZoneAsVector(zoneAction);
+		World w = this.state.getWorld();
+		Tile[] tiles = w.getTiles();
+		double[] map = new double[tiles.length];
+		Pos2D[] locations = new Pos2D[tiles.length];
+		for (int i = 0; i < tiles.length; i++) {
+			Pos2D p = tiles[i].getPos();
+			locations[i] = p;
+			double[] input = addActionVector(getInputAroundTile(w, p), zoneVector);
+			double output = getOutput(input);
+			map[i]=output;
+		}
+		return map;
+	}
 
 	@Override
 	public UserData takeNextAction() {
-		ZoneType zoneAction = this.zoner.takeNextAction().getZoneSelection();
+		ZoneType zoneAction = this.zone;
 		double[] zoneVector = WorldRepresentation.getZoneAsVector(zoneAction);
 		World w = this.state.getWorld();
 		Tile[] tiles = w.getTiles();
@@ -176,7 +203,7 @@ public class MLPQLearner implements AI {
 		UserData fake = new UserData();
 		fake.setClickLocation(locations[maxIndex]);
 		fake.setZoneSelection(zoneAction);
-		fake.setRadius(1);
+		fake.setRadius(0);
 		fake.setSquare(true);
 		fake.setTakeStep(false);
 		fake.setDrawFlag(true);
@@ -186,8 +213,6 @@ public class MLPQLearner implements AI {
 
 	@Override
 	public void addCase(Model state, Model prev, UserData action) {
-		this.zoner.addCase(state, prev, action);
-
 		Pos2D pos = action.getClickLocation();
 		ZoneType zoneAct = action.getZoneSelection();
 		double prevScore = Rules.score(prev.getWorld().getTileAt(pos));
@@ -243,5 +268,12 @@ public class MLPQLearner implements AI {
 		}
 		return tiles;
 	}
+
+	public void setZoneOfAction(ZoneType zoneAction) {
+		this.zone = zoneAction;
+		
+	}
+
+
 
 }

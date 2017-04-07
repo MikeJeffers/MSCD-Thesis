@@ -16,8 +16,8 @@ import edu.mscd.thesis.model.zones.ZoneType;
  *
  */
 public class Rules {
-	public static final int WORLD_X = 15;
-	public static final int WORLD_Y = 10;
+	public static final int WORLD_X = 25;
+	public static final int WORLD_Y = 20;
 	public static final int TILE_COUNT = WORLD_X*WORLD_Y;
 	//Game Constants and factors
 	public static final int MAX = 255;

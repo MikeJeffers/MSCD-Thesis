@@ -18,6 +18,9 @@ public class GameLoop extends AnimationTimer implements Controller {
 	private int aiObserveCounter;
 	private UserData aiActionPrev;
 	private Model prevModelState;
+	private long previousTime = System.currentTimeMillis();
+	private long currentTime = previousTime;
+	private long timeStep = 500000000;
 
 	private AI ai;
 
@@ -32,6 +35,12 @@ public class GameLoop extends AnimationTimer implements Controller {
 
 	@Override
 	public void handle(long now) {
+		if(now-previousTime>timeStep){
+			System.out.println(now-previousTime);
+			step=true;
+			previousTime = now;
+		}
+			
 
 		if (currentSelection.isStepMode() && step) {
 			aiObserveCounter++;
