@@ -1,5 +1,8 @@
 package edu.mscd.thesis.controller;
 
+import java.util.Map;
+import java.util.Map.Entry;
+
 import edu.mscd.thesis.model.Model;
 import edu.mscd.thesis.model.Pos2D;
 import edu.mscd.thesis.nn.AI;
@@ -7,9 +10,17 @@ import edu.mscd.thesis.util.ModelStripper;
 import edu.mscd.thesis.util.Rules;
 import edu.mscd.thesis.view.View;
 import javafx.animation.AnimationTimer;
+import javafx.collections.ListChangeListener;
+import javafx.collections.ObservableList;
+import javafx.scene.chart.XYChart.Data;
+import javafx.scene.chart.XYChart.Series;
 
-public class GameLoop extends AnimationTimer implements Controller {
-	private Model model;
+public class GameLoop extends AnimationTimer implements Controller{
+	private ObservableList<Data<Number, Number>> scores;
+	
+	private ObservableList<CityData> modelData;
+
+	private Model<UserData, CityData> model;
 	private View<UserData> view;
 	private UserData currentSelection = new UserData();
 	private boolean step = true;
@@ -17,16 +28,51 @@ public class GameLoop extends AnimationTimer implements Controller {
 	private boolean aiMode = true;
 	private int aiObserveCounter;
 	private UserData aiActionPrev;
-	private Model prevModelState;
+	private Model<UserData, CityData> prevModelState;
 	private long previousTime = System.currentTimeMillis();
 	private long timeStep = 500000000;
+	private int turn = 0;
 
 	private AI ai;
 
-	public GameLoop(Model model, View<UserData> view, AI ai) {
+	public GameLoop(Model<UserData, CityData> model, View<UserData> view, AI ai) {
+		this.modelData = new ArrayObservableList<CityData>();
+		
+		this.modelData.addListener(new ListChangeListener<CityData>() {
+			@Override
+			public void onChanged(ListChangeListener.Change<? extends CityData> c) {
+				while (c.next()) {
+					for (CityData additem : c.getAddedSubList()) {
+						Map<CityProperty, Series<Number,Number>> dataMap = view.getDataStreams();
+						Map<CityProperty, Double> data = additem.getDataMap();
+						for(Entry<CityProperty, Series<Number,Number>> pair: dataMap.entrySet()){
+							Double value = data.get(pair.getKey());
+							if(value!=null){
+								pair.getValue().getData().add(new Data<Number,Number>(turn, value));
+							}
+						}
+						//view.getDisplayData().getData().add(additem);
+					}
+				}
+			}
+		});
+		
+		this.scores = new ArrayObservableList<Data<Number, Number>>();
+		this.scores.addListener(new ListChangeListener<Data<Number, Number>>() {
+			@Override
+			public void onChanged(ListChangeListener.Change<? extends Data<Number, Number>> c) {
+				while (c.next()) {
+					for (Data<Number, Number> additem : c.getAddedSubList()) {
+						view.getDisplayData().getData().add(additem);
+					}
+				}
+			}
+		});
+
 		this.model = model;
 		this.view = view;
-		view.attachObserver(this);
+		view.attachObserver(new ViewListener(this));
+		model.attachObserver(new ModelListener(this));
 		this.ai = ai;
 		this.prevModelState = ModelStripper.reducedCopy(model);
 
@@ -34,13 +80,13 @@ public class GameLoop extends AnimationTimer implements Controller {
 
 	@Override
 	public void handle(long now) {
-		if(now-previousTime>timeStep){
-			System.out.println(now-previousTime);
-			step=true;
+		if (now - previousTime > timeStep) {
+			System.out.println(now - previousTime);
+			step = true;
 			previousTime = now;
+			turn++;
+			this.scores.add(new Data<Number, Number>(turn, Rules.score(model)));
 		}
-		
-		
 
 		if (currentSelection.isStepMode() && step) {
 			aiObserveCounter++;
@@ -54,10 +100,10 @@ public class GameLoop extends AnimationTimer implements Controller {
 					if (aiActionPrev != null) {
 						ai.addCase(model, prevModelState, aiActionPrev, 0.5);
 					}
-					if(!nextAction.equals(aiActionPrev)){
+					if (!nextAction.equals(aiActionPrev)) {
 						this.makeAIMove(nextAction);
 						aiObserveCounter = 0;
-					}else{
+					} else {
 						System.out.println("AI repeat move ignored");
 					}
 					aiActionPrev = nextAction;
@@ -69,8 +115,6 @@ public class GameLoop extends AnimationTimer implements Controller {
 			draw = false;
 			view.renderView(model);
 		}
-		
-		
 
 	}
 
@@ -91,19 +135,27 @@ public class GameLoop extends AnimationTimer implements Controller {
 
 	private void makeAIMove(UserData action) {
 		prevModelState = ModelStripper.reducedCopy(model);
-		model.userStateChange(action);
+		model.notifyNewData(action);
 		step = action.isTakeStep();
 		draw = action.isDrawFlag();
 
 	}
+	
+	@Override
+	public synchronized void notifyModelEvent(CityData data) {
+		data.setProperty(CityProperty.SCORE, (Rules.score(model)));
+		modelData.add(data);
+		
+		
+	}
 
 	@Override
-	public synchronized void notifyNewData(UserData data) {
+	public synchronized void notifyViewEvent(UserData data) {
 		Pos2D old = this.currentSelection.getClickLocation();
 		Pos2D newClick = data.getClickLocation();
 		// TODO this is messy, only update model on new canvas click?
 		if (!old.equals(newClick)) {
-			model.userStateChange(data);
+			model.notifyNewData(data);
 		}
 		this.currentSelection = data.copy();
 		step = data.isTakeStep();

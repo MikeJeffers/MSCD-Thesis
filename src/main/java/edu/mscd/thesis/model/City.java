@@ -2,9 +2,12 @@ package edu.mscd.thesis.model;
 
 import java.util.Collection;
 
+import edu.mscd.thesis.controller.CityData;
 import edu.mscd.thesis.model.zones.ZoneType;
 
 public interface City {
+	public CityData getData();
+	
 	Collection<Person> getPopulation();
 
 	int totalPopulation();

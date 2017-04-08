@@ -1,6 +1,8 @@
 package edu.mscd.thesis.model;
 
 import java.util.Collection;
+
+import edu.mscd.thesis.controller.CityData;
 import edu.mscd.thesis.model.zones.ZoneType;
 
 public class CityReduced implements City{
@@ -13,6 +15,7 @@ public class CityReduced implements City{
 	private double averageHappy;
 	private double averageMoney;
 	private int[] zoneCounts;
+	private CityData data;
 
 	public CityReduced(City original) {
 		this.cDemand = original.commercialDemand();
@@ -23,6 +26,7 @@ public class CityReduced implements City{
 		this.averageMoney = original.averageWealth();
 		this.averageHappy = original.averageHappiness();
 		this.populationSize = original.totalPopulation();
+		this.data = original.getData();
 		this.zoneCounts = new int[ZoneType.values().length];
 		for(int i=0; i<ZoneType.values().length; i++){
 			zoneCounts[i]=original.getZoneCount(ZoneType.values()[i]);
@@ -114,6 +118,12 @@ public class CityReduced implements City{
 	@Override
 	public int getZoneCount(ZoneType zt){
 		return this.zoneCounts[zt.ordinal()];
+	}
+
+
+	@Override
+	public CityData getData() {
+		return this.data;
 	}
 	
 

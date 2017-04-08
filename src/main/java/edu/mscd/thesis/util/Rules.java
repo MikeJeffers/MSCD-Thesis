@@ -1,6 +1,8 @@
 package edu.mscd.thesis.util;
 
 
+import edu.mscd.thesis.controller.CityData;
+import edu.mscd.thesis.controller.UserData;
 import edu.mscd.thesis.model.City;
 import edu.mscd.thesis.model.Model;
 import edu.mscd.thesis.model.Tile;
@@ -84,7 +86,7 @@ public class Rules {
 	 * @param m - Model THAT HAS BEEN REDUCED
 	 * @return double score that is some value based on success metrics
 	 */
-	public static double score(Model m){
+	public static double score(Model<UserData, CityData> m){
 		World w = m.getWorld();
 		City c = w.getCity();
 		double weightSum = 10.0;

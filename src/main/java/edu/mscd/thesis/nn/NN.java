@@ -1,5 +1,6 @@
 package edu.mscd.thesis.nn;
 
+import edu.mscd.thesis.controller.CityData;
 import edu.mscd.thesis.controller.UserData;
 import edu.mscd.thesis.model.Model;
 import edu.mscd.thesis.model.Pos2D;
@@ -9,12 +10,12 @@ import edu.mscd.thesis.util.Rules;
 import edu.mscd.thesis.util.Util;
 
 public class NN implements AI{
-	private Model state;
+	private Model<UserData, CityData> state;
 	private TileMapper tileMap;
 	private ZoneDecider zoneDecider;
 	private ZoneMapper zoneMap;
 	
-	public NN(Model state){
+	public NN(Model<UserData, CityData> state){
 		this.state = ModelStripper.reducedCopy(state);
 		this.zoneMap = new ZoneMapper(this.state);
 		this.tileMap = new TileMapper(this.state);
@@ -78,7 +79,7 @@ public class NN implements AI{
 
 
 	@Override
-	public void addCase(Model prev, Model current, UserData action, double userRating) {
+	public void addCase(Model<UserData, CityData> prev, Model<UserData, CityData> current, UserData action, double userRating) {
 		this.zoneDecider.addCase(state, prev, action, userRating);
 		this.tileMap.addCase(state, prev, action, userRating);
 		this.zoneMap.addCase(state, prev, action, userRating);
@@ -86,7 +87,7 @@ public class NN implements AI{
 	}
 
 	@Override
-	public void setState(Model state) {
+	public void setState(Model<UserData, CityData> state) {
 		this.state = ModelStripper.reducedCopy(state);
 		this.zoneDecider.setState(this.state);
 		

@@ -1,27 +1,31 @@
 package edu.mscd.thesis.model;
 
-
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Random;
 
+import edu.mscd.thesis.controller.CityData;
+import edu.mscd.thesis.controller.Observer;
 import edu.mscd.thesis.controller.UserData;
 import edu.mscd.thesis.model.bldgs.Building;
 import edu.mscd.thesis.model.zones.Zone;
 import edu.mscd.thesis.model.zones.ZoneFactory;
 import edu.mscd.thesis.model.zones.ZoneFactoryImpl;
 import edu.mscd.thesis.model.zones.ZoneType;
-import edu.mscd.thesis.util.Rules;
 import edu.mscd.thesis.util.TileUpdaterService;
 import edu.mscd.thesis.util.Util;
 
-public class WorldImpl implements World{
+public class WorldImpl implements World {
 	private Tile[] tiles;
 	private int cols, rows;
 	private City city;
 	private TileUpdaterService tileUpdater;
 
+	private List<Observer<CityData>> observers;
+
 	public WorldImpl(int sizeX, int sizeY) {
+		this.observers = new ArrayList<Observer<CityData>>();
 		int size = sizeX * sizeY;
 		tiles = new Tile[size];
 		this.rows = sizeY;
@@ -45,8 +49,7 @@ public class WorldImpl implements World{
 
 	@Override
 	public void update() {
-		//System.out.println(city);
-		
+		// System.out.println(city);
 
 		// TODO
 		// iterate through all zones: incr/decr value based on conditions
@@ -91,6 +94,7 @@ public class WorldImpl implements World{
 
 		tileUpdater.runUpdates();
 		city.update();
+		this.notifyObserver();
 	}
 
 	private Building findClosestOpenHome(Tile t) {
@@ -168,13 +172,10 @@ public class WorldImpl implements World{
 		return true;
 	}
 
-	
 	@Override
-	public Tile[] getTiles(){
+	public Tile[] getTiles() {
 		return this.tiles;
 	}
-
-
 
 	@Override
 	public Tile getTileAt(Pos2D pos) {
@@ -197,9 +198,10 @@ public class WorldImpl implements World{
 	}
 
 	@Override
-	public void userStateChange(UserData userData) {
-		this.setAllZonesAround(userData.getClickLocation(), userData.getZoneSelection(), userData.getRadius(), userData.isSquare());
-		
+	public void notifyNewData(UserData userData) {
+		this.setAllZonesAround(userData.getClickLocation(), userData.getZoneSelection(), userData.getRadius(),
+				userData.isSquare());
+
 	}
 
 	@Override
@@ -215,6 +217,26 @@ public class WorldImpl implements World{
 	@Override
 	public int height() {
 		return this.rows;
+	}
+
+	@Override
+	public void attachObserver(Observer<CityData> obs) {
+		this.observers.add(obs);
+
+	}
+
+	@Override
+	public void detachObserver(Observer<CityData> obs) {
+		this.observers.remove(obs);
+
+	}
+
+	@Override
+	public void notifyObserver() {
+		for (Observer<CityData> o : this.observers) {
+			o.notifyNewData(city.getData());
+		}
+
 	}
 
 }

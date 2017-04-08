@@ -2,7 +2,12 @@ package edu.mscd.thesis.view;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
 
+import edu.mscd.thesis.controller.CityData;
+import edu.mscd.thesis.controller.CityProperty;
 import edu.mscd.thesis.controller.Observer;
 import edu.mscd.thesis.controller.UserData;
 import edu.mscd.thesis.model.Model;
@@ -12,7 +17,6 @@ import edu.mscd.thesis.util.Rules;
 import edu.mscd.thesis.util.Util;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
-import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -22,9 +26,12 @@ import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.chart.LineChart;
+import javafx.scene.chart.NumberAxis;
+import javafx.scene.chart.XYChart;
+import javafx.scene.chart.XYChart.Series;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
-import javafx.scene.control.SingleSelectionModel;
 import javafx.scene.control.Spinner;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.FlowPane;
@@ -36,12 +43,17 @@ import javafx.stage.Stage;
 
 public class GUI implements View<UserData> {
 	private Collection<Observer<UserData>> observers = new ArrayList<Observer<UserData>>();
-	private Renderer<Model> renderer = new ModelRenderer(RenderMode.NORMAL);
+	private Renderer<Model<UserData, CityData>> renderer = new ModelRenderer(RenderMode.NORMAL);
 	private GraphicsContext gc;
 	private Stage stage;
-	
+
 	// User selections on UI elements
 	private static UserData selection = new UserData();
+
+	// Chart data
+	XYChart.Series<Number, Number> scores = new XYChart.Series<Number, Number>();
+
+	Map<CityProperty, Series<Number, Number>> chartData = new HashMap<CityProperty, Series<Number, Number>>();
 
 	@Override
 	public void initView(Stage stage) {
@@ -53,12 +65,17 @@ public class GUI implements View<UserData> {
 		gc = canvas.getGraphicsContext2D();
 
 		FlowPane controlPane = new FlowPane();
+		
+		
+		//ZONE pane
 		FlowPane zonePanel = new FlowPane();
 		for (ZoneType zType : ZoneType.values()) {
 			Button button = new Button(zType.toString());
 			button.setOnAction(e -> setSelectedTypeTo(zType));
 			zonePanel.getChildren().add(button);
 		}
+		
+		//STEP button in ZonePane
 		Button step = new Button("STEP");
 		step.setOnAction(new EventHandler<ActionEvent>(){
 			@Override
@@ -71,6 +88,9 @@ public class GUI implements View<UserData> {
 			}
 		});
 		zonePanel.getChildren().add(step);
+		//End StepButton in Zonepane
+		
+		//BRUSH in zonePane
 		Button brushShape = new Button("Circle");
 		brushShape.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
@@ -85,7 +105,9 @@ public class GUI implements View<UserData> {
 			}
 		});
 		zonePanel.getChildren().add(brushShape);
-
+		//EndBrush
+		
+		//RadiusSelector
 		Spinner<Integer> radiusSelector = new Spinner<Integer>(0, 10, 1);
 		radiusSelector.valueProperty().addListener(new ChangeListener<Integer>() {
 			@Override
@@ -94,10 +116,16 @@ public class GUI implements View<UserData> {
 			}
 		});
 		zonePanel.getChildren().add(radiusSelector);
-
+		//End RadiusSelector
+		
+		//EndZonePane
+		
+		//CAMERA 
 		FlowPane cameraControls = new FlowPane();
 		makeControlButtons(cameraControls, gc);
-
+		//endcamera
+		
+		//Rendermode pane
 		FlowPane renderModeControls = new FlowPane();
 		ComboBox<RenderMode> combo = new ComboBox<RenderMode>();
 		combo.getItems().setAll(RenderMode.values());
@@ -111,15 +139,49 @@ public class GUI implements View<UserData> {
 			}
 		});
 		renderModeControls.getChildren().add(combo);
+		//endrendermode
+		
+		
+		//CHART
+		FlowPane chartPane = new FlowPane();
+		XYChart.Series<Number, Number> scores = new XYChart.Series<Number, Number>();
+		for(CityProperty prop: CityProperty.values()){
+			XYChart.Series<Number, Number> series = new XYChart.Series<Number, Number>();
+			series.setName(prop.getName());
+			this.chartData.put(prop, series);
+		}
+		
+		
+		NumberAxis xAxis = new NumberAxis();
+        NumberAxis yAxis = new NumberAxis();
+        xAxis.setLabel("Turn#");
+        yAxis.setLabel("Score");
+        LineChart<Number,Number> lineChart = new LineChart<Number,Number>(xAxis,yAxis);
+       
+        lineChart.setTitle("Game Score over turn");
+        scores.setName("Scores");
+        
+        for(Entry<CityProperty, Series<Number,Number>>pair: chartData.entrySet()){
+        	lineChart.getData().add(pair.getValue());
+        }
+        //lineChart.getData().addAll(scores);
+		chartPane.getChildren().add(lineChart);
+		//--end CHART
 
 		controlPane.setLayoutX(Util.WINDOW_WIDTH);
 
 		controlPane.getChildren().add(zonePanel);
 		controlPane.getChildren().add(cameraControls);
 		controlPane.getChildren().add(renderModeControls);
-
+		controlPane.getChildren().add(chartPane);
+		
 		root.getChildren().add(canvas);
 		root.getChildren().add(controlPane);
+		
+		
+		
+		
+		
 
 		Affine transformMatrix = gc.getTransform();
 		transformMatrix.appendScale(Util.SCALE_FACTOR, Util.SCALE_FACTOR);
@@ -244,7 +306,7 @@ public class GUI implements View<UserData> {
 	}
 
 	@Override
-	public void renderView(Model model) {
+	public void renderView(Model<UserData, CityData> model) {
 		this.renderer.draw(model, this.gc);
 
 	}
@@ -254,6 +316,16 @@ public class GUI implements View<UserData> {
 		if (Util.SCREENSHOT) {
 			Util.takeScreenshot(this.stage);
 		}
+	}
+
+	@Override
+	public Series<Number, Number> getDisplayData() {
+		return this.scores;
+	}
+
+	@Override
+	public Map<CityProperty, Series<Number, Number>> getDataStreams() {
+		return this.chartData;
 	}
 
 }

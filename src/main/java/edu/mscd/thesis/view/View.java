@@ -1,7 +1,10 @@
 package edu.mscd.thesis.view;
 
-import edu.mscd.thesis.controller.Observer;
+import edu.mscd.thesis.controller.CityData;
+import edu.mscd.thesis.controller.Observable;
+import edu.mscd.thesis.controller.UserData;
 import edu.mscd.thesis.model.Model;
+import javafx.scene.chart.XYChart;
 import javafx.stage.Stage;
 
 /**
@@ -11,17 +14,13 @@ import javafx.stage.Stage;
  *
  * @param <T> Type of data to notify Observers with
  */
-public interface View<T> {
+public interface View<T> extends Observable<T>, DataDisplay{
 	public void initView(Stage stage);
 
-	public void attachObserver(Observer<T> obs);
-
-	public void detachObserver(Observer<T> obs);
-
-	public void notifyObserver();
-
-	public void renderView(Model model);
+	public void renderView(Model<UserData, CityData> model);
 	
 	public void screenShot();
+	
+	public XYChart.Series<Number,Number> getDisplayData();
 
 }

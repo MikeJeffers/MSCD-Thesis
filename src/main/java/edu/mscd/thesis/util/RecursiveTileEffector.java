@@ -8,7 +8,7 @@ import edu.mscd.thesis.model.World;
 import edu.mscd.thesis.model.zones.ZoneType;
 
 public class RecursiveTileEffector extends RecursiveTask<World>{
-
+	private static final long serialVersionUID = 1L;
 	int low;
     int high;
     World w;

@@ -4,6 +4,8 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
+import edu.mscd.thesis.controller.CityData;
+import edu.mscd.thesis.controller.CityProperty;
 import edu.mscd.thesis.model.bldgs.Building;
 import edu.mscd.thesis.model.zones.ZoneType;
 import edu.mscd.thesis.util.Rules;
@@ -37,7 +39,6 @@ public class CityImpl implements City {
 
 	@Override
 	public int totalPopulation() {
-
 		return this.population.size();
 	}
 	
@@ -46,7 +47,7 @@ public class CityImpl implements City {
 		double total = totalPopulation();
 		double happiness = 0.0;
 		for (Person p : population) {
-			happiness +=p.getHappiness();
+			happiness +=((double)p.getHappiness())/((double)Rules.MAX);
 		}
 		if (total < 1) {
 			return 0;
@@ -59,7 +60,7 @@ public class CityImpl implements City {
 		double total = totalPopulation();
 		double money = 0.0;
 		for (Person p : population) {
-			money +=p.getMoney();
+			money +=((double)p.getMoney())/((double)Rules.MAX);
 		}
 		if (total < 1) {
 			return 0;
@@ -220,6 +221,18 @@ public class CityImpl implements City {
 	@Override
 	public int getZoneCount(ZoneType zt) {
 		return this.zoneCounts[zt.ordinal()];
+	}
+
+	@Override
+	public CityData getData() {
+		CityData data = new CityData();
+		data.setProperty(CityProperty.R_DEMAND, this.residentialDemand());
+		data.setProperty(CityProperty.C_DEMAND, this.commercialDemand());
+		data.setProperty(CityProperty.WEALTH, this.averageWealth());
+		data.setProperty(CityProperty.HAPPY, this.averageHappiness());
+		data.setProperty(CityProperty.UNEMPLOY, this.percentageUnemployed());
+		data.setProperty(CityProperty.HOMELESS, this.percentageHomeless());
+		return data;
 	}
 
 

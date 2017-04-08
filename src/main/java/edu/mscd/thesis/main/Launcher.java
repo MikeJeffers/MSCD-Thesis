@@ -1,5 +1,6 @@
 package edu.mscd.thesis.main;
 
+import edu.mscd.thesis.controller.CityData;
 import edu.mscd.thesis.controller.Controller;
 import edu.mscd.thesis.controller.GameLoop;
 import edu.mscd.thesis.controller.UserData;
@@ -20,23 +21,23 @@ import javafx.stage.Stage;
  *
  */
 public class Launcher extends Application {
+
 	private View<UserData> view;
-	private Model model;
+	private Model<UserData, CityData> model;
 	private Controller controller;
 	private AI ai;
 
 	public Launcher() {
 	}
-	
+
 	@Override
-	public void init(){
-		
+	public void init() {
+
 		model = initModel();
 		ai = new NN(model);
 		view = initView();
 		controller = initController(model, view, ai);
-		
-		
+
 	}
 
 	@Override
@@ -46,11 +47,11 @@ public class Launcher extends Application {
 		t.run();
 	}
 
-	private static Model initModel() {
+	private static Model<UserData, CityData> initModel() {
 		return new WorldImpl(Rules.WORLD_X, Rules.WORLD_Y);
 	}
 
-	private static Controller initController(Model model, View<UserData> view, AI ai) {
+	private static Controller initController(Model<UserData, CityData> model, View<UserData> view, AI ai) {
 		return new GameLoop(model, view, ai);
 	}
 

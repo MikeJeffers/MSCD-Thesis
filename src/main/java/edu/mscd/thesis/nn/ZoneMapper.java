@@ -1,7 +1,5 @@
 package edu.mscd.thesis.nn;
 
-import java.util.Arrays;
-
 import org.encog.Encog;
 import org.encog.engine.network.activation.ActivationSigmoid;
 import org.encog.ml.data.MLData;
@@ -12,35 +10,35 @@ import org.encog.neural.networks.BasicNetwork;
 import org.encog.neural.networks.layers.BasicLayer;
 import org.encog.neural.networks.training.propagation.resilient.ResilientPropagation;
 
+import edu.mscd.thesis.controller.CityData;
 import edu.mscd.thesis.controller.UserData;
 import edu.mscd.thesis.model.Model;
 import edu.mscd.thesis.model.Pos2D;
 import edu.mscd.thesis.model.Tile;
 import edu.mscd.thesis.model.World;
 import edu.mscd.thesis.model.zones.ZoneType;
-import edu.mscd.thesis.util.ModelStripper;
 import edu.mscd.thesis.util.Rules;
-import edu.mscd.thesis.util.Util;
-
 
 /**
- * Input layer:[STATE(9xZoneVectors)+Action(ZoneVector)] where ZoneVector is signal[R,C,I,0] where only one input is 1.0
- * Output is Q-score of (STATE, ACTION) pair
+ * Input layer:[STATE(9xZoneVectors)+Action(ZoneVector)] where ZoneVector is
+ * signal[R,C,I,0] where only one input is 1.0 Output is Q-score of (STATE,
+ * ACTION) pair
+ * 
  * @author Mike
  *
  */
-public class ZoneMapper implements Learner, Mapper{
+public class ZoneMapper implements Learner, Mapper {
 
 	private static final int ZONETYPES = ZoneType.values().length;
 	private static final int INPUT_LAYER_SIZE = 9 * ZONETYPES + ZONETYPES;
 	private static final int OUTPUT_LAYER_SIZE = 1;
 	private static final BasicNetwork network = new BasicNetwork();
 	private static final MLDataSet DATASET = new BasicMLDataSet();
-	private Model state;
+	private Model<UserData, CityData> state;
 
 	private ZoneType zone;
 
-	public ZoneMapper(Model state) {
+	public ZoneMapper(Model<UserData, CityData> state) {
 		this.state = state;
 		initNetwork();
 		initTraining();
@@ -91,7 +89,7 @@ public class ZoneMapper implements Learner, Mapper{
 		}
 
 	}
-	
+
 	private double[] constructSampleInput(double[] zoneVector, double[] action) {
 		double[] inputSet = new double[INPUT_LAYER_SIZE];
 		for (int cell = 0; cell < 9; cell++) {
@@ -104,8 +102,6 @@ public class ZoneMapper implements Learner, Mapper{
 		}
 		return inputSet;
 	}
-
-
 
 	private void trainResilient() {
 		ResilientPropagation train = new ResilientPropagation(network, DATASET);
@@ -122,9 +118,9 @@ public class ZoneMapper implements Learner, Mapper{
 		MLData output = network.compute(new BasicMLData(input));
 		return output.getData()[0];
 	}
-	
+
 	@Override
-	public double[] getMapOfValues(Model state, UserData action) {
+	public double[] getMapOfValues(Model<UserData, CityData> state, UserData action) {
 		ZoneType zoneAction = action.getZoneSelection();
 		double[] zoneVector = WorldRepresentation.getZoneAsVector(zoneAction);
 		World w = state.getWorld();
@@ -136,14 +132,13 @@ public class ZoneMapper implements Learner, Mapper{
 			locations[i] = p;
 			double[] input = addActionVector(getInputAroundTile(w, p), zoneVector);
 			double output = getOutput(input);
-			map[i]=output;
+			map[i] = output;
 		}
 		return map;
 	}
 
-
 	@Override
-	public void addCase(Model state, Model prev, UserData action, double userRating) {
+	public void addCase(Model<UserData, CityData> state, Model<UserData, CityData> prev, UserData action, double userRating) {
 		Pos2D pos = action.getClickLocation();
 		ZoneType zoneAct = action.getZoneSelection();
 		double prevScore = Rules.score(prev.getWorld().getTileAt(pos));
@@ -202,9 +197,7 @@ public class ZoneMapper implements Learner, Mapper{
 
 	public void setZoneOfAction(ZoneType zoneAction) {
 		this.zone = zoneAction;
-		
+
 	}
-
-
 
 }

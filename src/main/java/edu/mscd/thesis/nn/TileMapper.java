@@ -10,13 +10,13 @@ import org.encog.neural.networks.BasicNetwork;
 import org.encog.neural.networks.layers.BasicLayer;
 import org.encog.neural.networks.training.propagation.resilient.ResilientPropagation;
 
+import edu.mscd.thesis.controller.CityData;
 import edu.mscd.thesis.controller.UserData;
 import edu.mscd.thesis.model.Model;
 import edu.mscd.thesis.model.Pos2D;
 import edu.mscd.thesis.model.Tile;
 import edu.mscd.thesis.model.World;
 import edu.mscd.thesis.model.zones.ZoneType;
-import edu.mscd.thesis.util.ModelStripper;
 import edu.mscd.thesis.util.Rules;
 import edu.mscd.thesis.util.Util;
 
@@ -36,7 +36,7 @@ public class TileMapper implements Learner, Mapper {
 
 
 
-	public TileMapper(Model state) {
+	public TileMapper(Model<UserData, CityData> state) {
 		initNetwork();
 		initTraining(state);
 		trainResilient();
@@ -51,7 +51,7 @@ public class TileMapper implements Learner, Mapper {
 		network.reset();
 	}
 
-	private void initTraining(Model initialState) {
+	private void initTraining(Model<UserData, CityData> initialState) {
 		Tile[] tiles = initialState.getWorld().getTiles();
 		double[][] input = new double[tiles.length][INPUT_LAYER_SIZE];
 		double[][] output = new double[tiles.length][OUTPUT_LAYER_SIZE];
@@ -95,7 +95,7 @@ public class TileMapper implements Learner, Mapper {
 
 	
 	@Override
-	public double[] getMapOfValues(Model state, UserData action) {
+	public double[] getMapOfValues(Model<UserData, CityData> state, UserData action) {
 		ZoneType zoneAction = action.getZoneSelection();
 		double[] zoneVector = WorldRepresentation.getZoneAsVector(zoneAction);
 		World w = state.getWorld();
@@ -116,7 +116,7 @@ public class TileMapper implements Learner, Mapper {
 
 
 	@Override
-	public void addCase(Model state, Model prev, UserData action, double userRating) {
+	public void addCase(Model<UserData, CityData> state, Model<UserData, CityData> prev, UserData action, double userRating) {
 		Pos2D pos = action.getClickLocation();
 		Tile targetTile = prev.getWorld().getTileAt(pos);
 		ZoneType zoneAct = action.getZoneSelection();

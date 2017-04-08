@@ -8,15 +8,12 @@ import edu.mscd.thesis.model.Pos2D;
 import edu.mscd.thesis.model.TileType;
 import edu.mscd.thesis.model.zones.Density;
 import edu.mscd.thesis.model.zones.ZoneType;
-import edu.mscd.thesis.util.Rules;
 
 public abstract class Home extends AbstractBuilding {
 
 	public Home(Pos2D pos, TileType tileType, ZoneType zoneType, Density density) {
 		super(pos, tileType, zoneType, density);
 	}
-
-
 
 	@Override
 	public void setMaxOccupancy(int max) {
@@ -58,9 +55,9 @@ public abstract class Home extends AbstractBuilding {
 			return false;
 		}
 		boolean success = super.getOccupants().add(p);
-		if(success){
+		if (success) {
 			p.liveAt(this);
-		}	
+		}
 		return success;
 	}
 

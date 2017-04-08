@@ -12,6 +12,7 @@ import org.encog.neural.networks.BasicNetwork;
 import org.encog.neural.networks.layers.BasicLayer;
 import org.encog.neural.networks.training.propagation.resilient.ResilientPropagation;
 
+import edu.mscd.thesis.controller.CityData;
 import edu.mscd.thesis.controller.UserData;
 import edu.mscd.thesis.model.Model;
 import edu.mscd.thesis.model.Pos2D;
@@ -25,9 +26,9 @@ public class MapEncoder {
 	public static final BasicNetwork network = new BasicNetwork();
 	public static final MLDataSet DATASET = new BasicMLDataSet();
 	private double[] map;
-	private Model state;
+	private Model<UserData, CityData> state;
 
-	public MapEncoder(Model state) {
+	public MapEncoder(Model<UserData, CityData> state) {
 		this.state = ModelStripper.reducedCopy(state);
 		initNetwork();
 		learn(this.state);
@@ -50,7 +51,7 @@ public class MapEncoder {
 		
 	}
 
-	public void learn(Model state) {
+	public void learn(Model<UserData, CityData> state) {
 		Tile[] tiles = state.getWorld().getTiles();
 
 		double[][] inputData = new double[tiles.length][27];
@@ -79,7 +80,7 @@ public class MapEncoder {
 		Encog.getInstance().shutdown();
 	}
 
-	public double[] scoreWorldState(Model state) {
+	public double[] scoreWorldState(Model<UserData, CityData> state) {
 
 		World temp = ModelStripper.reducedCopy(state).getWorld();
 		Tile[] tiles = temp.getTiles();

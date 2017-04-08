@@ -1,7 +1,6 @@
 package edu.mscd.thesis.nn;
 
 import org.encog.Encog;
-import org.encog.engine.network.activation.ActivationCompetitive;
 import org.encog.engine.network.activation.ActivationSigmoid;
 import org.encog.ml.data.MLData;
 import org.encog.ml.data.MLDataSet;
@@ -9,30 +8,26 @@ import org.encog.ml.data.basic.BasicMLData;
 import org.encog.ml.data.basic.BasicMLDataSet;
 import org.encog.neural.networks.BasicNetwork;
 import org.encog.neural.networks.layers.BasicLayer;
-import org.encog.neural.networks.training.propagation.back.Backpropagation;
 import org.encog.neural.networks.training.propagation.resilient.ResilientPropagation;
-import org.encog.neural.pattern.JordanPattern;
 
+import edu.mscd.thesis.controller.CityData;
 import edu.mscd.thesis.controller.UserData;
 import edu.mscd.thesis.model.City;
 import edu.mscd.thesis.model.Model;
-import edu.mscd.thesis.model.Pos2D;
-import edu.mscd.thesis.model.Tile;
-import edu.mscd.thesis.model.World;
 import edu.mscd.thesis.model.zones.ZoneType;
 import edu.mscd.thesis.util.ModelStripper;
 import edu.mscd.thesis.util.Rules;
 import edu.mscd.thesis.util.Util;
 
 public class ZoneDecider implements Actor, Learner{
-	private Model state;
+	private Model<UserData, CityData> state;
 	
 	public final static BasicNetwork network = new BasicNetwork();
 	public final static MLDataSet DATASET = new BasicMLDataSet();
 	
 	
 	
-	public ZoneDecider(Model initialState){
+	public ZoneDecider(Model<UserData, CityData> initialState){
 		this.state = ModelStripper.reducedCopy(initialState);
 		initNetwork();
 		initTrainingDataSet();
@@ -173,7 +168,7 @@ public class ZoneDecider implements Actor, Learner{
 	}
 
 	@Override
-	public void addCase(Model prev, Model current, UserData action, double userRating) {
+	public void addCase(Model<UserData, CityData> prev, Model<UserData, CityData> current, UserData action, double userRating) {
 		double currentScore = Rules.score(state);
 		double prevScore = Rules.score(prev);
 		
@@ -203,7 +198,7 @@ public class ZoneDecider implements Actor, Learner{
 
 
 	@Override
-	public void setState(Model state) {
+	public void setState(Model<UserData, CityData> state) {
 		this.state = state;
 		
 	}

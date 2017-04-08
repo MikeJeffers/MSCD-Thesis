@@ -10,25 +10,20 @@ import javafx.scene.image.Image;
 
 public class House extends Home {
 
-
 	public House(Pos2D pos, TileType tileType, ZoneType zoneType, Density density) {
 		super(pos, tileType, zoneType, density);
 		this.changeDensity(density);
 	}
 
-
-
 	@Override
 	public void changeDensity(Density density) {
 		int level = density.getDensityLevel();
-		File file = new File("resources/house"+level+".png");
+		File file = new File("resources/house" + level + ".png");
 		Image img = new Image(file.toURI().toString());
 		super.setImage(img);
 		super.setWealthLevel(level);
-		super.setMaxOccupancy(level+1);
+		super.setMaxOccupancy(level + 1);
 		super.changeDensity(density);
 	}
-	
-
 
 }

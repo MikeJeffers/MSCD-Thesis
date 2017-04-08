@@ -2,6 +2,8 @@ package edu.mscd.thesis.model;
 
 import java.util.List;
 
+import edu.mscd.thesis.controller.CityData;
+import edu.mscd.thesis.controller.Observer;
 import edu.mscd.thesis.controller.UserData;
 import edu.mscd.thesis.model.zones.Zone;
 import edu.mscd.thesis.model.zones.ZoneType;
@@ -87,7 +89,7 @@ public class WorldReduced implements World{
 	}
 
 	@Override
-	public void userStateChange(UserData userData) {
+	public void notifyNewData(UserData userData) {
 		this.setAllZonesAround(userData.getClickLocation(), userData.getZoneSelection(), userData.getRadius(), userData.isSquare());
 		
 	}
@@ -110,5 +112,19 @@ public class WorldReduced implements World{
 		return this.rows;
 	}
 
+	@Override
+	public void attachObserver(Observer<CityData> obs) {
+		// TODO never called
+	}
+
+	@Override
+	public void detachObserver(Observer<CityData> obs) {
+		// TODO never called
+	}
+
+	@Override
+	public void notifyObserver() {
+		// TODO never called
+	}
 
 }

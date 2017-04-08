@@ -14,7 +14,7 @@ import edu.mscd.thesis.util.Rules;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.image.Image;
 
-public abstract class AbstractBuilding implements Building, Cloneable {
+public abstract class AbstractBuilding implements Building {
 	private Pos2D pos;
 	private Image image;
 	private TileType tileType;
