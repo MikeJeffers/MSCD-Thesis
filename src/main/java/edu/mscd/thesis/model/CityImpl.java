@@ -228,6 +228,7 @@ public class CityImpl implements City {
 		CityData data = new CityData();
 		data.setProperty(CityProperty.R_DEMAND, this.residentialDemand());
 		data.setProperty(CityProperty.C_DEMAND, this.commercialDemand());
+		data.setProperty(CityProperty.I_DEMAND, this.industrialDemand());
 		data.setProperty(CityProperty.WEALTH, this.averageWealth());
 		data.setProperty(CityProperty.HAPPY, this.averageHappiness());
 		data.setProperty(CityProperty.UNEMPLOY, this.percentageUnemployed());

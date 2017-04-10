@@ -32,8 +32,8 @@ public class Util {
 	 */
 	public static final int MAX_SEQUENTIAL = (Rules.WORLD_X * Rules.WORLD_Y) / 8;
 	// GUI constants
-	public static final int WINDOW_WIDTH = 800;
-	public static final int WINDOW_HEIGHT = 600;
+	public static final int WINDOW_WIDTH = 1200;
+	public static final int WINDOW_HEIGHT = 900;
 	public static final double SCALE_FACTOR = Util.getScaleFactor(Rules.WORLD_X, Rules.WORLD_Y, WINDOW_WIDTH,
 			WINDOW_HEIGHT);
 	public static final boolean SCREENSHOT = false;

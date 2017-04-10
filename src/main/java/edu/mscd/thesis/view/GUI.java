@@ -17,9 +17,11 @@ import edu.mscd.thesis.util.Rules;
 import edu.mscd.thesis.util.Util;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.geometry.Insets;
 import javafx.geometry.Point2D;
 import javafx.scene.Group;
 import javafx.scene.Node;
@@ -30,14 +32,17 @@ import javafx.scene.chart.Axis;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
+import javafx.scene.chart.XYChart.Data;
 import javafx.scene.chart.XYChart.Series;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
 import javafx.scene.control.Spinner;
 import javafx.scene.input.DragEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.transform.Affine;
@@ -76,6 +81,7 @@ public class GUI implements View<UserData> {
 		Pane cameraControls = makeControlButtons(gc);
 		Pane renderModeControls = makeRenderModeControls();
 		Pane chartPane = makeChartPane();
+		Pane scorePane = makeMetricsPane();
 
 		controlPane.setLayoutX(Util.WINDOW_WIDTH);
 
@@ -83,6 +89,7 @@ public class GUI implements View<UserData> {
 		controlPane.getChildren().add(cameraControls);
 		controlPane.getChildren().add(renderModeControls);
 		controlPane.getChildren().add(chartPane);
+		controlPane.getChildren().add(scorePane);
 
 		root.getChildren().add(canvas);
 		root.getChildren().add(controlPane);
@@ -92,6 +99,48 @@ public class GUI implements View<UserData> {
 
 		this.stage = stage;
 		stage.show();
+	}
+	
+	private Pane makeMetricsPane(){
+		Pane pane = new GridPane();
+		pane.setPadding(new Insets(15, 5, 25, 25));
+		int row = 0;
+		for(CityProperty prop: CityProperty.values()){
+			Label propReadout = new Label(prop.getLabel());
+			Label dataReadout = new Label();
+			GridPane.setRowIndex(propReadout, row);
+			GridPane.setRowIndex(dataReadout, row);
+			GridPane.setColumnIndex(propReadout, 0);
+			GridPane.setColumnIndex(dataReadout, 1);
+			pane.getChildren().addAll(propReadout, dataReadout);
+			row++;
+			ObservableList<Data<Number,Number>> list = this.chartData.get(prop).getData();
+			list.addListener(new ListChangeListener<Data<Number,Number>>(){
+
+				@Override
+				public void onChanged(javafx.collections.ListChangeListener.Change<? extends Data<Number, Number>> c) {
+					while (c.next()) {
+						if(c.wasAdded()){
+							Data<Number,Number> data = c.getList().get(c.getTo()-1);
+							String toDisplay = Double.toString((data.getYValue().doubleValue()*100));
+							if(toDisplay.length()>7){
+								toDisplay = toDisplay.substring(0, 7);
+							}
+							
+							
+							dataReadout.setText(toDisplay);
+						}
+					}
+					
+				}
+				
+			});
+		}
+		
+		
+		
+
+		return pane;
 	}
 
 	private void addClickListenerTo(Canvas canvas) {
