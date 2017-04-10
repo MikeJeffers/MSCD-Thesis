@@ -15,9 +15,9 @@ import javafx.collections.ObservableList;
 import javafx.scene.chart.XYChart.Data;
 import javafx.scene.chart.XYChart.Series;
 
-public class GameLoop extends AnimationTimer implements Controller{
+public class GameLoop extends AnimationTimer implements Controller {
 	private ObservableList<Data<Number, Number>> scores;
-	
+
 	private ObservableList<CityData> modelData;
 
 	private Model<UserData, CityData> model;
@@ -37,26 +37,25 @@ public class GameLoop extends AnimationTimer implements Controller{
 
 	public GameLoop(Model<UserData, CityData> model, View<UserData> view, AI ai) {
 		this.modelData = new ArrayObservableList<CityData>();
-		
+
 		this.modelData.addListener(new ListChangeListener<CityData>() {
 			@Override
 			public void onChanged(ListChangeListener.Change<? extends CityData> c) {
 				while (c.next()) {
 					for (CityData additem : c.getAddedSubList()) {
-						Map<CityProperty, Series<Number,Number>> dataMap = view.getDataStreams();
+						Map<CityProperty, Series<Number, Number>> dataMap = view.getDataStreams();
 						Map<CityProperty, Double> data = additem.getDataMap();
-						for(Entry<CityProperty, Series<Number,Number>> pair: dataMap.entrySet()){
+						for (Entry<CityProperty, Series<Number, Number>> pair : dataMap.entrySet()) {
 							Double value = data.get(pair.getKey());
-							if(value!=null){
-								pair.getValue().getData().add(new Data<Number,Number>(turn, value));
+							if (value != null) {
+								pair.getValue().getData().add(new Data<Number, Number>(turn, value));
 							}
 						}
-						//view.getDisplayData().getData().add(additem);
 					}
 				}
 			}
 		});
-		
+
 		this.scores = new ArrayObservableList<Data<Number, Number>>();
 		this.scores.addListener(new ListChangeListener<Data<Number, Number>>() {
 			@Override
@@ -80,15 +79,16 @@ public class GameLoop extends AnimationTimer implements Controller{
 
 	@Override
 	public void handle(long now) {
-		if (now - previousTime > timeStep) {
+		if (!currentSelection.isStepMode() && now - previousTime > timeStep) {
 			System.out.println(now - previousTime);
 			step = true;
 			previousTime = now;
-			turn++;
-			this.scores.add(new Data<Number, Number>(turn, Rules.score(model)));
+
 		}
 
-		if (currentSelection.isStepMode() && step) {
+		if (step) {
+			this.scores.add(new Data<Number, Number>(turn, Rules.score(model)));
+			turn++;
 			aiObserveCounter++;
 			step = false;
 			model.update();
@@ -136,17 +136,13 @@ public class GameLoop extends AnimationTimer implements Controller{
 	private void makeAIMove(UserData action) {
 		prevModelState = ModelStripper.reducedCopy(model);
 		model.notifyNewData(action);
-		step = action.isTakeStep();
-		draw = action.isDrawFlag();
-
 	}
-	
+
 	@Override
 	public synchronized void notifyModelEvent(CityData data) {
 		data.setProperty(CityProperty.SCORE, (Rules.score(model)));
 		modelData.add(data);
-		
-		
+
 	}
 
 	@Override

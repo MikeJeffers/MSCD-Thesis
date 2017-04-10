@@ -62,133 +62,38 @@ public class GUI implements View<UserData> {
 		Group root = new Group();
 
 		Canvas canvas = new Canvas(Util.WINDOW_WIDTH, Util.WINDOW_HEIGHT);
+		addClickListenerTo(canvas);
 		gc = canvas.getGraphicsContext2D();
-
-		FlowPane controlPane = new FlowPane();
-		
-		
-		//ZONE pane
-		FlowPane zonePanel = new FlowPane();
-		for (ZoneType zType : ZoneType.values()) {
-			Button button = new Button(zType.toString());
-			button.setOnAction(e -> setSelectedTypeTo(zType));
-			zonePanel.getChildren().add(button);
-		}
-		
-		//STEP button in ZonePane
-		Button step = new Button("STEP");
-		step.setOnAction(new EventHandler<ActionEvent>(){
-			@Override
-			public void handle(ActionEvent event) {
-				selection.setTakeStep(true);
-				notifyObserver();
-				if(Util.SCREENSHOT){
-					Util.takeScreenshot(stage);
-				}	
-			}
-		});
-		zonePanel.getChildren().add(step);
-		//End StepButton in Zonepane
-		
-		//BRUSH in zonePane
-		Button brushShape = new Button("Circle");
-		brushShape.setOnAction(new EventHandler<ActionEvent>() {
-			@Override
-			public void handle(ActionEvent event) {
-				selection.setSquare(!selection.isSquare());
-				if (selection.isSquare()) {
-					brushShape.setText("Square");
-				} else {
-					brushShape.setText("Circle");
-				}
-
-			}
-		});
-		zonePanel.getChildren().add(brushShape);
-		//EndBrush
-		
-		//RadiusSelector
-		Spinner<Integer> radiusSelector = new Spinner<Integer>(0, 10, 1);
-		radiusSelector.valueProperty().addListener(new ChangeListener<Integer>() {
-			@Override
-			public void changed(ObservableValue<? extends Integer> observable, Integer oldValue, Integer newValue) {
-				selection.setRadius(newValue);
-			}
-		});
-		zonePanel.getChildren().add(radiusSelector);
-		//End RadiusSelector
-		
-		//EndZonePane
-		
-		//CAMERA 
-		FlowPane cameraControls = new FlowPane();
-		makeControlButtons(cameraControls, gc);
-		//endcamera
-		
-		//Rendermode pane
-		FlowPane renderModeControls = new FlowPane();
-		ComboBox<RenderMode> combo = new ComboBox<RenderMode>();
-		combo.getItems().setAll(RenderMode.values());
-		combo.setValue(RenderMode.NORMAL);
-		combo.valueProperty().addListener(new ChangeListener<RenderMode>() {
-			@Override
-			public void changed(ObservableValue<? extends RenderMode> observable, RenderMode oldValue,
-					RenderMode newValue) {
-				renderer.changeMode(newValue);
-				redraw(gc);
-			}
-		});
-		renderModeControls.getChildren().add(combo);
-		//endrendermode
-		
-		
-		//CHART
-		FlowPane chartPane = new FlowPane();
-		XYChart.Series<Number, Number> scores = new XYChart.Series<Number, Number>();
-		for(CityProperty prop: CityProperty.values()){
-			XYChart.Series<Number, Number> series = new XYChart.Series<Number, Number>();
-			series.setName(prop.getName());
-			this.chartData.put(prop, series);
-		}
-		
-		
-		NumberAxis xAxis = new NumberAxis();
-        NumberAxis yAxis = new NumberAxis();
-        xAxis.setLabel("Turn#");
-        yAxis.setLabel("Score");
-        LineChart<Number,Number> lineChart = new LineChart<Number,Number>(xAxis,yAxis);
-       
-        lineChart.setTitle("Game Score over turn");
-        scores.setName("Scores");
-        
-        for(Entry<CityProperty, Series<Number,Number>>pair: chartData.entrySet()){
-        	lineChart.getData().add(pair.getValue());
-        }
-        //lineChart.getData().addAll(scores);
-		chartPane.getChildren().add(lineChart);
-		//--end CHART
-
-		controlPane.setLayoutX(Util.WINDOW_WIDTH);
-
-		controlPane.getChildren().add(zonePanel);
-		controlPane.getChildren().add(cameraControls);
-		controlPane.getChildren().add(renderModeControls);
-		controlPane.getChildren().add(chartPane);
-		
-		root.getChildren().add(canvas);
-		root.getChildren().add(controlPane);
-		
-		
-		
-		
-		
-
 		Affine transformMatrix = gc.getTransform();
 		transformMatrix.appendScale(Util.SCALE_FACTOR, Util.SCALE_FACTOR);
 		gc.setTransform(transformMatrix);
 
+
+		FlowPane controlPane = new FlowPane();
+		Pane zonePane = makeZonePane();
+		Pane cameraControls = makeControlButtons(gc);
+		Pane renderModeControls = makeRenderModeControls();
+		Pane chartPane = makeChartPane();
+
+		controlPane.setLayoutX(Util.WINDOW_WIDTH);
+
+		controlPane.getChildren().add(zonePane);
+		controlPane.getChildren().add(cameraControls);
+		controlPane.getChildren().add(renderModeControls);
+		controlPane.getChildren().add(chartPane);
+
+		root.getChildren().add(canvas);
+		root.getChildren().add(controlPane);
+
+		
 		Scene mainScene = new Scene(root, Color.WHITE);
 		stage.setScene(mainScene);
+		
+		this.stage = stage;
+		stage.show();
+	}
+	
+	private void addClickListenerTo(Canvas canvas){
 		canvas.addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
 			@Override
 			public void handle(MouseEvent event) {
@@ -213,11 +118,132 @@ public class GUI implements View<UserData> {
 				}
 			}
 		});
-		this.stage = stage;
-		stage.show();
+	}
+	
+	private Pane makeChartPane(){
+		Pane chart = new FlowPane();
+		XYChart.Series<Number, Number> scores = new XYChart.Series<Number, Number>();
+		for (CityProperty prop : CityProperty.values()) {
+			XYChart.Series<Number, Number> series = new XYChart.Series<Number, Number>();
+			series.setName(prop.getName());
+			this.chartData.put(prop, series);
+		}
+
+		NumberAxis xAxis = new NumberAxis();
+		NumberAxis yAxis = new NumberAxis();
+		xAxis.setLabel("Turn#");
+		yAxis.setLabel("Score");
+		LineChart<Number, Number> lineChart = new LineChart<Number, Number>(xAxis, yAxis);
+
+		lineChart.setTitle("Game Score over turn");
+		scores.setName("Scores");
+
+		for (Entry<CityProperty, Series<Number, Number>> pair : chartData.entrySet()) {
+			lineChart.getData().add(pair.getValue());
+		}
+		chart.getChildren().add(lineChart);
+		return chart;
+	}
+	
+	private Pane makeRenderModeControls(){
+		Pane renderModeControls = new FlowPane();
+		ComboBox<RenderMode> combo = new ComboBox<RenderMode>();
+		combo.getItems().setAll(RenderMode.values());
+		combo.setValue(RenderMode.NORMAL);
+		combo.valueProperty().addListener(new ChangeListener<RenderMode>() {
+			@Override
+			public void changed(ObservableValue<? extends RenderMode> observable, RenderMode oldValue,
+					RenderMode newValue) {
+				renderer.changeMode(newValue);
+				redraw(gc);
+			}
+		});
+		renderModeControls.getChildren().add(combo);
+		return renderModeControls;
+		
 	}
 
-	private void makeControlButtons(Pane panel, GraphicsContext gc) {
+	private Pane makeZonePane() {
+		FlowPane zonePanel = new FlowPane();
+		addZoneButtonsTo(zonePanel);
+		zonePanel.getChildren().add(turnStepButton());
+		zonePanel.getChildren().add(makePlayPauseButton());
+		zonePanel.getChildren().add(brushShapeButton());
+		zonePanel.getChildren().add(radiusSelect());
+		return zonePanel;
+	}
+
+	private void addZoneButtonsTo(Pane panel) {
+		for (ZoneType zType : ZoneType.values()) {
+			Button button = new Button(zType.toString());
+			button.setOnAction(e -> setSelectedTypeTo(zType));
+			panel.getChildren().add(button);
+		}
+	}
+
+	private Button turnStepButton() {
+		Button step = new Button("STEP");
+		step.setOnAction(new EventHandler<ActionEvent>() {
+			@Override
+			public void handle(ActionEvent event) {
+				selection.setTakeStep(true);
+				notifyObserver();
+				if (Util.SCREENSHOT) {
+					Util.takeScreenshot(stage);
+				}
+			}
+		});
+		return step;
+	}
+	
+	private Button makePlayPauseButton() {
+		Button playButton = new Button("PLAY");
+		playButton.setOnAction(new EventHandler<ActionEvent>() {
+			@Override
+			public void handle(ActionEvent event) {
+				selection.setStepMode(!selection.isStepMode());
+				notifyObserver();
+				if(selection.isStepMode()){
+					playButton.setText(">");
+				}else{
+					playButton.setText("||");
+				}
+			}
+		});
+		return playButton;
+	}
+
+	private Button brushShapeButton() {
+		Button brushShape = new Button("Circle");
+		brushShape.setOnAction(new EventHandler<ActionEvent>() {
+			@Override
+			public void handle(ActionEvent event) {
+				selection.setSquare(!selection.isSquare());
+				if (selection.isSquare()) {
+					brushShape.setText("Square");
+				} else {
+					brushShape.setText("Circle");
+				}
+
+			}
+		});
+		return brushShape;
+	}
+
+	private Spinner<Integer> radiusSelect() {
+		Spinner<Integer> radiusSelector = new Spinner<Integer>(0, 10, 1);
+		radiusSelector.valueProperty().addListener(new ChangeListener<Integer>() {
+			@Override
+			public void changed(ObservableValue<? extends Integer> observable, Integer oldValue, Integer newValue) {
+				selection.setRadius(newValue);
+			}
+		});
+		return radiusSelector;
+
+	}
+
+	private Pane makeControlButtons(GraphicsContext gc) {
+		FlowPane pane = new FlowPane();
 		Button upButton = new Button("UP");
 		Button downButton = new Button("DOWN");
 		Button rightButton = new Button("RIGHT");
@@ -236,7 +262,7 @@ public class GUI implements View<UserData> {
 		Button resetView = new Button("Reset View");
 		resetView.setOnAction(e -> resetMatrix(gc));
 
-		ObservableList<Node> nodes = panel.getChildren();
+		ObservableList<Node> nodes = pane.getChildren();
 		nodes.add(upButton);
 		nodes.add(downButton);
 		nodes.add(rightButton);
@@ -244,7 +270,7 @@ public class GUI implements View<UserData> {
 		nodes.add(zoomIn);
 		nodes.add(zoomOut);
 		nodes.add(resetView);
-
+		return pane;
 	}
 
 	private void translateView(GraphicsContext gc, Pos2D dir) {
