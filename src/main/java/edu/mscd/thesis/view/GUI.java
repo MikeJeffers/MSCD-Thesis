@@ -26,6 +26,7 @@ import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.chart.Axis;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
@@ -33,7 +34,9 @@ import javafx.scene.chart.XYChart.Series;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Spinner;
+import javafx.scene.input.DragEvent;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
@@ -68,7 +71,6 @@ public class GUI implements View<UserData> {
 		transformMatrix.appendScale(Util.SCALE_FACTOR, Util.SCALE_FACTOR);
 		gc.setTransform(transformMatrix);
 
-
 		FlowPane controlPane = new FlowPane();
 		Pane zonePane = makeZonePane();
 		Pane cameraControls = makeControlButtons(gc);
@@ -85,15 +87,14 @@ public class GUI implements View<UserData> {
 		root.getChildren().add(canvas);
 		root.getChildren().add(controlPane);
 
-		
 		Scene mainScene = new Scene(root, Color.WHITE);
 		stage.setScene(mainScene);
-		
+
 		this.stage = stage;
 		stage.show();
 	}
-	
-	private void addClickListenerTo(Canvas canvas){
+
+	private void addClickListenerTo(Canvas canvas) {
 		canvas.addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
 			@Override
 			public void handle(MouseEvent event) {
@@ -119,13 +120,13 @@ public class GUI implements View<UserData> {
 			}
 		});
 	}
-	
-	private Pane makeChartPane(){
+
+	private Pane makeChartPane() {
 		Pane chart = new FlowPane();
 		XYChart.Series<Number, Number> scores = new XYChart.Series<Number, Number>();
 		for (CityProperty prop : CityProperty.values()) {
 			XYChart.Series<Number, Number> series = new XYChart.Series<Number, Number>();
-			series.setName(prop.getName());
+			series.setName(prop.getLabel());
 			this.chartData.put(prop, series);
 		}
 
@@ -136,6 +137,33 @@ public class GUI implements View<UserData> {
 		LineChart<Number, Number> lineChart = new LineChart<Number, Number>(xAxis, yAxis);
 
 		lineChart.setTitle("Game Score over turn");
+
+		lineChart.setOnMouseClicked(new EventHandler<MouseEvent>() {
+			@Override
+			public void handle(MouseEvent event) {
+				if (event.getClickCount() == 2) {
+					Axis<Number> x = lineChart.getXAxis();
+					x.setAutoRanging(true);
+				}
+			}
+		});
+		lineChart.setOnScroll(new EventHandler<ScrollEvent>() {
+			@Override
+			public void handle(ScrollEvent event) {
+				double scroll = event.getTextDeltaY();
+				NumberAxis x = (NumberAxis) lineChart.getXAxis();
+				x.setAutoRanging(false);
+				if (event.isControlDown()) {
+					// scale
+					x.setLowerBound(x.getLowerBound() + scroll);
+					x.setUpperBound(x.getUpperBound() - scroll);
+				} else {
+					// translate
+					x.setUpperBound(x.getUpperBound() + scroll);
+					x.setLowerBound(x.getLowerBound() + scroll);
+				}
+			}
+		});
 		scores.setName("Scores");
 
 		for (Entry<CityProperty, Series<Number, Number>> pair : chartData.entrySet()) {
@@ -144,8 +172,8 @@ public class GUI implements View<UserData> {
 		chart.getChildren().add(lineChart);
 		return chart;
 	}
-	
-	private Pane makeRenderModeControls(){
+
+	private Pane makeRenderModeControls() {
 		Pane renderModeControls = new FlowPane();
 		ComboBox<RenderMode> combo = new ComboBox<RenderMode>();
 		combo.getItems().setAll(RenderMode.values());
@@ -160,7 +188,7 @@ public class GUI implements View<UserData> {
 		});
 		renderModeControls.getChildren().add(combo);
 		return renderModeControls;
-		
+
 	}
 
 	private Pane makeZonePane() {
@@ -195,7 +223,7 @@ public class GUI implements View<UserData> {
 		});
 		return step;
 	}
-	
+
 	private Button makePlayPauseButton() {
 		Button playButton = new Button("PLAY");
 		playButton.setOnAction(new EventHandler<ActionEvent>() {
@@ -203,9 +231,9 @@ public class GUI implements View<UserData> {
 			public void handle(ActionEvent event) {
 				selection.setStepMode(!selection.isStepMode());
 				notifyObserver();
-				if(selection.isStepMode()){
+				if (selection.isStepMode()) {
 					playButton.setText(">");
-				}else{
+				} else {
 					playButton.setText("||");
 				}
 			}

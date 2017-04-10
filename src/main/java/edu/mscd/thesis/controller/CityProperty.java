@@ -10,14 +10,14 @@ public enum CityProperty {
 	HAPPY("Happiness"),
 	SCORE("GameScore");
 	
-	private String name;
+	private String label;
 	
-	CityProperty(String name){
-		this.name = name;
+	CityProperty(String label){
+		this.label = label;
 	}
 	
-	public String getName(){
-		return this.name;
+	public String getLabel(){
+		return this.label;
 	}
 	
 
