@@ -16,7 +16,6 @@ import javafx.scene.chart.XYChart.Data;
 import javafx.scene.chart.XYChart.Series;
 
 public class GameLoop extends AnimationTimer implements Controller {
-	private ObservableList<Data<Number, Number>> scores;
 
 	private ObservableList<CityData> modelData;
 
@@ -56,17 +55,6 @@ public class GameLoop extends AnimationTimer implements Controller {
 			}
 		});
 
-		this.scores = new ArrayObservableList<Data<Number, Number>>();
-		this.scores.addListener(new ListChangeListener<Data<Number, Number>>() {
-			@Override
-			public void onChanged(ListChangeListener.Change<? extends Data<Number, Number>> c) {
-				while (c.next()) {
-					for (Data<Number, Number> additem : c.getAddedSubList()) {
-						view.getDisplayData().getData().add(additem);
-					}
-				}
-			}
-		});
 
 		this.model = model;
 		this.view = view;
@@ -87,7 +75,6 @@ public class GameLoop extends AnimationTimer implements Controller {
 		}
 
 		if (step) {
-			this.scores.add(new Data<Number, Number>(turn, Rules.score(model)));
 			turn++;
 			aiObserveCounter++;
 			step = false;
@@ -142,7 +129,6 @@ public class GameLoop extends AnimationTimer implements Controller {
 	public synchronized void notifyModelEvent(CityData data) {
 		data.setProperty(CityProperty.SCORE, (Rules.score(model)));
 		modelData.add(data);
-
 	}
 
 	@Override
