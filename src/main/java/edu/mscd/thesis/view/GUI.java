@@ -13,8 +13,10 @@ import edu.mscd.thesis.controller.UserData;
 import edu.mscd.thesis.model.Model;
 import edu.mscd.thesis.model.Pos2D;
 import edu.mscd.thesis.model.zones.ZoneType;
+import edu.mscd.thesis.util.CityDataWeightVector;
 import edu.mscd.thesis.util.Rules;
 import edu.mscd.thesis.util.Util;
+import edu.mscd.thesis.util.WeightVector;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
@@ -39,6 +41,7 @@ import javafx.scene.chart.XYChart.Series;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.Slider;
 import javafx.scene.control.Spinner;
 import javafx.scene.input.DragEvent;
 import javafx.scene.input.MouseEvent;
@@ -67,9 +70,14 @@ public class GUI implements View<UserData> {
 	private static UserData ai_selection = new UserData();
 	private static EventType<DataReceived> dataReceipt = new EventType<>("DataReceived");
 
-	private Node eventTarget;
+	private Node aiMoveEventTarget;
+	private Node scoreEventTarget;
+	
+	private double score;
 
 	private Map<CityProperty, Series<Number, Number>> chartData = new HashMap<CityProperty, Series<Number, Number>>();
+	
+	private WeightVector<CityProperty> weightVectorForNN = new CityDataWeightVector();
 
 	@Override
 	public void initView(Stage stage) {
@@ -89,7 +97,9 @@ public class GUI implements View<UserData> {
 		Pane cameraControls = makeControlButtons(gc);
 		Pane renderModeControls = makeRenderModeControls();
 		Pane chartPane = makeStackedChartPane();
-		Pane scorePane = makeMetricsPane();
+		Pane metricsPane = makeMetricsPane();
+		Pane scorePane = makeScorePane();
+		Pane weightSliders = makeSliderPane();
 		Pane moveReporter = makeAIMoveReport();
 
 		controlPane.setHgap(5);
@@ -97,12 +107,14 @@ public class GUI implements View<UserData> {
 		controlPane.setPadding(new Insets(5, 5, 5, 25));
 
 		controlPane.setLayoutX(Util.WINDOW_WIDTH);
-		controlPane.add(chartPane, 0, 0, 3, 3);
+		controlPane.add(chartPane, 0, 0, 4, 4);
 		controlPane.add(zonePane, 0, 5);
 		controlPane.add(cameraControls, 0, 6);
 		controlPane.add(renderModeControls, 0, 7);
-		controlPane.add(scorePane, 0, 8);
-		controlPane.add(moveReporter, 0, 9);
+		controlPane.add(metricsPane, 0, 8);
+		controlPane.add(scorePane, 0, 9);
+		controlPane.add(weightSliders, 0, 10);
+		controlPane.add(moveReporter, 0, 11);
 
 		root.getChildren().add(canvas);
 		root.getChildren().add(controlPane);
@@ -116,12 +128,12 @@ public class GUI implements View<UserData> {
 
 	private Pane makeAIMoveReport() {
 		Pane pane = new GridPane();
-		eventTarget = pane;
+		aiMoveEventTarget = pane;
 		Label aiMove = new Label("...AI is thinking...");
 		GridPane.setColumnIndex(aiMove, 0);
 		GridPane.setRowIndex(aiMove, 0);
 
-		eventTarget.addEventHandler(dataReceipt, new EventHandler<DataReceived>() {
+		aiMoveEventTarget.addEventHandler(dataReceipt, new EventHandler<DataReceived>() {
 			@Override
 			public void handle(DataReceived event) {
 				aiMove.setText(ai_selection.getLabelText());
@@ -131,6 +143,63 @@ public class GUI implements View<UserData> {
 		pane.getChildren().add(aiMove);
 		return pane;
 	}
+	
+	private Pane makeScorePane() {
+		Pane pane = new GridPane();
+		scoreEventTarget = pane;
+		Label scoreText = new Label("Score: ");
+		Label scoreValue = new Label(Double.toString(score));
+		GridPane.setColumnIndex(scoreText, 0);
+		GridPane.setRowIndex(scoreText, 0);
+		GridPane.setColumnIndex(scoreValue,1);
+		GridPane.setRowIndex(scoreValue, 0);
+
+		scoreEventTarget.addEventHandler(dataReceipt, new EventHandler<DataReceived>() {
+			@Override
+			public void handle(DataReceived event) {
+				String toDisplay = Double.toString(score);
+				if (toDisplay.length() > 7) {
+					toDisplay = toDisplay.substring(0, 7);
+				}
+				scoreValue.setText(toDisplay);
+			}
+
+		});
+		pane.getChildren().addAll(scoreText, scoreValue);
+		return pane;
+	}
+	
+	private Pane makeSliderPane(){
+		Pane pane = new GridPane();
+		int row = 0;
+		for (CityProperty prop : CityProperty.values()) {
+			Label propReadout = new Label(prop.getLabel());
+			Label dataReadout = new Label("0.5");
+			Slider slider = new Slider(0.0, 1.0, 0.5);
+			this.weightVectorForNN.setWeightFor(prop, 0.5);
+			slider.valueProperty().addListener(new ChangeListener<Number>(){
+				@Override
+				public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
+					weightVectorForNN.setWeightFor(prop, newValue.doubleValue());
+					String toDisplay = Double.toString(newValue.doubleValue());
+					if (toDisplay.length() > 7) {
+						toDisplay = toDisplay.substring(0, 7);
+					}
+					dataReadout.setText(toDisplay);
+				}
+			});
+			GridPane.setRowIndex(propReadout, row);
+			GridPane.setRowIndex(dataReadout, row);
+			GridPane.setRowIndex(slider, row);
+			GridPane.setColumnIndex(propReadout, 0);
+			GridPane.setColumnIndex(slider, 1);
+			GridPane.setColumnIndex(dataReadout, 2);
+			pane.getChildren().addAll(propReadout, dataReadout, slider);
+			row++;
+			
+		}
+		return pane;
+	}
 
 	private Pane makeMetricsPane() {
 		Pane pane = new GridPane();
@@ -138,6 +207,7 @@ public class GUI implements View<UserData> {
 		for (CityProperty prop : CityProperty.values()) {
 			Label propReadout = new Label(prop.getLabel());
 			Label dataReadout = new Label();
+			double displayMultipler = prop.getMultiplier();
 			GridPane.setRowIndex(propReadout, row);
 			GridPane.setRowIndex(dataReadout, row);
 			GridPane.setColumnIndex(propReadout, 0);
@@ -152,7 +222,7 @@ public class GUI implements View<UserData> {
 					while (c.next()) {
 						if (c.wasAdded()) {
 							Data<Number, Number> data = c.getList().get(c.getTo() - 1);
-							String toDisplay = Double.toString((data.getYValue().doubleValue() * 100));
+							String toDisplay = Double.toString((data.getYValue().doubleValue() * displayMultipler));
 							if (toDisplay.length() > 7) {
 								toDisplay = toDisplay.substring(0, 7);
 							}
@@ -215,24 +285,7 @@ public class GUI implements View<UserData> {
 			lineChart.setBackground(new Background(new BackgroundFill(Color.WHITE, CornerRadii.EMPTY, Insets.EMPTY)));
 			stackCharts.getChildren().add(lineChart);
 		}
-		//Add Combined view of normalized scores (population non-normalized)
-		/*TODO this corrupts other charts??
-		NumberAxis xAxis = new NumberAxis();
-		NumberAxis yAxis = new NumberAxis();
-		xAxis.setLabel("Turn#");
-		yAxis.setLabel("Value");
-		LineChart<Number, Number> combinedView = new LineChart<Number, Number>(xAxis, yAxis);
-		for (Entry<CityProperty, Series<Number, Number>> pair : chartData.entrySet()) {
-			if(pair.getKey()==CityProperty.POP){
-				continue;
-			}
-			combinedView.getData().add(pair.getValue());
-		}
-		combinedView.setMaxSize(Util.WINDOW_WIDTH/3, Util.WINDOW_HEIGHT/3);
-		combinedView.setBackground(new Background(new BackgroundFill(Color.WHITE, CornerRadii.EMPTY, Insets.EMPTY)));
-		addChartBehaviourListeners(combinedView);
-		stackCharts.getChildren().add(combinedView);
-		*/
+
 		stackCharts.setOnMouseClicked(new EventHandler<MouseEvent>(){
 
 			@Override
@@ -300,21 +353,23 @@ public class GUI implements View<UserData> {
 	}
 
 	private Pane makeZonePane() {
-		FlowPane zonePanel = new FlowPane();
-		addZoneButtonsTo(zonePanel);
-		zonePanel.getChildren().add(turnStepButton());
-		zonePanel.getChildren().add(makePlayPauseButton());
-		zonePanel.getChildren().add(brushShapeButton());
-		zonePanel.getChildren().add(radiusSelect());
+		GridPane zonePanel = new GridPane();
+		zonePanel.add(makeZoneButtonPane(), 0, 0);
+		Pane combine = new FlowPane();
+		combine.getChildren().addAll(turnStepButton(), makePlayPauseButton(), brushShapeButton());
+		zonePanel.add(combine, 0, 1);
+		zonePanel.add(radiusSelect(), 0, 2);
 		return zonePanel;
 	}
 
-	private void addZoneButtonsTo(Pane panel) {
+	private Pane makeZoneButtonPane() {
+		Pane zonePane = new FlowPane();
 		for (ZoneType zType : ZoneType.values()) {
 			Button button = new Button(zType.toString());
 			button.setOnAction(e -> setSelectedTypeTo(zType));
-			panel.getChildren().add(button);
+			zonePane.getChildren().add(button);
 		}
+		return zonePane;
 	}
 
 	private Button turnStepButton() {
@@ -486,9 +541,21 @@ public class GUI implements View<UserData> {
 	}
 
 	@Override
-	public void setRecentMove(UserData action) {
+	public void updateAIMove(UserData action) {
 		ai_selection = action.copy();
-		this.eventTarget.fireEvent(new DataReceived(dataReceipt));
+		this.aiMoveEventTarget.fireEvent(new DataReceived(dataReceipt));
+	}
+
+	@Override
+	public WeightVector<CityProperty> getWeightVector() {
+		return this.weightVectorForNN;
+	}
+
+	@Override
+	public void updateScore(double value) {
+		this.score = value;
+		this.scoreEventTarget.fireEvent(new DataReceived(dataReceipt));
+		
 	}
 
 

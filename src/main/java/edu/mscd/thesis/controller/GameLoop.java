@@ -123,13 +123,13 @@ public class GameLoop extends AnimationTimer implements Controller {
 	private void makeAIMove(UserData action) {
 		prevModelState = ModelStripper.reducedCopy(model);
 		model.notifyNewData(action);
-		view.setRecentMove(action);
+		view.updateAIMove(action);
 	}
 
 	@Override
 	public synchronized void notifyModelEvent(CityData data) {
-		data.setProperty(CityProperty.SCORE, (Rules.score(model)));
 		modelData.add(data);
+		view.updateScore(Rules.score(model, view.getWeightVector()));
 	}
 
 	@Override

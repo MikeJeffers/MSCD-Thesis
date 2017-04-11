@@ -2,6 +2,7 @@ package edu.mscd.thesis.util;
 
 
 import edu.mscd.thesis.controller.CityData;
+import edu.mscd.thesis.controller.CityProperty;
 import edu.mscd.thesis.controller.UserData;
 import edu.mscd.thesis.model.City;
 import edu.mscd.thesis.model.Model;
@@ -23,6 +24,7 @@ public class Rules {
 	public static final int TILE_COUNT = WORLD_X*WORLD_Y;
 	//Game Constants and factors
 	public static final int MAX = 255;
+	public static final int MAX_PERCENTAGE = 100;
 	//Zone growth factors
 	public static final int GROWTH_THRESHOLD = 125;
 	public static final int BASE_GROWTH_COST = 25;
@@ -97,7 +99,7 @@ public class Rules {
 		cityScore+=(c.averageWealth()/MAX)*((4*weightSum)/10);
 		cityScore+=(1-c.percentageHomeless())*((1*weightSum)/10);
 		cityScore+=(1-c.percentageUnemployed())*((1*weightSum)/10);
-		cityScore+=Math.min((c.totalPopulation()/w.getTiles().length), 1.0)*((1*weightSum)/10);
+		cityScore+=Math.min((c.totalPopulation()/MAX_POPULATION), 1.0)*((1*weightSum)/10);
 		cityScore = cityScore/(5.0*weightSum);
 		
 		Tile[] tiles = w.getTiles();
@@ -108,6 +110,29 @@ public class Rules {
 		}
 		tilesTotalScore = tilesTotalScore/tiles.length;
 		return tilesTotalScore+cityScore;
+	}
+	
+	public static double score(Model<UserData, CityData>model, WeightVector<CityProperty> weights){
+		if(weights==null){
+			return score(model);
+		}
+		World w = model.getWorld();
+		City c = w.getCity();
+		CityData data = c.getData();
+		double weightSum = weights.getSum();
+		double cityScore = 0;
+		for(CityProperty prop: CityProperty.values()){
+			if(data.getDataMap().containsKey(prop)){
+				double value = data.getDataMap().get(prop)*weights.getWeightFor(prop);
+				if(prop.needsInversion()){
+					value = 1.0-value;
+				}
+				cityScore+=value;
+			}
+		}
+		cityScore = cityScore/weightSum;
+		
+		return cityScore;
 	}
 	
 	public static double score(Tile t){
