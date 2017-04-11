@@ -12,7 +12,5 @@ public interface DataDisplay {
 	public Map<CityProperty, Series<Number, Number>> getCityChartData();
 	
 	public void setRecentMove(UserData action);
-	
-	public Series<Number, Number> getPopulationChart();
 
 }

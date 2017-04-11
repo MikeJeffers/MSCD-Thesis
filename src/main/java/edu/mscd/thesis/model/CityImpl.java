@@ -242,6 +242,7 @@ public class CityImpl implements City {
 		data.setProperty(CityProperty.HAPPY, this.averageHappiness());
 		data.setProperty(CityProperty.UNEMPLOY, this.percentageUnemployed());
 		data.setProperty(CityProperty.HOMELESS, this.percentageHomeless());
+		data.setProperty(CityProperty.POP, this.totalPopulation());
 		return data;
 	}
 

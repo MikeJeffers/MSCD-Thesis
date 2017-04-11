@@ -43,10 +43,15 @@ import javafx.scene.control.Spinner;
 import javafx.scene.input.DragEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundFill;
+import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
 import javafx.scene.transform.Affine;
 import javafx.scene.transform.NonInvertibleTransformException;
 import javafx.stage.Stage;
@@ -61,11 +66,10 @@ public class GUI implements View<UserData> {
 	private static UserData selection = new UserData();
 	private static UserData ai_selection = new UserData();
 	private static EventType<DataReceived> dataReceipt = new EventType<>("DataReceived");
-	
+
 	private Node eventTarget;
 
-	Map<CityProperty, Series<Number, Number>> chartData = new HashMap<CityProperty, Series<Number, Number>>();
-	Series<Number, Number> popChart = new Series<Number, Number>();
+	private Map<CityProperty, Series<Number, Number>> chartData = new HashMap<CityProperty, Series<Number, Number>>();
 
 	@Override
 	public void initView(Stage stage) {
@@ -84,18 +88,16 @@ public class GUI implements View<UserData> {
 		Pane zonePane = makeZonePane();
 		Pane cameraControls = makeControlButtons(gc);
 		Pane renderModeControls = makeRenderModeControls();
-		Pane chartPane = makeChartPane();
+		Pane chartPane = makeStackedChartPane();
 		Pane scorePane = makeMetricsPane();
-		Pane popChartPane = makePopChartPane();
 		Pane moveReporter = makeAIMoveReport();
-		
+
 		controlPane.setHgap(5);
 		controlPane.setVgap(5);
 		controlPane.setPadding(new Insets(5, 5, 5, 25));
 
 		controlPane.setLayoutX(Util.WINDOW_WIDTH);
 		controlPane.add(chartPane, 0, 0, 3, 3);
-		controlPane.add(popChartPane, 0, 3, 3, 2);
 		controlPane.add(zonePane, 0, 5);
 		controlPane.add(cameraControls, 0, 6);
 		controlPane.add(renderModeControls, 0, 7);
@@ -111,31 +113,29 @@ public class GUI implements View<UserData> {
 		this.stage = stage;
 		stage.show();
 	}
-	
-	
-	private Pane makeAIMoveReport(){
+
+	private Pane makeAIMoveReport() {
 		Pane pane = new GridPane();
 		eventTarget = pane;
 		Label aiMove = new Label("...AI is thinking...");
 		GridPane.setColumnIndex(aiMove, 0);
 		GridPane.setRowIndex(aiMove, 0);
-		
-		eventTarget.addEventHandler(dataReceipt, new EventHandler<DataReceived>(){
+
+		eventTarget.addEventHandler(dataReceipt, new EventHandler<DataReceived>() {
 			@Override
 			public void handle(DataReceived event) {
 				aiMove.setText(ai_selection.getLabelText());
 			}
-			
+
 		});
 		pane.getChildren().add(aiMove);
 		return pane;
 	}
-	
 
-	private Pane makeMetricsPane(){
+	private Pane makeMetricsPane() {
 		Pane pane = new GridPane();
 		int row = 0;
-		for(CityProperty prop: CityProperty.values()){
+		for (CityProperty prop : CityProperty.values()) {
 			Label propReadout = new Label(prop.getLabel());
 			Label dataReadout = new Label();
 			GridPane.setRowIndex(propReadout, row);
@@ -144,16 +144,16 @@ public class GUI implements View<UserData> {
 			GridPane.setColumnIndex(dataReadout, 1);
 			pane.getChildren().addAll(propReadout, dataReadout);
 			row++;
-			ObservableList<Data<Number,Number>> list = this.chartData.get(prop).getData();
-			list.addListener(new ListChangeListener<Data<Number,Number>>(){
+			ObservableList<Data<Number, Number>> list = this.chartData.get(prop).getData();
+			list.addListener(new ListChangeListener<Data<Number, Number>>() {
 
 				@Override
 				public void onChanged(javafx.collections.ListChangeListener.Change<? extends Data<Number, Number>> c) {
 					while (c.next()) {
-						if(c.wasAdded()){
-							Data<Number,Number> data = c.getList().get(c.getTo()-1);
-							String toDisplay = Double.toString((data.getYValue().doubleValue()*100));
-							if(toDisplay.length()>7){
+						if (c.wasAdded()) {
+							Data<Number, Number> data = c.getList().get(c.getTo() - 1);
+							String toDisplay = Double.toString((data.getYValue().doubleValue() * 100));
+							if (toDisplay.length() > 7) {
 								toDisplay = toDisplay.substring(0, 7);
 							}
 							dataReadout.setText(toDisplay);
@@ -192,72 +192,73 @@ public class GUI implements View<UserData> {
 		});
 	}
 	
-	private Pane makePopChartPane(){
-		Pane chart = new FlowPane();
-		NumberAxis xAxis = new NumberAxis();
-		NumberAxis yAxis = new NumberAxis();
-		xAxis.setLabel("Turn#");
-		yAxis.setLabel("Population");
-		LineChart<Number, Number> lineChart = new LineChart<Number, Number>(xAxis, yAxis);
-
-		lineChart.setTitle("Population per Turn");
-
-		lineChart.setOnMouseClicked(new EventHandler<MouseEvent>() {
-			@Override
-			public void handle(MouseEvent event) {
-				if (event.getClickCount() == 2) {
-					Axis<Number> x = lineChart.getXAxis();
-					x.setAutoRanging(true);
-				}
-			}
-		});
-		lineChart.setOnScroll(new EventHandler<ScrollEvent>() {
-			@Override
-			public void handle(ScrollEvent event) {
-				double scroll = event.getTextDeltaY();
-				NumberAxis x = (NumberAxis) lineChart.getXAxis();
-				x.setAutoRanging(false);
-				if (event.isControlDown()) {
-					// scale
-					x.setLowerBound(x.getLowerBound() + scroll);
-					x.setUpperBound(x.getUpperBound() - scroll);
-				} else {
-					// translate
-					x.setUpperBound(x.getUpperBound() + scroll);
-					x.setLowerBound(x.getLowerBound() + scroll);
-				}
-			}
-		});
-		this.popChart.setName("Population");
-		lineChart.setMaxSize(450, 200);
-		lineChart.getData().add(this.popChart);
+	
+	private Pane makeStackedChartPane(){
+		Pane stackCharts = new StackPane();
 		
-		chart.getChildren().add(lineChart);
-		return chart;
-	}
-
-	private Pane makeChartPane() {
-		Pane chart = new FlowPane();
 		for (CityProperty prop : CityProperty.values()) {
 			XYChart.Series<Number, Number> series = new XYChart.Series<Number, Number>();
 			series.setName(prop.getLabel());
 			this.chartData.put(prop, series);
-		}
+			NumberAxis xAxis = new NumberAxis();
+			NumberAxis yAxis = new NumberAxis();
+			xAxis.setLabel("Turn#");
+			yAxis.setLabel(prop.getLabel());
+			LineChart<Number, Number> lineChart = new LineChart<Number, Number>(xAxis, yAxis);
+			lineChart.setTitle(prop.getLabel()+" over turn");
 
+			addChartBehaviourListeners(lineChart);
+			
+			lineChart.getData().add(chartData.get(prop));
+
+			lineChart.setMaxSize(Util.WINDOW_WIDTH/3, Util.WINDOW_HEIGHT/3);
+			lineChart.setBackground(new Background(new BackgroundFill(Color.WHITE, CornerRadii.EMPTY, Insets.EMPTY)));
+			stackCharts.getChildren().add(lineChart);
+		}
+		//Add Combined view of normalized scores (population non-normalized)
+		/*TODO this corrupts other charts??
 		NumberAxis xAxis = new NumberAxis();
 		NumberAxis yAxis = new NumberAxis();
 		xAxis.setLabel("Turn#");
-		yAxis.setLabel("Score");
-		LineChart<Number, Number> lineChart = new LineChart<Number, Number>(xAxis, yAxis);
+		yAxis.setLabel("Value");
+		LineChart<Number, Number> combinedView = new LineChart<Number, Number>(xAxis, yAxis);
+		for (Entry<CityProperty, Series<Number, Number>> pair : chartData.entrySet()) {
+			if(pair.getKey()==CityProperty.POP){
+				continue;
+			}
+			combinedView.getData().add(pair.getValue());
+		}
+		combinedView.setMaxSize(Util.WINDOW_WIDTH/3, Util.WINDOW_HEIGHT/3);
+		combinedView.setBackground(new Background(new BackgroundFill(Color.WHITE, CornerRadii.EMPTY, Insets.EMPTY)));
+		addChartBehaviourListeners(combinedView);
+		stackCharts.getChildren().add(combinedView);
+		*/
+		stackCharts.setOnMouseClicked(new EventHandler<MouseEvent>(){
 
-		lineChart.setTitle("Game Score over turn");
+			@Override
+			public void handle(MouseEvent event) {
+				if(!event.isControlDown()){
+					ObservableList<Node> children = stackCharts.getChildren();
+			        if (children.size()>1) {
+			            Node topNode = children.get(children.size()-1);
+			            topNode.toBack();
+			        }
+				}
+				
+			}
+		});
+		return stackCharts;
+	}
 
+	private void addChartBehaviourListeners(LineChart<Number, Number> lineChart) {
 		lineChart.setOnMouseClicked(new EventHandler<MouseEvent>() {
 			@Override
 			public void handle(MouseEvent event) {
-				if (event.getClickCount() == 2) {
-					Axis<Number> x = lineChart.getXAxis();
-					x.setAutoRanging(true);
+				if(event.isControlDown()){
+					if (event.getClickCount() == 2) {
+						lineChart.getXAxis().setAutoRanging(true);
+						lineChart.getYAxis().setAutoRanging(true);
+					}
 				}
 			}
 		});
@@ -278,12 +279,6 @@ public class GUI implements View<UserData> {
 				}
 			}
 		});
-		for (Entry<CityProperty, Series<Number, Number>> pair : chartData.entrySet()) {
-			lineChart.getData().add(pair.getValue());
-		}
-		lineChart.setMaxSize(450, 300);
-		chart.getChildren().add(lineChart);
-		return chart;
 	}
 
 	private Pane makeRenderModeControls() {
@@ -496,9 +491,5 @@ public class GUI implements View<UserData> {
 		this.eventTarget.fireEvent(new DataReceived(dataReceipt));
 	}
 
-	@Override
-	public Series<Number, Number> getPopulationChart() {
-		return this.popChart;
-	}
 
 }

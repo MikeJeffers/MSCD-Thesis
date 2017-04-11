@@ -130,7 +130,6 @@ public class GameLoop extends AnimationTimer implements Controller {
 	public synchronized void notifyModelEvent(CityData data) {
 		data.setProperty(CityProperty.SCORE, (Rules.score(model)));
 		modelData.add(data);
-		view.getPopulationChart().getData().add(new Data<Number,Number>(turn, model.getWorld().getCity().totalPopulation()));
 	}
 
 	@Override

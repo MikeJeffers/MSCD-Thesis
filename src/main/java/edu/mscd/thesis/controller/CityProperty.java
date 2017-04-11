@@ -1,13 +1,14 @@
 package edu.mscd.thesis.controller;
 
 public enum CityProperty {
-	R_DEMAND("R"),
-	C_DEMAND("C"),
-	I_DEMAND("I"),
-	HOMELESS("Homelessness"),
-	UNEMPLOY("Unemployment"),
-	WEALTH("Wealth"),
-	HAPPY("Happiness"),
+	R_DEMAND("Residential Demand"),
+	C_DEMAND("Commercial Demand"),
+	I_DEMAND("Industrial Demand"),
+	HOMELESS("Homelessness %"),
+	UNEMPLOY("Unemployment %"),
+	WEALTH("Average Wealth"),
+	HAPPY("Average Happiness"),
+	POP("Population"),
 	SCORE("GameScore");
 	
 	private String label;
