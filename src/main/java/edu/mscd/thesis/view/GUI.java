@@ -43,6 +43,7 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.Slider;
 import javafx.scene.control.Spinner;
+import javafx.scene.control.Tooltip;
 import javafx.scene.input.DragEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
@@ -72,11 +73,11 @@ public class GUI implements View<UserData> {
 
 	private Node aiMoveEventTarget;
 	private Node scoreEventTarget;
-	
+
 	private double score;
 
 	private Map<CityProperty, Series<Number, Number>> chartData = new HashMap<CityProperty, Series<Number, Number>>();
-	
+
 	private WeightVector<CityProperty> weightVectorForNN = new CityDataWeightVector();
 
 	@Override
@@ -143,7 +144,7 @@ public class GUI implements View<UserData> {
 		pane.getChildren().add(aiMove);
 		return pane;
 	}
-	
+
 	private Pane makeScorePane() {
 		Pane pane = new GridPane();
 		scoreEventTarget = pane;
@@ -151,7 +152,7 @@ public class GUI implements View<UserData> {
 		Label scoreValue = new Label(Double.toString(score));
 		GridPane.setColumnIndex(scoreText, 0);
 		GridPane.setRowIndex(scoreText, 0);
-		GridPane.setColumnIndex(scoreValue,1);
+		GridPane.setColumnIndex(scoreValue, 1);
 		GridPane.setRowIndex(scoreValue, 0);
 
 		scoreEventTarget.addEventHandler(dataReceipt, new EventHandler<DataReceived>() {
@@ -168,8 +169,8 @@ public class GUI implements View<UserData> {
 		pane.getChildren().addAll(scoreText, scoreValue);
 		return pane;
 	}
-	
-	private Pane makeSliderPane(){
+
+	private Pane makeSliderPane() {
 		Pane pane = new GridPane();
 		int row = 0;
 		for (CityProperty prop : CityProperty.values()) {
@@ -177,7 +178,7 @@ public class GUI implements View<UserData> {
 			Label dataReadout = new Label("0.5");
 			Slider slider = new Slider(0.0, 1.0, 0.5);
 			this.weightVectorForNN.setWeightFor(prop, 0.5);
-			slider.valueProperty().addListener(new ChangeListener<Number>(){
+			slider.valueProperty().addListener(new ChangeListener<Number>() {
 				@Override
 				public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
 					weightVectorForNN.setWeightFor(prop, newValue.doubleValue());
@@ -196,7 +197,7 @@ public class GUI implements View<UserData> {
 			GridPane.setColumnIndex(dataReadout, 2);
 			pane.getChildren().addAll(propReadout, dataReadout, slider);
 			row++;
-			
+
 		}
 		return pane;
 	}
@@ -261,11 +262,10 @@ public class GUI implements View<UserData> {
 			}
 		});
 	}
-	
-	
-	private Pane makeStackedChartPane(){
+
+	private Pane makeStackedChartPane() {
 		Pane stackCharts = new StackPane();
-		
+
 		for (CityProperty prop : CityProperty.values()) {
 			XYChart.Series<Number, Number> series = new XYChart.Series<Number, Number>();
 			series.setName(prop.getLabel());
@@ -275,29 +275,29 @@ public class GUI implements View<UserData> {
 			xAxis.setLabel("Turn#");
 			yAxis.setLabel(prop.getLabel());
 			LineChart<Number, Number> lineChart = new LineChart<Number, Number>(xAxis, yAxis);
-			lineChart.setTitle(prop.getLabel()+" over turn");
+			lineChart.setTitle(prop.getLabel() + " over turn");
 
 			addChartBehaviourListeners(lineChart);
-			
+
 			lineChart.getData().add(chartData.get(prop));
 
-			lineChart.setMaxSize(Util.WINDOW_WIDTH/3, Util.WINDOW_HEIGHT/3);
+			lineChart.setMaxSize(Util.WINDOW_WIDTH / 3, Util.WINDOW_HEIGHT / 3);
 			lineChart.setBackground(new Background(new BackgroundFill(Color.WHITE, CornerRadii.EMPTY, Insets.EMPTY)));
 			stackCharts.getChildren().add(lineChart);
 		}
 
-		stackCharts.setOnMouseClicked(new EventHandler<MouseEvent>(){
+		stackCharts.setOnMouseClicked(new EventHandler<MouseEvent>() {
 
 			@Override
 			public void handle(MouseEvent event) {
-				if(!event.isControlDown()){
+				if (!event.isControlDown()) {
 					ObservableList<Node> children = stackCharts.getChildren();
-			        if (children.size()>1) {
-			            Node topNode = children.get(children.size()-1);
-			            topNode.toBack();
-			        }
+					if (children.size() > 1) {
+						Node topNode = children.get(children.size() - 1);
+						topNode.toBack();
+					}
 				}
-				
+
 			}
 		});
 		return stackCharts;
@@ -307,7 +307,7 @@ public class GUI implements View<UserData> {
 		lineChart.setOnMouseClicked(new EventHandler<MouseEvent>() {
 			@Override
 			public void handle(MouseEvent event) {
-				if(event.isControlDown()){
+				if (event.isControlDown()) {
 					if (event.getClickCount() == 2) {
 						lineChart.getXAxis().setAutoRanging(true);
 						lineChart.getYAxis().setAutoRanging(true);
@@ -363,9 +363,10 @@ public class GUI implements View<UserData> {
 	}
 
 	private Pane makeZoneButtonPane() {
-		Pane zonePane = new FlowPane();
+		Pane zonePane = new FlowPane();//TODO add label
 		for (ZoneType zType : ZoneType.values()) {
 			Button button = new Button(zType.toString());
+			button.setTooltip(new Tooltip("Set Zone Selection to: "+zType.name()));
 			button.setOnAction(e -> setSelectedTypeTo(zType));
 			zonePane.getChildren().add(button);
 		}
@@ -374,13 +375,16 @@ public class GUI implements View<UserData> {
 
 	private Button turnStepButton() {
 		Button step = new Button("STEP");
+		step.setTooltip(new Tooltip("Press to manually step-through turns while paused"));
 		step.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent event) {
-				selection.setTakeStep(true);
-				notifyObserver();
-				if (Util.SCREENSHOT) {
-					Util.takeScreenshot(stage);
+				if(selection.isStepMode()){
+					selection.setTakeStep(true);
+					notifyObserver();
+					if (Util.SCREENSHOT) {
+						Util.takeScreenshot(stage);
+					}
 				}
 			}
 		});
@@ -389,23 +393,27 @@ public class GUI implements View<UserData> {
 
 	private Button makePlayPauseButton() {
 		Button playButton = new Button("PLAY");
+		playButton.setTooltip(new Tooltip("Press to play/pause the game"));
 		playButton.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent event) {
 				selection.setStepMode(!selection.isStepMode());
 				notifyObserver();
 				if (selection.isStepMode()) {
-					playButton.setText(">");
+					playButton.setText("PLAY");
 				} else {
-					playButton.setText("||");
+					playButton.setText("PAUSE");
 				}
 			}
 		});
 		return playButton;
 	}
 
-	private Button brushShapeButton() {
+	private Pane brushShapeButton() {
+		Pane brushPane = new GridPane();
 		Button brushShape = new Button("Circle");
+		Label label = new Label("Brush: ");
+		brushShape.setTooltip(new Tooltip("Click to change Brush Shape!"));
 		brushShape.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent event) {
@@ -418,18 +426,32 @@ public class GUI implements View<UserData> {
 
 			}
 		});
-		return brushShape;
+		GridPane.setColumnIndex(label, 0);
+		GridPane.setRowIndex(label, 0);
+		GridPane.setColumnIndex(brushShape, 1);
+		GridPane.setRowIndex(brushShape, 0);
+		brushPane.getChildren().addAll(label, brushShape);
+		return brushPane;
 	}
 
-	private Spinner<Integer> radiusSelect() {
+	private Pane radiusSelect() {
+		Pane radiusSelectPane = new GridPane();
+		Label label = new Label("Radius: ");
 		Spinner<Integer> radiusSelector = new Spinner<Integer>(0, 10, 1);
+		radiusSelector.setTooltip(new Tooltip("Sets size of Brush"));
+		radiusSelector.setMaxSize(100, 25);
 		radiusSelector.valueProperty().addListener(new ChangeListener<Integer>() {
 			@Override
 			public void changed(ObservableValue<? extends Integer> observable, Integer oldValue, Integer newValue) {
 				selection.setRadius(newValue);
 			}
 		});
-		return radiusSelector;
+		GridPane.setColumnIndex(label, 0);
+		GridPane.setRowIndex(label, 0);
+		GridPane.setColumnIndex(radiusSelector, 1);
+		GridPane.setRowIndex(radiusSelector, 0);
+		radiusSelectPane.getChildren().addAll(label, radiusSelector);
+		return radiusSelectPane;
 
 	}
 
@@ -555,8 +577,7 @@ public class GUI implements View<UserData> {
 	public void updateScore(double value) {
 		this.score = value;
 		this.scoreEventTarget.fireEvent(new DataReceived(dataReceipt));
-		
-	}
 
+	}
 
 }
