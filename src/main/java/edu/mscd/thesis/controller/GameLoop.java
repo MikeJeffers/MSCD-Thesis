@@ -42,7 +42,7 @@ public class GameLoop extends AnimationTimer implements Controller {
 			public void onChanged(ListChangeListener.Change<? extends CityData> c) {
 				while (c.next()) {
 					for (CityData additem : c.getAddedSubList()) {
-						Map<CityProperty, Series<Number, Number>> dataMap = view.getDataStreams();
+						Map<CityProperty, Series<Number, Number>> dataMap = view.getCityChartData();
 						Map<CityProperty, Double> data = additem.getDataMap();
 						for (Entry<CityProperty, Series<Number, Number>> pair : dataMap.entrySet()) {
 							Double value = data.get(pair.getKey());
@@ -123,12 +123,14 @@ public class GameLoop extends AnimationTimer implements Controller {
 	private void makeAIMove(UserData action) {
 		prevModelState = ModelStripper.reducedCopy(model);
 		model.notifyNewData(action);
+		view.setRecentMove(action);
 	}
 
 	@Override
 	public synchronized void notifyModelEvent(CityData data) {
 		data.setProperty(CityProperty.SCORE, (Rules.score(model)));
 		modelData.add(data);
+		view.getPopulationChart().getData().add(new Data<Number,Number>(turn, model.getWorld().getCity().totalPopulation()));
 	}
 
 	@Override

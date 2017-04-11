@@ -20,7 +20,9 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
+import javafx.event.Event;
 import javafx.event.EventHandler;
+import javafx.event.EventType;
 import javafx.geometry.Insets;
 import javafx.geometry.Point2D;
 import javafx.scene.Group;
@@ -57,11 +59,13 @@ public class GUI implements View<UserData> {
 
 	// User selections on UI elements
 	private static UserData selection = new UserData();
-
-	// Chart data
-	XYChart.Series<Number, Number> scores = new XYChart.Series<Number, Number>();
+	private static UserData ai_selection = new UserData();
+	private static EventType<DataReceived> dataReceipt = new EventType<>("DataReceived");
+	
+	private Node eventTarget;
 
 	Map<CityProperty, Series<Number, Number>> chartData = new HashMap<CityProperty, Series<Number, Number>>();
+	Series<Number, Number> popChart = new Series<Number, Number>();
 
 	@Override
 	public void initView(Stage stage) {
@@ -76,20 +80,27 @@ public class GUI implements View<UserData> {
 		transformMatrix.appendScale(Util.SCALE_FACTOR, Util.SCALE_FACTOR);
 		gc.setTransform(transformMatrix);
 
-		FlowPane controlPane = new FlowPane();
+		GridPane controlPane = new GridPane();
 		Pane zonePane = makeZonePane();
 		Pane cameraControls = makeControlButtons(gc);
 		Pane renderModeControls = makeRenderModeControls();
 		Pane chartPane = makeChartPane();
 		Pane scorePane = makeMetricsPane();
+		Pane popChartPane = makePopChartPane();
+		Pane moveReporter = makeAIMoveReport();
+		
+		controlPane.setHgap(5);
+		controlPane.setVgap(5);
+		controlPane.setPadding(new Insets(5, 5, 5, 25));
 
 		controlPane.setLayoutX(Util.WINDOW_WIDTH);
-
-		controlPane.getChildren().add(zonePane);
-		controlPane.getChildren().add(cameraControls);
-		controlPane.getChildren().add(renderModeControls);
-		controlPane.getChildren().add(chartPane);
-		controlPane.getChildren().add(scorePane);
+		controlPane.add(chartPane, 0, 0, 3, 3);
+		controlPane.add(popChartPane, 0, 3, 3, 2);
+		controlPane.add(zonePane, 0, 5);
+		controlPane.add(cameraControls, 0, 6);
+		controlPane.add(renderModeControls, 0, 7);
+		controlPane.add(scorePane, 0, 8);
+		controlPane.add(moveReporter, 0, 9);
 
 		root.getChildren().add(canvas);
 		root.getChildren().add(controlPane);
@@ -101,9 +112,28 @@ public class GUI implements View<UserData> {
 		stage.show();
 	}
 	
+	
+	private Pane makeAIMoveReport(){
+		Pane pane = new GridPane();
+		eventTarget = pane;
+		Label aiMove = new Label("...AI is thinking...");
+		GridPane.setColumnIndex(aiMove, 0);
+		GridPane.setRowIndex(aiMove, 0);
+		
+		eventTarget.addEventHandler(dataReceipt, new EventHandler<DataReceived>(){
+			@Override
+			public void handle(DataReceived event) {
+				aiMove.setText(ai_selection.getLabelText());
+			}
+			
+		});
+		pane.getChildren().add(aiMove);
+		return pane;
+	}
+	
+
 	private Pane makeMetricsPane(){
 		Pane pane = new GridPane();
-		pane.setPadding(new Insets(15, 5, 25, 25));
 		int row = 0;
 		for(CityProperty prop: CityProperty.values()){
 			Label propReadout = new Label(prop.getLabel());
@@ -126,20 +156,12 @@ public class GUI implements View<UserData> {
 							if(toDisplay.length()>7){
 								toDisplay = toDisplay.substring(0, 7);
 							}
-							
-							
 							dataReadout.setText(toDisplay);
 						}
 					}
-					
 				}
-				
 			});
 		}
-		
-		
-		
-
 		return pane;
 	}
 
@@ -169,10 +191,53 @@ public class GUI implements View<UserData> {
 			}
 		});
 	}
+	
+	private Pane makePopChartPane(){
+		Pane chart = new FlowPane();
+		NumberAxis xAxis = new NumberAxis();
+		NumberAxis yAxis = new NumberAxis();
+		xAxis.setLabel("Turn#");
+		yAxis.setLabel("Population");
+		LineChart<Number, Number> lineChart = new LineChart<Number, Number>(xAxis, yAxis);
+
+		lineChart.setTitle("Population per Turn");
+
+		lineChart.setOnMouseClicked(new EventHandler<MouseEvent>() {
+			@Override
+			public void handle(MouseEvent event) {
+				if (event.getClickCount() == 2) {
+					Axis<Number> x = lineChart.getXAxis();
+					x.setAutoRanging(true);
+				}
+			}
+		});
+		lineChart.setOnScroll(new EventHandler<ScrollEvent>() {
+			@Override
+			public void handle(ScrollEvent event) {
+				double scroll = event.getTextDeltaY();
+				NumberAxis x = (NumberAxis) lineChart.getXAxis();
+				x.setAutoRanging(false);
+				if (event.isControlDown()) {
+					// scale
+					x.setLowerBound(x.getLowerBound() + scroll);
+					x.setUpperBound(x.getUpperBound() - scroll);
+				} else {
+					// translate
+					x.setUpperBound(x.getUpperBound() + scroll);
+					x.setLowerBound(x.getLowerBound() + scroll);
+				}
+			}
+		});
+		this.popChart.setName("Population");
+		lineChart.setMaxSize(450, 200);
+		lineChart.getData().add(this.popChart);
+		
+		chart.getChildren().add(lineChart);
+		return chart;
+	}
 
 	private Pane makeChartPane() {
 		Pane chart = new FlowPane();
-		XYChart.Series<Number, Number> scores = new XYChart.Series<Number, Number>();
 		for (CityProperty prop : CityProperty.values()) {
 			XYChart.Series<Number, Number> series = new XYChart.Series<Number, Number>();
 			series.setName(prop.getLabel());
@@ -213,11 +278,10 @@ public class GUI implements View<UserData> {
 				}
 			}
 		});
-		scores.setName("Scores");
-
 		for (Entry<CityProperty, Series<Number, Number>> pair : chartData.entrySet()) {
 			lineChart.getData().add(pair.getValue());
 		}
+		lineChart.setMaxSize(450, 300);
 		chart.getChildren().add(lineChart);
 		return chart;
 	}
@@ -422,13 +486,19 @@ public class GUI implements View<UserData> {
 	}
 
 	@Override
-	public Series<Number, Number> getDisplayData() {
-		return this.scores;
+	public Map<CityProperty, Series<Number, Number>> getCityChartData() {
+		return this.chartData;
 	}
 
 	@Override
-	public Map<CityProperty, Series<Number, Number>> getDataStreams() {
-		return this.chartData;
+	public void setRecentMove(UserData action) {
+		ai_selection = action.copy();
+		this.eventTarget.fireEvent(new DataReceived(dataReceipt));
+	}
+
+	@Override
+	public Series<Number, Number> getPopulationChart() {
+		return this.popChart;
 	}
 
 }

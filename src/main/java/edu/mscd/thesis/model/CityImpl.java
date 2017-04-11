@@ -167,11 +167,20 @@ public class CityImpl implements City {
 		for (int i = 0; i < toAddCounter; i++) {
 			addPerson();
 		}
-		if(this.population.isEmpty()){
-			addPerson();
-		}
+		populationControl();
+		
 		countZones();
 	}
+	
+	private void populationControl(){
+		while(this.population.size()<Rules.BASE_POPULATION){
+			addPerson();
+		}
+		while(this.population.size()>Rules.MAX_POPULATION){
+			this.population.remove(this.population.iterator().next());
+		}
+	}
+	
 
 	@Override
 	public String toString() {

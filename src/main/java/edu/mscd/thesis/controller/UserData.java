@@ -117,6 +117,20 @@ public class UserData {
 		return sb.toString();
 	}
 	
+	public String getLabelText(){
+		StringBuilder sb = new StringBuilder();
+		sb.append("Click at:");
+		sb.append(clickLocation);
+		sb.append("\n");
+		sb.append("Zonetype:");
+		sb.append(zoneSelection);
+		sb.append("\n");
+		sb.append("Radius=");
+		sb.append(radius);
+		sb.append("\n");
+		return sb.toString();
+	}
+	
 	public UserData copy(){
 		UserData data = new UserData();
 		data.setAI(this.isAI);

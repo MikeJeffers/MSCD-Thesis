@@ -28,6 +28,8 @@ public class Rules {
 	public static final int BASE_GROWTH_COST = 25;
 	//City population and Person constants
 	public static final int STARTING_POPULATION = 100;
+	public static final int BASE_POPULATION = 10;
+	public static final int MAX_POPULATION = TILE_COUNT*Density.VERYHIGH.getDensityLevel();
 	public static final int BIRTH_RATE = 3;
 	public static final int LIFE_SPAN = 100;
 	public static final double R_DEMAND_BASE = 0.05;

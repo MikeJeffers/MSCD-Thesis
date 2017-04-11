@@ -20,7 +20,5 @@ public interface View<T> extends Observable<T>, DataDisplay{
 	public void renderView(Model<UserData, CityData> model);
 	
 	public void screenShot();
-	
-	public XYChart.Series<Number,Number> getDisplayData();
 
 }
