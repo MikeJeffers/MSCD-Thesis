@@ -55,6 +55,7 @@ import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
@@ -478,7 +479,7 @@ public class GUI implements View<UserData> {
 	}
 
 	private Pane makeControlButtons(GraphicsContext gc) {
-		FlowPane pane = new FlowPane();
+		GridPane pane = new GridPane();
 		Button upButton = new Button("UP");
 		Button downButton = new Button("DOWN");
 		Button rightButton = new Button("RIGHT");
@@ -496,15 +497,16 @@ public class GUI implements View<UserData> {
 
 		Button resetView = new Button("Reset View");
 		resetView.setOnAction(e -> resetMatrix(gc));
-
-		ObservableList<Node> nodes = pane.getChildren();
-		nodes.add(upButton);
-		nodes.add(downButton);
-		nodes.add(rightButton);
-		nodes.add(leftbutton);
-		nodes.add(zoomIn);
-		nodes.add(zoomOut);
-		nodes.add(resetView);
+		
+		GridPane.setHalignment(zoomOut, HPos.LEFT);
+		GridPane.setHalignment(zoomIn, HPos.RIGHT);
+		GridPane.setHalignment(upButton, HPos.CENTER);
+		pane.add(upButton, 1, 0);
+		pane.add(downButton, 1, 1);
+		pane.add(rightButton, 2, 1);
+		pane.add(leftbutton, 0, 1);
+		pane.add(zoomIn, 0, 0);
+		pane.add(zoomOut, 2, 0);
 		return pane;
 	}
 
