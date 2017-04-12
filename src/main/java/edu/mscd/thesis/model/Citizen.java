@@ -20,7 +20,7 @@ public class Citizen implements Person {
 		this.id = _id;
 		this.money = Util.getRandomBetween(1, 55);
 		this.happiness = Util.getRandomBetween(1, 55);
-		this.age = Util.getRandomBetween(1, 2);
+		this.age = Util.getRandomBetween(1, 80);
 	}
 
 	@Override

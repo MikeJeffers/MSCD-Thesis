@@ -105,7 +105,7 @@ public class GUI implements View<UserData> {
 		Pane scorePane = makeScorePane();
 		Pane weightSliders = makeSliderPane();
 		Pane moveReporter = makeAIMoveReport();
-
+		
 		controlPane.setHgap(5);
 		controlPane.setVgap(5);
 		controlPane.setPadding(new Insets(5, 5, 5, 25));
@@ -132,10 +132,13 @@ public class GUI implements View<UserData> {
 
 	private Pane makeAIMoveReport() {
 		Pane pane = new GridPane();
+		Label aiMoveLabel = new Label("AI Move:  ");
 		aiMoveEventTarget = pane;
 		Label aiMove = new Label("...AI is thinking...");
-		GridPane.setColumnIndex(aiMove, 0);
+		GridPane.setColumnIndex(aiMove, 1);
 		GridPane.setRowIndex(aiMove, 0);
+		GridPane.setConstraints(aiMoveLabel, 0, 0, 1, 1, HPos.LEFT, VPos.TOP);
+		
 
 		aiMoveEventTarget.addEventHandler(dataReceipt, new EventHandler<DataReceived>() {
 			@Override
@@ -144,6 +147,7 @@ public class GUI implements View<UserData> {
 			}
 
 		});
+		pane.getChildren().add(aiMoveLabel);
 		pane.getChildren().add(aiMove);
 		return pane;
 	}
@@ -175,7 +179,11 @@ public class GUI implements View<UserData> {
 
 	private Pane makeSliderPane() {
 		Pane pane = new GridPane();
-		int row = 0;
+		Label weightLabel = new Label("Game Score Weights: ");
+		GridPane.setRowIndex(weightLabel, 0);
+		GridPane.setColumnIndex(weightLabel, 0);
+		pane.getChildren().add(weightLabel);
+		int row = 1;
 		for (CityProperty prop : CityProperty.values()) {
 			Label propReadout = new Label(prop.getLabel());
 			Label dataReadout = new Label("0.5");
@@ -207,7 +215,11 @@ public class GUI implements View<UserData> {
 
 	private Pane makeMetricsPane() {
 		Pane pane = new GridPane();
-		int row = 0;
+		Label metricsLabel = new Label("Data Readout: ");
+		GridPane.setRowIndex(metricsLabel, 0);
+		GridPane.setColumnIndex(metricsLabel, 0);
+		pane.getChildren().add(metricsLabel);
+		int row = 1;
 		for (CityProperty prop : CityProperty.values()) {
 			Label propReadout = new Label(prop.getLabel());
 			Label dataReadout = new Label();
@@ -338,7 +350,11 @@ public class GUI implements View<UserData> {
 	}
 
 	private Pane makeRenderModeControls() {
-		Pane renderModeControls = new FlowPane();
+		Pane renderModeControls = new GridPane();
+		Label renderModeLabel = new Label("Data Overlays: ");
+		GridPane.setColumnIndex(renderModeLabel, 0);
+		GridPane.setRowIndex(renderModeLabel, 0);
+		renderModeControls.getChildren().add(renderModeLabel);
 		ComboBox<RenderMode> combo = new ComboBox<RenderMode>();
 		combo.getItems().setAll(RenderMode.values());
 		combo.setValue(RenderMode.NORMAL);
@@ -350,6 +366,8 @@ public class GUI implements View<UserData> {
 				redraw(gc);
 			}
 		});
+		GridPane.setColumnIndex(combo, 1);
+		GridPane.setRowIndex(combo, 0);
 		renderModeControls.getChildren().add(combo);
 		return renderModeControls;
 
@@ -480,7 +498,7 @@ public class GUI implements View<UserData> {
 
 	private Pane makeControlButtons(GraphicsContext gc) {
 		GridPane pane = new GridPane();
-		Button upButton = new Button("UP");
+		Button upButton = new Button(" UP ");
 		Button downButton = new Button("DOWN");
 		Button rightButton = new Button("RIGHT");
 		Button leftbutton = new Button("LEFT");
@@ -501,12 +519,17 @@ public class GUI implements View<UserData> {
 		GridPane.setHalignment(zoomOut, HPos.LEFT);
 		GridPane.setHalignment(zoomIn, HPos.RIGHT);
 		GridPane.setHalignment(upButton, HPos.CENTER);
-		pane.add(upButton, 1, 0);
-		pane.add(downButton, 1, 1);
-		pane.add(rightButton, 2, 1);
-		pane.add(leftbutton, 0, 1);
-		pane.add(zoomIn, 0, 0);
-		pane.add(zoomOut, 2, 0);
+		upButton.setPrefWidth(54);
+		Label label = new Label("Camera Controls:");
+		GridPane.setConstraints(label, 0, 0, 3, 1, HPos.LEFT, VPos.BASELINE);
+		pane.add(label, 0, 0);
+		pane.add(upButton, 1, 1);
+		pane.add(downButton, 1, 2);
+		pane.add(rightButton, 2, 2);
+		pane.add(leftbutton, 0, 2);
+		pane.add(zoomIn, 0, 1);
+		pane.add(zoomOut, 2, 1);
+		
 		return pane;
 	}
 
