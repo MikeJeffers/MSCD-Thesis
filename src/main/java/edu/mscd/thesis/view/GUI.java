@@ -25,8 +25,10 @@ import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.event.EventType;
+import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.Point2D;
+import javafx.geometry.VPos;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.Scene;
@@ -354,20 +356,50 @@ public class GUI implements View<UserData> {
 
 	private Pane makeZonePane() {
 		GridPane zonePanel = new GridPane();
-		zonePanel.add(makeZoneButtonPane(), 0, 0);
+		Label zoneLabel = new Label("Zones: ");
+		Label brushLabel = new Label("Brush: ");
+		Label radiusLabel = new Label("Radius: ");
+		Label turnLabel = new Label("Turn control: ");
+		Pane zonePane = makeZoneButtonPane();
 		Pane combine = new FlowPane();
-		combine.getChildren().addAll(turnStepButton(), makePlayPauseButton(), brushShapeButton());
-		zonePanel.add(combine, 0, 1);
-		zonePanel.add(radiusSelect(), 0, 2);
+		combine.getChildren().addAll(turnStepButton(), makePlayPauseButton());
+		Pane brushPane = brushShapeButton();
+		Pane radiusPane = radiusSelect();
+		
+		
+		GridPane.setConstraints(zoneLabel, 0, 0, 1, 1, HPos.LEFT, VPos.BASELINE);
+		GridPane.setConstraints(zonePane, 1, 0, 1, 1, HPos.RIGHT, VPos.BASELINE);
+		GridPane.setConstraints(turnLabel, 0, 1, 1, 1, HPos.LEFT, VPos.BASELINE);
+		GridPane.setConstraints(combine, 1, 1, 1, 1, HPos.RIGHT, VPos.BASELINE);
+		GridPane.setConstraints(brushLabel, 0, 2, 1, 1, HPos.LEFT, VPos.BASELINE);
+		GridPane.setConstraints(brushPane, 1, 2, 1, 1, HPos.RIGHT, VPos.BASELINE);
+		GridPane.setConstraints(radiusLabel, 0, 3, 1, 1, HPos.LEFT, VPos.BASELINE);
+		GridPane.setConstraints(radiusPane, 1, 3, 1, 1, HPos.RIGHT, VPos.BASELINE);
+
+		zonePanel.getChildren().addAll(zoneLabel, zonePane, turnLabel, combine, brushLabel, brushPane, radiusLabel, radiusPane);
 		return zonePanel;
 	}
 
 	private Pane makeZoneButtonPane() {
-		Pane zonePane = new FlowPane();//TODO add label
+		Pane zonePane = new FlowPane();
+		Button[] theButtons = new Button[ZoneType.values().length];
 		for (ZoneType zType : ZoneType.values()) {
 			Button button = new Button(zType.toString());
+			theButtons[zType.ordinal()] = button;
 			button.setTooltip(new Tooltip("Set Zone Selection to: "+zType.name()));
-			button.setOnAction(e -> setSelectedTypeTo(zType));
+			button.setOnAction(new EventHandler<ActionEvent>(){
+				@Override
+				public void handle(ActionEvent event) {
+					selection.setZoneSelection(zType);
+					button.setDisable(true);
+					for(int i=0; i<theButtons.length; i++){
+						if(theButtons[i]!= null && !theButtons[i].equals(button)){
+							theButtons[i].setDisable(false);
+						}
+					}
+				}
+				
+			});
 			zonePane.getChildren().add(button);
 		}
 		return zonePane;
@@ -410,9 +442,8 @@ public class GUI implements View<UserData> {
 	}
 
 	private Pane brushShapeButton() {
-		Pane brushPane = new GridPane();
+		Pane brushPane = new FlowPane();
 		Button brushShape = new Button("Circle");
-		Label label = new Label("Brush: ");
 		brushShape.setTooltip(new Tooltip("Click to change Brush Shape!"));
 		brushShape.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
@@ -426,17 +457,12 @@ public class GUI implements View<UserData> {
 
 			}
 		});
-		GridPane.setColumnIndex(label, 0);
-		GridPane.setRowIndex(label, 0);
-		GridPane.setColumnIndex(brushShape, 1);
-		GridPane.setRowIndex(brushShape, 0);
-		brushPane.getChildren().addAll(label, brushShape);
+		brushPane.getChildren().add(brushShape);
 		return brushPane;
 	}
 
 	private Pane radiusSelect() {
-		Pane radiusSelectPane = new GridPane();
-		Label label = new Label("Radius: ");
+		Pane radiusSelectPane = new FlowPane();
 		Spinner<Integer> radiusSelector = new Spinner<Integer>(0, 10, 1);
 		radiusSelector.setTooltip(new Tooltip("Sets size of Brush"));
 		radiusSelector.setMaxSize(100, 25);
@@ -446,11 +472,7 @@ public class GUI implements View<UserData> {
 				selection.setRadius(newValue);
 			}
 		});
-		GridPane.setColumnIndex(label, 0);
-		GridPane.setRowIndex(label, 0);
-		GridPane.setColumnIndex(radiusSelector, 1);
-		GridPane.setRowIndex(radiusSelector, 0);
-		radiusSelectPane.getChildren().addAll(label, radiusSelector);
+		radiusSelectPane.getChildren().add(radiusSelector);
 		return radiusSelectPane;
 
 	}
@@ -517,11 +539,6 @@ public class GUI implements View<UserData> {
 		selection.setTakeStep(false);
 		notifyObserver();
 
-	}
-
-	private void setSelectedTypeTo(ZoneType zType) {
-		System.out.println("Selection changed to:" + zType.toString());
-		selection.setZoneSelection(zType);
 	}
 
 	@Override
