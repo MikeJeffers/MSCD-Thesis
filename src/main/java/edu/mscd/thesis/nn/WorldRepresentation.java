@@ -1,5 +1,9 @@
 package edu.mscd.thesis.nn;
 
+import java.util.Map;
+
+import edu.mscd.thesis.controller.CityData;
+import edu.mscd.thesis.controller.CityProperty;
 import edu.mscd.thesis.model.Tile;
 import edu.mscd.thesis.model.TileType;
 import edu.mscd.thesis.model.World;
@@ -96,6 +100,25 @@ public class WorldRepresentation {
 		attributes[4]=Util.mapValue(getTileDensityScore(t), srcDomain, normDomain);
 		return attributes;
 		
+	}
+	
+	
+	public static double[] getCityDataVector(CityData data){
+		double[] vector = new double[CityProperty.values().length];
+		if(data!=null){
+			Map<CityProperty, Double> map = data.getDataMap();
+			for(CityProperty prop: CityProperty.values()){
+				if(map.containsKey(prop)){
+					double value = data.getDataMap().get(prop);
+					value = value*prop.getNormalizationFactor();
+					if(prop.needsInversion()){
+						value = 1.0-value;
+					}
+					vector[prop.ordinal()]=value;
+				}
+			}
+		}
+		return vector;
 	}
 
 }

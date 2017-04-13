@@ -1,5 +1,7 @@
 package edu.mscd.thesis.nn;
 
+import java.util.Map;
+
 import org.encog.Encog;
 import org.encog.engine.network.activation.ActivationSigmoid;
 import org.encog.ml.data.MLData;
@@ -11,6 +13,7 @@ import org.encog.neural.networks.layers.BasicLayer;
 import org.encog.neural.networks.training.propagation.resilient.ResilientPropagation;
 
 import edu.mscd.thesis.controller.CityData;
+import edu.mscd.thesis.controller.CityProperty;
 import edu.mscd.thesis.controller.UserData;
 import edu.mscd.thesis.model.City;
 import edu.mscd.thesis.model.Model;
@@ -24,87 +27,170 @@ public class ZoneDecider implements Actor, Learner{
 	
 	public final static BasicNetwork network = new BasicNetwork();
 	public final static MLDataSet DATASET = new BasicMLDataSet();
+	private static final int INPUT_LAYER_SIZE = CityProperty.values().length+ZoneType.values().length;
+	private static final int OUTPUT_LAYER_SIZE = 1;
 	
 	
 	
 	public ZoneDecider(Model<UserData, CityData> initialState){
 		this.state = ModelStripper.reducedCopy(initialState);
 		initNetwork();
-		initTrainingDataSet();
+		initTraining();
 		trainResilient();
 	}
 	
-	
-	private void initTrainingDataSet(){
-		
-		double[][] input = new double[15][4];
-		double[][] output = new double[15][4];
-		for(int i=0; i<ZoneType.values().length; i++){
-			input[i] = WorldRepresentation.getZoneAsVector(ZoneType.values()[i]);
-			output[i]=WorldRepresentation.getZoneAsVector(ZoneType.values()[i]);
+	private void initTraining(){
+		double[][] input = new double[28][INPUT_LAYER_SIZE];
+		double[][] output = new double[28][OUTPUT_LAYER_SIZE];
+		int i = 0;
+		CityData dataVec = new CityData();
+		for(CityProperty prop: CityProperty.values()){
+			dataVec.setProperty(prop, 0);
 		}
-		input[4][0] = 0.77;//R
-		input[4][1] = 0.77;//C
-		input[4][2] = 1.0;//I
-		output[4] = WorldRepresentation.getZoneAsVector(ZoneType.INDUSTRIAL);
-
-		input[5][0] = 0.55;//R
-		input[5][1] = 1.0;//C
-		input[5][2] = 1.0;//I
-		output[5] = WorldRepresentation.getZoneAsVector(ZoneType.INDUSTRIAL);
+		//Empty model
+		double[] emptyCityData = WorldRepresentation.getCityDataVector(dataVec);
+		for(ZoneType zone: ZoneType.values()){
+			double[] zoneAction = WorldRepresentation.getZoneAsVector(zone);
+			input[i] = Util.appendVectors(emptyCityData, zoneAction);
+			if(ZoneType.EMPTY==zone){
+				output[i] = new double[]{0};
+			}else if(ZoneType.RESIDENTIAL==zone){
+				output[i] = new double[]{1};
+			}else if(ZoneType.COMMERICAL==zone){
+				output[i] = new double[]{0.5};
+			}else if(ZoneType.INDUSTRIAL==zone){
+				output[i] = new double[]{0.4};
+			}
+			i++;
+		}
 		
-		input[6][0] = 0.0;//R
-		input[6][1] = 0.5;//C
-		input[6][2] = 0.6;//I
-		output[6] = WorldRepresentation.getZoneAsVector(ZoneType.INDUSTRIAL);
+		//High R demand
+		dataVec.setProperty(CityProperty.R_DEMAND, 1.0);
+		double[] highR = WorldRepresentation.getCityDataVector(dataVec);
+		dataVec.setProperty(CityProperty.R_DEMAND, 0);
+		for(ZoneType zone: ZoneType.values()){
+			double[] zoneAction = WorldRepresentation.getZoneAsVector(zone);
+			input[i] = Util.appendVectors(highR, zoneAction);
+			if(ZoneType.EMPTY==zone){
+				output[i] = new double[]{0};
+			}else if(ZoneType.RESIDENTIAL==zone){
+				output[i] = new double[]{0.75};
+			}else if(ZoneType.COMMERICAL==zone){
+				output[i] = new double[]{0.0};
+			}else if(ZoneType.INDUSTRIAL==zone){
+				output[i] = new double[]{0.0};
+			}
+			i++;
+		}
 		
-		input[7][0] = 0.2;//R
-		input[7][1] = 0.4;//C
-		input[7][2] = 0.4;//I
-		output[7] = WorldRepresentation.getZoneAsVector(ZoneType.INDUSTRIAL);
+		//High C demand
+		dataVec.setProperty(CityProperty.C_DEMAND, 1.0);
+		double[] highC = WorldRepresentation.getCityDataVector(dataVec);
+		dataVec.setProperty(CityProperty.C_DEMAND, 0);
+		for(ZoneType zone: ZoneType.values()){
+			double[] zoneAction = WorldRepresentation.getZoneAsVector(zone);
+			input[i] = Util.appendVectors(highC, zoneAction);
+			if(ZoneType.EMPTY==zone){
+				output[i] = new double[]{0};
+			}else if(ZoneType.RESIDENTIAL==zone){
+				output[i] = new double[]{0};
+			}else if(ZoneType.COMMERICAL==zone){
+				output[i] = new double[]{0.75};
+			}else if(ZoneType.INDUSTRIAL==zone){
+				output[i] = new double[]{0.0};
+			}
+			i++;
+		}
 		
-		input[8][0] = 0.55;//R
-		input[8][1] = 0.4;//C
-		input[8][2] = 0.4;//I
-		output[8] = WorldRepresentation.getZoneAsVector(ZoneType.RESIDENTIAL);
+		//High industrial demand
+		dataVec.setProperty(CityProperty.I_DEMAND, 1.0);
+		double[] highIndy = WorldRepresentation.getCityDataVector(dataVec);
+		dataVec.setProperty(CityProperty.I_DEMAND, 0);
+		for(ZoneType zone: ZoneType.values()){
+			double[] zoneAction = WorldRepresentation.getZoneAsVector(zone);
+			input[i] = Util.appendVectors(highIndy, zoneAction);
+			if(ZoneType.EMPTY==zone){
+				output[i] = new double[]{0};
+			}else if(ZoneType.RESIDENTIAL==zone){
+				output[i] = new double[]{0};
+			}else if(ZoneType.COMMERICAL==zone){
+				output[i] = new double[]{0.0};
+			}else if(ZoneType.INDUSTRIAL==zone){
+				output[i] = new double[]{0.75};
+			}
+			i++;
+		}
 		
-		input[9][0] = 0.85;//R
-		input[9][1] = 0.7;//C
-		input[9][2] = 0.7;//I
-		output[9] = WorldRepresentation.getZoneAsVector(ZoneType.RESIDENTIAL);
+		//high homelessness
+		dataVec.setProperty(CityProperty.HOMELESS, 1.0);
+		double[] highHomeless = WorldRepresentation.getCityDataVector(dataVec);
+		dataVec.setProperty(CityProperty.HOMELESS, 0);
+		for(ZoneType zone: ZoneType.values()){
+			double[] zoneAction = WorldRepresentation.getZoneAsVector(zone);
+			input[i] = Util.appendVectors(highHomeless, zoneAction);
+			if(ZoneType.EMPTY==zone){
+				output[i] = new double[]{0};
+			}else if(ZoneType.RESIDENTIAL==zone){
+				output[i] = new double[]{1};
+			}else if(ZoneType.COMMERICAL==zone){
+				output[i] = new double[]{0};
+			}else if(ZoneType.INDUSTRIAL==zone){
+				output[i] = new double[]{0.0};
+			}
+			i++;
+		}
 		
-		input[10][0] = 0.05;//R
-		input[10][1] = 0.15;//C
-		input[10][2] = 0.0;//I
-		output[10] = WorldRepresentation.getZoneAsVector(ZoneType.COMMERICAL);
+		//high unemployment with high C
+		dataVec.setProperty(CityProperty.UNEMPLOY, 1.0);
+		dataVec.setProperty(CityProperty.C_DEMAND, 1.0);
+		double[] highJoblessC = WorldRepresentation.getCityDataVector(dataVec);
+		dataVec.setProperty(CityProperty.UNEMPLOY, 0);
+		dataVec.setProperty(CityProperty.C_DEMAND, 0);
+		for(ZoneType zone: ZoneType.values()){
+			double[] zoneAction = WorldRepresentation.getZoneAsVector(zone);
+			input[i] = Util.appendVectors(highJoblessC, zoneAction);
+			if(ZoneType.EMPTY==zone){
+				output[i] = new double[]{0};
+			}else if(ZoneType.RESIDENTIAL==zone){
+				output[i] = new double[]{0};
+			}else if(ZoneType.COMMERICAL==zone){
+				output[i] = new double[]{1};
+			}else if(ZoneType.INDUSTRIAL==zone){
+				output[i] = new double[]{0.0};
+			}
+			i++;
+		}
 		
-		input[11][0] = 0.05;//R
-		input[11][1] = 0.55;//C
-		input[11][2] = 0.45;//I
-		output[11] = WorldRepresentation.getZoneAsVector(ZoneType.COMMERICAL);
 		
-		input[12][0] = 0.65;//R
-		input[12][1] = 0.55;//C
-		input[12][2] = 0.45;//I
-		output[12] = WorldRepresentation.getZoneAsVector(ZoneType.RESIDENTIAL);
+		//High unemployment with high indy demand
+		dataVec.setProperty(CityProperty.UNEMPLOY, 1.0);
+		dataVec.setProperty(CityProperty.I_DEMAND, 1.0);
+		double[] highJobLessI = WorldRepresentation.getCityDataVector(dataVec);
+		dataVec.setProperty(CityProperty.UNEMPLOY, 0);
+		dataVec.setProperty(CityProperty.I_DEMAND, 0);
+		for(ZoneType zone: ZoneType.values()){
+			double[] zoneAction = WorldRepresentation.getZoneAsVector(zone);
+			input[i] = Util.appendVectors(highJobLessI, zoneAction);
+			if(ZoneType.EMPTY==zone){
+				output[i] = new double[]{0};
+			}else if(ZoneType.RESIDENTIAL==zone){
+				output[i] = new double[]{0.0};
+			}else if(ZoneType.COMMERICAL==zone){
+				output[i] = new double[]{0.0};
+			}else if(ZoneType.INDUSTRIAL==zone){
+				output[i] = new double[]{1.0};
+			}
+			i++;
+		}
 		
-		input[13][0] = 0.05;//R
-		input[13][1] = 0.10;//C
-		input[13][2] = 0.15;//I
-		output[13] = WorldRepresentation.getZoneAsVector(ZoneType.INDUSTRIAL);
-		
-		input[14][0] = 0.15;//R
-		input[14][1] = 0.25;//C
-		input[14][2] = 0.35;//I
-		output[14] = WorldRepresentation.getZoneAsVector(ZoneType.INDUSTRIAL);
-		
-
-		for (int i = 0; i < input.length; i++) {
-			MLData trainingIn = new BasicMLData(input[i]);
-			MLData idealOut = new BasicMLData(output[i]);
+		for (int j = 0; j < input.length; j++) {
+			MLData trainingIn = new BasicMLData(input[j]);
+			MLData idealOut = new BasicMLData(output[j]);
 			DATASET.add(trainingIn, idealOut);
 		}
+		
 	}
+	
 
 
 	private void trainResilient() {
@@ -121,10 +207,10 @@ public class ZoneDecider implements Actor, Learner{
 	}
 
 	private void initNetwork() {
-		network.addLayer(new BasicLayer(null, true, 4));
-		network.addLayer(new BasicLayer(new ActivationSigmoid(), true, 12));
-		network.addLayer(new BasicLayer(new ActivationSigmoid(), true, 7));
-		network.addLayer(new BasicLayer(new ActivationSigmoid(), false, 4));
+		network.addLayer(new BasicLayer(null, true, INPUT_LAYER_SIZE));
+		network.addLayer(new BasicLayer(new ActivationSigmoid(), true, (int) (INPUT_LAYER_SIZE*1.5)));
+		network.addLayer(new BasicLayer(new ActivationSigmoid(), true, INPUT_LAYER_SIZE/2));
+		network.addLayer(new BasicLayer(new ActivationSigmoid(), false, OUTPUT_LAYER_SIZE));
 		network.getStructure().finalizeStructure();
 		network.reset();
 	}
@@ -137,26 +223,29 @@ public class ZoneDecider implements Actor, Learner{
 
 	@Override
 	public UserData takeNextAction() {
-		City city = state.getWorld().getCity();
-		double r = city.residentialDemand();
-		double c = city.commercialDemand();
-		double indy = city.industrialDemand();
-		System.out.println("residential demand:"+r);
-		System.out.println("commercial demand:"+c);
-		System.out.println("industrial demand:"+indy);
-		double[] input = new double[4];
+		CityData cityData = state.getWorld().getCity().getData();
+		double[] modelVector = WorldRepresentation.getCityDataVector(cityData);
+		double[] qValues = new double[ZoneType.values().length];
+		int maxIndex = 0;
+		double maxScore = -1;
 		for(int i=0; i<ZoneType.values().length; i++){
-			input[i]= Rules.getDemandForZoneType(ZoneType.values()[i], state.getWorld());
-			System.out.println(ZoneType.values()[i]+" "+ input[i]);
+			double[] zoneAction = WorldRepresentation.getZoneAsVector(ZoneType.values()[i]);
+			double[] input = Util.appendVectors(modelVector,zoneAction);
+			MLData data = new BasicMLData(input);
+			double qValue = network.compute(data).getData(0);
+			qValues[i] = qValue;
+			if(qValue>maxScore){
+				maxScore = qValue;
+				maxIndex = i;
+			}
 		}
 		
-		MLData data = new BasicMLData(input);
-		int index = network.winner(data);
-		double indexValue = network.compute(data).getData(index);
 		
-		int strength = (int)Math.round(Util.mapValue(indexValue, new double[]{0,1}, new double[]{0,3}));
 		
-		ZoneType AIselection = ZoneType.values()[getZoneIndex(input)];
+		
+		int strength = (int)Math.round(Util.mapValue(maxScore, new double[]{0,1}, new double[]{0,3}));
+		
+		ZoneType AIselection = ZoneType.values()[maxIndex];
 
 		UserData fake = new UserData();
 		fake.setZoneSelection(AIselection);
@@ -171,6 +260,15 @@ public class ZoneDecider implements Actor, Learner{
 	public void addCase(Model<UserData, CityData> prev, Model<UserData, CityData> current, UserData action, double userRating) {
 		double currentScore = Rules.score(state);
 		double prevScore = Rules.score(prev);
+		CityData cityData = prev.getWorld().getCity().getData();
+		double[] modelVector = WorldRepresentation.getCityDataVector(cityData);
+		double[] zoneAction = WorldRepresentation.getZoneAsVector(action.getZoneSelection());
+		double[] input = Util.appendVectors(modelVector, zoneAction);
+		double[] output = new double[]{currentScore};
+		MLData trainingIn = new BasicMLData(input);
+		MLData idealOut = new BasicMLData(output);
+		DATASET.add(trainingIn, idealOut);
+		this.trainResilient();
 		
 		//Train on positive cases,online learning
 		if (currentScore > prevScore) {

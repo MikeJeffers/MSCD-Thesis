@@ -100,7 +100,7 @@ public class Rules {
 		cityScore+=(1-c.percentageHomeless())*((1*weightSum)/10);
 		cityScore+=(1-c.percentageUnemployed())*((1*weightSum)/10);
 		cityScore+=Math.min((c.totalPopulation()/MAX_POPULATION), 1.0)*((1*weightSum)/10);
-		cityScore = cityScore/(5.0*weightSum);
+		cityScore = cityScore/(weightSum);
 		
 		Tile[] tiles = w.getTiles();
 		double tilesTotalScore = 0;
@@ -109,7 +109,7 @@ public class Rules {
 			tilesTotalScore+=tileScore;
 		}
 		tilesTotalScore = tilesTotalScore/tiles.length;
-		return tilesTotalScore+cityScore;
+		return (tilesTotalScore+cityScore)/2.0;
 	}
 	
 	public static double score(Model<UserData, CityData>model, WeightVector<CityProperty> weights){
@@ -124,6 +124,7 @@ public class Rules {
 		for(CityProperty prop: CityProperty.values()){
 			if(data.getDataMap().containsKey(prop)){
 				double value = data.getDataMap().get(prop)*weights.getWeightFor(prop);
+				value = value*prop.getNormalizationFactor();
 				if(prop.needsInversion()){
 					value = 1.0-value;
 				}
