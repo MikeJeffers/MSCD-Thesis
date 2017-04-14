@@ -7,7 +7,7 @@ import edu.mscd.thesis.model.zones.Zone;
 import edu.mscd.thesis.model.zones.ZoneType;
 
 
-public interface Tile{
+public interface Tile extends OverlayNode{
 	
 	double getZoneValue();
 	

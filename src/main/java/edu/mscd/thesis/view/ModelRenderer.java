@@ -6,8 +6,8 @@ import edu.mscd.thesis.model.Model;
 import edu.mscd.thesis.model.World;
 import javafx.scene.canvas.GraphicsContext;
 
-public class ModelRenderer implements Renderer<Model<UserData, CityData>>, SpatialDataRender<Double>{
-	private WorldRenderer worldRenderer;
+public class ModelRenderer implements Renderer<Model<UserData, CityData>>{
+	private Renderer<World> worldRenderer;
 	public ModelRenderer(RenderMode mode){
 		this.worldRenderer = new WorldRenderer(mode);
 	}
@@ -22,11 +22,6 @@ public class ModelRenderer implements Renderer<Model<UserData, CityData>>, Spati
 		this.worldRenderer.changeMode(mode);
 	}
 
-	@Override
-	public void setData(Double[] data) {
-		this.worldRenderer.setData(data);
-		
-	}
 
 
 

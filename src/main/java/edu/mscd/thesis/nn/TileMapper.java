@@ -120,11 +120,11 @@ public class TileMapper implements Learner, Mapper {
 		Pos2D pos = action.getClickLocation();
 		Tile targetTile = prev.getWorld().getTileAt(pos);
 		ZoneType zoneAct = action.getZoneSelection();
-		double prevScore = Rules.score(prev.getWorld().getTileAt(pos));
-		double currentScore = Rules.score(state.getWorld().getTileAt(pos));
+		double prevScore = Rules.score(prev);
+		double currentScore = Rules.score(state);
 		double normalizedScoreDiff = ((currentScore - prevScore) / 2.0) + 0.5;
 		double[] input = Util.appendVectors(WorldRepresentation.getTileAttributesAsVector(targetTile), WorldRepresentation.getZoneAsVector(zoneAct));
-		learn(input, new double[] { normalizedScoreDiff });
+		learn(input, new double[] { currentScore });
 
 	}
 

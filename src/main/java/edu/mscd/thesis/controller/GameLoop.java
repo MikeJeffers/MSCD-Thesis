@@ -110,24 +110,15 @@ public class GameLoop extends AnimationTimer implements Controller {
 	
 	private void render(){
 		double[] map = ai.getMapOfValues(model, currentSelection);
-		Double[] boxed = new Double[map.length];
-		double max = 0;
-		double min = 100;
-		for(int i=0; i<map.length; i++){
-			if(map[i]>max){
-				max = map[i];
-			}
-			if(map[i]<min){
-				min = map[i];
-			}
-		}
-		double [] src = new double[]{min, max};
+		System.out.println(Arrays.toString(map));
 		double[] norm = new double[]{0,1};
-		for(int i=0; i<map.length; i++){
-			boxed[i]=Util.mapValue(map[i], src, norm);
-		}
-		view.renderView(model, boxed);
+		map = Util.mapValues(map, norm);
+		model.setOverlay(map);
+		System.out.println(Arrays.toString(map));
+		view.renderView(model);
 	}
+	
+	
 
 	@Override
 	public void start() {

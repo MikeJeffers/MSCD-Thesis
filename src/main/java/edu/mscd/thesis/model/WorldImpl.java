@@ -239,4 +239,13 @@ public class WorldImpl implements World {
 
 	}
 
+	@Override
+	public void setOverlay(double[] data) {
+		for(int i=0; i<tiles.length; i++){
+			tiles[i].setOverlayValue(data[i]);
+		}
+		
+	}
+
+
 }

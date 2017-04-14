@@ -166,6 +166,26 @@ public class Util {
 		return appended;
 	}
 	
+	
+	public static double[] mapValues(double[] values, double[] targetDomain){
+		double[] scaled = new double[values.length];
+		double min = Double.MAX_VALUE;
+		double max = Double.MIN_VALUE;
+		for(int i=0; i<values.length; i++){
+			if(values[i]<min){
+				min = values[i];
+			}
+			if(values[i]>max){
+				max = values[i];
+			}
+		}
+		double[] src = new double[]{min, max};
+		for(int i=0; i<values.length; i++){
+			scaled[i] = mapValue(values[i], src, targetDomain);
+		}
+		return scaled;
+	}
+	
 	/**
 	 * Map a given value from a known source range to a new target range, scaling the factor
 	 * @param value - value to remap

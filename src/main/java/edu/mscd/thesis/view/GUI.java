@@ -588,15 +588,11 @@ public class GUI implements View<UserData> {
 		for (Observer<UserData> o : observers) {
 			o.notifyNewData(selection);
 		}
-
 	}
 
 	@Override
-	public void renderView(Model<UserData, CityData> model, Double[] map) {
-		this.renderer.setData(map);
+	public void renderView(Model<UserData, CityData> model) {
 		this.renderer.draw(model, this.gc);
-		
-
 	}
 
 	@Override

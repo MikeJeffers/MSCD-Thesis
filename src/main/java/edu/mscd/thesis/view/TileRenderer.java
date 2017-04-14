@@ -7,15 +7,13 @@ import edu.mscd.thesis.util.Rules;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 
-public class TileRenderer implements Renderer<Tile>, SpatialDataRenderNode<Double>{
+public class TileRenderer implements Renderer<Tile>{
 	private Renderer<Zone> zoneRenderer;
 	private RenderMode renderMode;
-	private double value;
 	public TileRenderer(RenderMode mode){
 		this.zoneRenderer = new ZoneRenderer(mode);
 		this.renderMode = mode;
 	}
-
 
 	@Override
 	public void draw(Tile tile, GraphicsContext g) {
@@ -49,8 +47,9 @@ public class TileRenderer implements Renderer<Tile>, SpatialDataRenderNode<Doubl
 			}
 			g.setFill(densityColor);
 		}else if(renderMode==RenderMode.POLICY){
-			double red = 0;
-			double blue = 0;
+			double value = tile.getOverlayValue();
+			double red = 1.0-value;
+			double blue = 0.5-(value/2.0);
 			double green = value;
 			double intensity = value/2.0+0.5;
 			Color color = new Color(red, green, blue, intensity);
@@ -69,12 +68,6 @@ public class TileRenderer implements Renderer<Tile>, SpatialDataRenderNode<Doubl
 	public void changeMode(RenderMode mode) {
 		this.renderMode = mode;
 		this.zoneRenderer.changeMode(mode);
-	}
-
-
-	@Override
-	public void setDataValue(Double data) {
-		this.value = data.doubleValue();
 	}
 
 }

@@ -127,4 +127,13 @@ public class WorldReduced implements World{
 		// TODO never called
 	}
 
+
+
+	@Override
+	public void setOverlay(double[] data) {
+		// TODO never called
+		
+	}
+
+
 }

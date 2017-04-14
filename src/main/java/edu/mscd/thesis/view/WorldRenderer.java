@@ -5,10 +5,8 @@ import edu.mscd.thesis.model.World;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 
-public class WorldRenderer implements Renderer<World>, SpatialDataRender<Double>{
-	private TileRenderer tileRender;
-	private Double[] data;
-	
+public class WorldRenderer implements Renderer<World>{
+	private Renderer<Tile> tileRender;
 	public WorldRenderer(RenderMode mode){
 		tileRender = new TileRenderer(mode);
 	}
@@ -19,7 +17,6 @@ public class WorldRenderer implements Renderer<World>, SpatialDataRender<Double>
 		g.fillRect(0, 0, g.getCanvas().getWidth(), g.getCanvas().getHeight());
 		Tile[] tiles = world.getTiles();
 		for (int i = 0; i <tiles.length; i++) {
-			tileRender.setDataValue(data[i]);
 			tileRender.draw(tiles[i], g);
 		}
 	}
@@ -29,11 +26,6 @@ public class WorldRenderer implements Renderer<World>, SpatialDataRender<Double>
 		this.tileRender.changeMode(mode);
 	}
 
-	@Override
-	public void setData(Double[] data) {
-		this.data = data;
-		
-	}
 
 	
 
