@@ -1,5 +1,7 @@
 package edu.mscd.thesis.controller;
 
+import edu.mscd.thesis.model.city.CityData;
+
 /**
  * Wrapper interface for Runnable Observer that contains game-loop
  * AnimationTimer

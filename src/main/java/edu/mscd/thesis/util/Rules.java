@@ -1,14 +1,16 @@
 package edu.mscd.thesis.util;
 
 
-import edu.mscd.thesis.controller.CityData;
-import edu.mscd.thesis.controller.CityProperty;
+import java.util.Map;
+
 import edu.mscd.thesis.controller.UserData;
 import edu.mscd.thesis.model.Model;
 import edu.mscd.thesis.model.Tile;
 import edu.mscd.thesis.model.TileType;
 import edu.mscd.thesis.model.World;
 import edu.mscd.thesis.model.city.City;
+import edu.mscd.thesis.model.city.CityData;
+import edu.mscd.thesis.model.city.CityProperty;
 import edu.mscd.thesis.model.zones.Density;
 import edu.mscd.thesis.model.zones.ZoneType;
 
@@ -90,26 +92,22 @@ public class Rules {
 	 * @param m - Model THAT HAS BEEN REDUCED
 	 * @return double score that is some value based on success metrics
 	 */
-	public static double score(Model<UserData, CityData> m){
-		World w = m.getWorld();
-		City c = w.getCity();
-		double weightSum = 10.0;
+	public static double score(Model<UserData, CityData> m){;
+		Map<CityProperty, Double> data = m.getWorld().getCity().getData().getDataMap();
 		double cityScore = 0;
-		cityScore+=(c.averageHappiness()/MAX)*((3*weightSum)/10);
-		cityScore+=(c.averageWealth()/MAX)*((4*weightSum)/10);
-		cityScore+=(1-c.percentageHomeless())*((1*weightSum)/10);
-		cityScore+=(1-c.percentageUnemployed())*((1*weightSum)/10);
-		cityScore+=Math.min((c.totalPopulation()/MAX_POPULATION), 1.0)*((1*weightSum)/10);
-		cityScore = cityScore/(weightSum);
-		
-		Tile[] tiles = w.getTiles();
-		double tilesTotalScore = 0;
-		for(int i=0; i<tiles.length;i++){
-			double tileScore = score(tiles[i]);
-			tilesTotalScore+=tileScore;
+		for(CityProperty prop: CityProperty.values()){
+			if(data.containsKey(prop)){
+				double value = data.get(prop);
+				value = value*prop.getNormalizationFactor();
+				if(prop.needsInversion()){
+					value = 1.0-value;
+				}
+				cityScore+=value;
+			}
 		}
-		tilesTotalScore = tilesTotalScore/tiles.length;
-		return (tilesTotalScore+cityScore)/2.0;
+		cityScore = cityScore/CityProperty.values().length;
+		cityScore = Util.boundValue(cityScore, 0, 1);
+		return cityScore;
 	}
 	
 	public static double score(Model<UserData, CityData>model, WeightVector<CityProperty> weights){
@@ -131,7 +129,8 @@ public class Rules {
 				cityScore+=value;
 			}
 		}
-		cityScore = cityScore/weightSum;
+		cityScore = cityScore/CityProperty.values().length;
+		cityScore = Util.boundValue(cityScore, 0, 1);
 		
 		return cityScore;
 	}

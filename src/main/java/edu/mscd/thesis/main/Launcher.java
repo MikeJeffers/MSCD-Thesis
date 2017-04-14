@@ -1,11 +1,11 @@
 package edu.mscd.thesis.main;
 
-import edu.mscd.thesis.controller.CityData;
 import edu.mscd.thesis.controller.Controller;
 import edu.mscd.thesis.controller.GameLoop;
 import edu.mscd.thesis.controller.UserData;
 import edu.mscd.thesis.model.Model;
 import edu.mscd.thesis.model.WorldImpl;
+import edu.mscd.thesis.model.city.CityData;
 import edu.mscd.thesis.nn.AI;
 import edu.mscd.thesis.nn.NN;
 import edu.mscd.thesis.util.Rules;

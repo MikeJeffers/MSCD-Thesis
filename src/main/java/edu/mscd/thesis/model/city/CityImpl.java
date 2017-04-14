@@ -4,8 +4,6 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-import edu.mscd.thesis.controller.CityData;
-import edu.mscd.thesis.controller.CityProperty;
 import edu.mscd.thesis.model.Person;
 import edu.mscd.thesis.model.Tile;
 import edu.mscd.thesis.model.World;

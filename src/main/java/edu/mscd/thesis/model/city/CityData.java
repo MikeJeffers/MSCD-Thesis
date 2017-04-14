@@ -1,4 +1,4 @@
-package edu.mscd.thesis.controller;
+package edu.mscd.thesis.model.city;
 
 import java.util.HashMap;
 import java.util.Map;

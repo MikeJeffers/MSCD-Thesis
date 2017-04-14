@@ -2,11 +2,11 @@ package edu.mscd.thesis.util;
 
 import java.util.Map;
 
-import edu.mscd.thesis.controller.CityData;
-import edu.mscd.thesis.controller.CityProperty;
 import edu.mscd.thesis.model.Tile;
 import edu.mscd.thesis.model.TileType;
 import edu.mscd.thesis.model.World;
+import edu.mscd.thesis.model.city.CityData;
+import edu.mscd.thesis.model.city.CityProperty;
 import edu.mscd.thesis.model.zones.ZoneType;
 
 public class ModelToVec {
@@ -95,7 +95,7 @@ public class ModelToVec {
 		attributes[1]=Util.mapValue(t.getCurrentLandValue(), srcDomain, normDomain);
 		attributes[2]=Util.mapValue(t.getPollution(), srcDomain, normDomain);
 		attributes[3]=Util.mapValue(t.materialValue(), srcDomain, normDomain);
-		attributes[4]=Util.mapValue(getTileDensityScore(t), srcDomain, normDomain);
+		attributes[4]=getTileDensityScore(t);
 		return attributes;
 		
 	}

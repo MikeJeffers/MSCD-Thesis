@@ -14,11 +14,11 @@ import org.encog.neural.networks.BasicNetwork;
 import org.encog.neural.networks.layers.BasicLayer;
 import org.encog.neural.networks.training.propagation.resilient.ResilientPropagation;
 
-import edu.mscd.thesis.controller.CityData;
-import edu.mscd.thesis.controller.CityProperty;
 import edu.mscd.thesis.controller.UserData;
 import edu.mscd.thesis.model.Model;
 import edu.mscd.thesis.model.Pos2D;
+import edu.mscd.thesis.model.city.CityData;
+import edu.mscd.thesis.model.city.CityProperty;
 import edu.mscd.thesis.model.zones.ZoneType;
 import edu.mscd.thesis.util.ModelStripper;
 import edu.mscd.thesis.util.ModelToVec;
@@ -55,6 +55,7 @@ public class NN implements AI{
 			double[] modelVec = new double[]{0.5,0.5};
 			input[i] = Util.appendVectors(modelVec, ModelToVec.getZoneAsVector(zone));
 			output[i] = new double[]{0.5};
+			i++;
 		}
 
 		for (int j = 0; j < input.length; j++) {
@@ -160,8 +161,9 @@ public class NN implements AI{
 		double[] tileValues = this.tileMap.getMapOfValues(prev, action);
 		double[] zoneValues = this.tileMap.getMapOfValues(prev, action);
 		int index = Util.getIndexOf(prev.getWorld().getTileAt(action.getClickLocation()), prev.getWorld().getTiles());
-		double score = Rules.score(current);
-		double[]output = new double[]{score};
+		double currentScore = Rules.score(current);
+		double prevScore = Rules.score(prev);
+		double[]output = new double[]{currentScore};
 		double[] modelVec = new double[]{tileValues[index], zoneValues[index]};
 		double[] actionVec = ModelToVec.getZoneAsVector(action.getZoneSelection());
 		double[] input = Util.appendVectors(modelVec, actionVec);

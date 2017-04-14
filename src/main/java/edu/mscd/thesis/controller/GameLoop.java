@@ -6,6 +6,8 @@ import java.util.Map.Entry;
 
 import edu.mscd.thesis.model.Model;
 import edu.mscd.thesis.model.Pos2D;
+import edu.mscd.thesis.model.city.CityData;
+import edu.mscd.thesis.model.city.CityProperty;
 import edu.mscd.thesis.nn.AI;
 import edu.mscd.thesis.util.ArrayObservableList;
 import edu.mscd.thesis.util.ModelStripper;
@@ -34,7 +36,7 @@ public class GameLoop extends AnimationTimer implements Controller {
 	private long previousTime = System.currentTimeMillis();
 	private long timeStep = 500000000;
 	private int turn = 0;
-	private int aiMoveObserveWaitTime = 10;
+	private int aiMoveObserveWaitTime = 5;
 
 	private AI ai;
 	private boolean isAIon = true;
