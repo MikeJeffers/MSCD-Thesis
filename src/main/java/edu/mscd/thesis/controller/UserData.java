@@ -16,6 +16,7 @@ public class UserData {
 	private Pos2D clickLocation;
 	private boolean drawFlag;
 	private boolean isAI;
+	private boolean makeMove;
 
 	public UserData() {
 		setDefault();
@@ -31,6 +32,7 @@ public class UserData {
 		setDrawFlag(true);
 		setTakeStep(true);
 		setAI(false);
+		setMakeMove(false);
 	}
 
 	/**
@@ -119,15 +121,11 @@ public class UserData {
 	
 	public String getLabelText(){
 		StringBuilder sb = new StringBuilder();
-		sb.append("Click at:");
 		sb.append(clickLocation);
-		sb.append("\n");
-		sb.append("Zonetype:");
+		sb.append(" Zonetype:");
 		sb.append(zoneSelection);
-		sb.append("\n");
-		sb.append("Radius=");
+		sb.append(" Radius=");
 		sb.append(radius);
-		sb.append("\n");
 		return sb.toString();
 	}
 	
@@ -182,6 +180,14 @@ public class UserData {
 			return eq;
 		}
 		return false;
+	}
+
+	public boolean isMakeMove() {
+		return makeMove;
+	}
+
+	public void setMakeMove(boolean makeMove) {
+		this.makeMove = makeMove;
 	}
 
 

@@ -65,7 +65,7 @@ import javafx.stage.Stage;
 
 public class GUI implements View<UserData> {
 	private Collection<Observer<UserData>> observers = new ArrayList<Observer<UserData>>();
-	private Renderer<Model<UserData, CityData>> renderer = new ModelRenderer(RenderMode.NORMAL);
+	private ModelRenderer renderer = new ModelRenderer(RenderMode.NORMAL);
 	private GraphicsContext gc;
 	private Stage stage;
 
@@ -269,6 +269,7 @@ public class GUI implements View<UserData> {
 				if (Util.isValidPos2D(modelCoordinate, Rules.WORLD_X, Rules.WORLD_Y)) {
 					selection.setTakeStep(true);
 					selection.setClickLocation(modelCoordinate);
+					selection.setMakeMove(true);
 					notifyObserver();
 				}
 				if (Util.SCREENSHOT) {
@@ -410,6 +411,9 @@ public class GUI implements View<UserData> {
 				@Override
 				public void handle(ActionEvent event) {
 					selection.setZoneSelection(zType);
+					selection.setMakeMove(false);
+					selection.setTakeStep(false);
+					notifyObserver();
 					button.setDisable(true);
 					for(int i=0; i<theButtons.length; i++){
 						if(theButtons[i]!= null && !theButtons[i].equals(button)){
@@ -432,6 +436,7 @@ public class GUI implements View<UserData> {
 			public void handle(ActionEvent event) {
 				if(selection.isStepMode()){
 					selection.setTakeStep(true);
+					selection.setMakeMove(true);
 					notifyObserver();
 					if (Util.SCREENSHOT) {
 						Util.takeScreenshot(stage);
@@ -587,8 +592,10 @@ public class GUI implements View<UserData> {
 	}
 
 	@Override
-	public void renderView(Model<UserData, CityData> model) {
+	public void renderView(Model<UserData, CityData> model, Double[] map) {
+		this.renderer.setData(map);
 		this.renderer.draw(model, this.gc);
+		
 
 	}
 

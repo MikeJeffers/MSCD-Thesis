@@ -4,7 +4,8 @@ public enum RenderMode {
 	NORMAL("Normal"),
 	POLLUTION("Pollution"),
 	LANDVALUE("Landvalues"),
-	DENSITY("Density");
+	DENSITY("Density"),
+	POLICY("AI-Policy Map");
 	
 	private String shortName;
 	private RenderMode(String id){

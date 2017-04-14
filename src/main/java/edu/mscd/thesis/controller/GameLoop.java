@@ -1,5 +1,6 @@
 package edu.mscd.thesis.controller;
 
+import java.util.Arrays;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -8,6 +9,7 @@ import edu.mscd.thesis.model.Pos2D;
 import edu.mscd.thesis.nn.AI;
 import edu.mscd.thesis.util.ModelStripper;
 import edu.mscd.thesis.util.Rules;
+import edu.mscd.thesis.util.Util;
 import edu.mscd.thesis.view.View;
 import javafx.animation.AnimationTimer;
 import javafx.collections.ListChangeListener;
@@ -31,8 +33,10 @@ public class GameLoop extends AnimationTimer implements Controller {
 	private long previousTime = System.currentTimeMillis();
 	private long timeStep = 500000000;
 	private int turn = 0;
+	private int aiMoveObserveWaitTime = 10;
 
 	private AI ai;
+	private boolean isAIon = true;
 
 	public GameLoop(Model<UserData, CityData> model, View<UserData> view, AI ai) {
 		this.modelData = new ArrayObservableList<CityData>();
@@ -79,9 +83,9 @@ public class GameLoop extends AnimationTimer implements Controller {
 			aiObserveCounter++;
 			step = false;
 			model.update();
-			view.renderView(model);
+			render();
 			ai.setState(model);
-			if (ai != null && aiMode && aiObserveCounter > 5) {
+			if (ai != null && aiMode && aiObserveCounter > aiMoveObserveWaitTime) {
 				UserData nextAction = ai.takeNextAction();
 				if (nextAction != null) {
 					if (aiActionPrev != null) {
@@ -97,12 +101,32 @@ public class GameLoop extends AnimationTimer implements Controller {
 				}
 			}
 			view.screenShot();
-
-		} else if (draw) {
-			draw = false;
-			view.renderView(model);
+		} else if(draw){
+			render();
+			draw=false;
 		}
 
+	}
+	
+	private void render(){
+		double[] map = ai.getMapOfValues(model, currentSelection);
+		Double[] boxed = new Double[map.length];
+		double max = 0;
+		double min = 100;
+		for(int i=0; i<map.length; i++){
+			if(map[i]>max){
+				max = map[i];
+			}
+			if(map[i]<min){
+				min = map[i];
+			}
+		}
+		double [] src = new double[]{min, max};
+		double[] norm = new double[]{0,1};
+		for(int i=0; i<map.length; i++){
+			boxed[i]=Util.mapValue(map[i], src, norm);
+		}
+		view.renderView(model, boxed);
 	}
 
 	@Override
@@ -134,10 +158,7 @@ public class GameLoop extends AnimationTimer implements Controller {
 
 	@Override
 	public synchronized void notifyViewEvent(UserData data) {
-		Pos2D old = this.currentSelection.getClickLocation();
-		Pos2D newClick = data.getClickLocation();
-		// TODO this is messy, only update model on new canvas click?
-		if (!old.equals(newClick)) {
+		if (data.isMakeMove()) {
 			model.notifyNewData(data);
 		}
 		this.currentSelection = data.copy();

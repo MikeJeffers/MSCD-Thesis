@@ -1,6 +1,19 @@
 package edu.mscd.thesis.nn;
 
+import java.util.Arrays;
+
+import org.encog.Encog;
+import org.encog.engine.network.activation.ActivationSigmoid;
+import org.encog.ml.data.MLData;
+import org.encog.ml.data.MLDataSet;
+import org.encog.ml.data.basic.BasicMLData;
+import org.encog.ml.data.basic.BasicMLDataSet;
+import org.encog.neural.networks.BasicNetwork;
+import org.encog.neural.networks.layers.BasicLayer;
+import org.encog.neural.networks.training.propagation.resilient.ResilientPropagation;
+
 import edu.mscd.thesis.controller.CityData;
+import edu.mscd.thesis.controller.CityProperty;
 import edu.mscd.thesis.controller.UserData;
 import edu.mscd.thesis.model.Model;
 import edu.mscd.thesis.model.Pos2D;
@@ -15,14 +28,61 @@ public class NN implements AI{
 	private ZoneDecider zoneDecider;
 	private ZoneMapper zoneMap;
 	
+	private final static BasicNetwork network = new BasicNetwork();
+	private final static MLDataSet DATASET = new BasicMLDataSet();
+	private static final int INPUT_LAYER_SIZE = 2+ZoneType.values().length;
+	private static final int OUTPUT_LAYER_SIZE = 1;
+	
 	public NN(Model<UserData, CityData> state){
 		this.state = ModelStripper.reducedCopy(state);
 		this.zoneMap = new ZoneMapper(this.state);
 		this.tileMap = new TileMapper(this.state);
 		this.zoneDecider = new ZoneDecider(this.state);
 		
+		this.initNetwork();
+		this.initTraining();
+		this.trainResilient();
+	}
+	
+	private void initTraining(){
+		double[][] input = new double[4][INPUT_LAYER_SIZE];
+		double[][] output = new double[4][OUTPUT_LAYER_SIZE];
+		int i=0;
+		for(ZoneType zone: ZoneType.values()){
+			double[] modelVec = new double[]{0.5,0.5};
+			input[i] = Util.appendVectors(modelVec, WorldRepresentation.getZoneAsVector(zone));
+			output[i] = new double[]{0.5};
+		}
+
+		for (int j = 0; j < input.length; j++) {
+			MLData trainingIn = new BasicMLData(input[j]);
+			MLData idealOut = new BasicMLData(output[j]);
+			DATASET.add(trainingIn, idealOut);
+		}
+	}
+	
+	private void initNetwork() {
+		network.addLayer(new BasicLayer(null, true, INPUT_LAYER_SIZE));
+		network.addLayer(new BasicLayer(new ActivationSigmoid(), true, (int) (INPUT_LAYER_SIZE*2)));
+		network.addLayer(new BasicLayer(new ActivationSigmoid(), false, OUTPUT_LAYER_SIZE));
+		network.getStructure().finalizeStructure();
+		network.reset();
 	}
 
+	
+	private void trainResilient() {
+		ResilientPropagation train = new ResilientPropagation(network, DATASET);
+		int epoch = 1;
+
+		do {
+			train.iteration();
+			epoch++;
+		} while (train.getError() > 0.01 && epoch < 50);
+		train.finishTraining();
+
+		Encog.getInstance().shutdown();
+	}
+	
 	@Override
 	public UserData takeNextAction() {
 		UserData zoneAction = this.zoneDecider.takeNextAction();
@@ -39,9 +99,17 @@ public class NN implements AI{
 		double maxScore = 0;
 		double minScore = Rules.MAX;
 		assert(mapA.length==mapB.length && locations.length==mapA.length);
+		double[] zoneVec = WorldRepresentation.getZoneAsVector(zoneType);
 		for(int i=0; i<mapA.length; i++){
 			locations[i] = this.state.getWorld().getTiles()[i].getPos();
-			double value =  Util.mapValue(mapA[i]+mapB[i], src, targ);
+			double[] modelMapValues = new double[]{mapA[i], mapB[i]};
+			
+			double[] inputVec = Util.appendVectors(modelMapValues, zoneVec);
+			
+			MLData input = new BasicMLData(inputVec);
+			
+			double value = network.compute(input).getData(0);
+			//double value =  Util.mapValue(mapA[i]+mapB[i], src, targ);
 			combined[i]=value;
 			if(value<minScore){
 				minScore = value;
@@ -83,6 +151,18 @@ public class NN implements AI{
 		this.zoneDecider.addCase(state, prev, action, userRating);
 		this.tileMap.addCase(state, prev, action, userRating);
 		this.zoneMap.addCase(state, prev, action, userRating);
+		double[] tileValues = this.tileMap.getMapOfValues(prev, action);
+		double[] zoneValues = this.tileMap.getMapOfValues(prev, action);
+		int index = Util.getIndexOf(prev.getWorld().getTileAt(action.getClickLocation()), prev.getWorld().getTiles());
+		double score = Rules.score(current);
+		double[]output = new double[]{score};
+		double[] modelVec = new double[]{tileValues[index], zoneValues[index]};
+		double[] actionVec = WorldRepresentation.getZoneAsVector(action.getZoneSelection());
+		double[] input = Util.appendVectors(modelVec, actionVec);
+		MLData trainingIn = new BasicMLData(input);
+		MLData idealOut = new BasicMLData(output);
+		DATASET.add(trainingIn, idealOut);
+		this.trainResilient();
 		
 	}
 
@@ -91,6 +171,22 @@ public class NN implements AI{
 		this.state = ModelStripper.reducedCopy(state);
 		this.zoneDecider.setState(this.state);
 		
+	}
+
+	@Override
+	public double[] getMapOfValues(Model<UserData, CityData> state, UserData action) {
+		double[] mapA = this.tileMap.getMapOfValues(state, action);
+		double[] mapB = this.zoneMap.getMapOfValues(state, action);
+		double[] combined = new double[mapA.length];
+		double[] zoneVec = WorldRepresentation.getZoneAsVector(action.getZoneSelection());
+		for(int i=0; i<mapA.length; i++){
+			double[] modelMapValues = new double[]{mapA[i], mapB[i]};
+			double[] inputVec = Util.appendVectors(modelMapValues, zoneVec);
+			MLData input = new BasicMLData(inputVec);
+			double value = network.compute(input).getData(0);
+			combined[i]=value;
+		}
+		return combined;
 	}
 
 }

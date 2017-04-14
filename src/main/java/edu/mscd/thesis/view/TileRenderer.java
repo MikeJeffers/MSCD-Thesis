@@ -3,12 +3,14 @@ package edu.mscd.thesis.view;
 import edu.mscd.thesis.model.Tile;
 import edu.mscd.thesis.model.zones.Density;
 import edu.mscd.thesis.model.zones.Zone;
+import edu.mscd.thesis.util.Rules;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 
-public class TileRenderer implements Renderer<Tile>{
+public class TileRenderer implements Renderer<Tile>, SpatialDataRenderNode<Double>{
 	private Renderer<Zone> zoneRenderer;
 	private RenderMode renderMode;
+	private double value;
 	public TileRenderer(RenderMode mode){
 		this.zoneRenderer = new ZoneRenderer(mode);
 		this.renderMode = mode;
@@ -20,10 +22,10 @@ public class TileRenderer implements Renderer<Tile>{
 		if(renderMode==RenderMode.NORMAL){
 			g.setFill(tile.getType().getColor());
 		}else if(renderMode==RenderMode.POLLUTION){
-			double red = tile.getPollution()/255;
-			double blue = (255-tile.getPollution())/255;
-			double green = ((255+tile.getPollution())/2)/255;
-			double intensity = (tile.getPollution())/255;
+			double red = tile.getPollution()/Rules.MAX;
+			double blue = (255-tile.getPollution())/Rules.MAX;
+			double green = ((255+tile.getPollution())/2)/Rules.MAX;
+			double intensity = (tile.getPollution())/Rules.MAX;
 			Color pollutionColor = new Color(red, green, blue, intensity);
 			g.setFill(pollutionColor);
 		}else if(renderMode==RenderMode.LANDVALUE){
@@ -46,6 +48,13 @@ public class TileRenderer implements Renderer<Tile>{
 				densityColor = new Color(red, green, blue, alpha);
 			}
 			g.setFill(densityColor);
+		}else if(renderMode==RenderMode.POLICY){
+			double red = 0;
+			double blue = 0;
+			double green = value;
+			double intensity = value/2.0+0.5;
+			Color color = new Color(red, green, blue, intensity);
+			g.setFill(color);
 		}
 		g.fillRect(tile.getPos().getX(), tile.getPos().getY(), 1, 1);
 		Zone z = tile.getZone();
@@ -60,6 +69,12 @@ public class TileRenderer implements Renderer<Tile>{
 	public void changeMode(RenderMode mode) {
 		this.renderMode = mode;
 		this.zoneRenderer.changeMode(mode);
+	}
+
+
+	@Override
+	public void setDataValue(Double data) {
+		this.value = data.doubleValue();
 	}
 
 }

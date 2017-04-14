@@ -17,7 +17,7 @@ import javafx.stage.Stage;
 public interface View<T> extends Observable<T>, DataDisplay{
 	public void initView(Stage stage);
 
-	public void renderView(Model<UserData, CityData> model);
+	public void renderView(Model<UserData, CityData> model, Double[] map);
 	
 	public void screenShot();
 
