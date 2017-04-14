@@ -12,6 +12,7 @@ import org.junit.Test;
 import edu.mscd.thesis.model.bldgs.Building;
 import edu.mscd.thesis.model.bldgs.Factory;
 import edu.mscd.thesis.model.bldgs.House;
+import edu.mscd.thesis.model.city.Citizen;
 import edu.mscd.thesis.model.zones.Density;
 import edu.mscd.thesis.model.zones.ZoneType;
 import edu.mscd.thesis.util.JavaFXThreadingRule;

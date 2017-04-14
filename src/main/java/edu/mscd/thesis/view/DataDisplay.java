@@ -4,7 +4,7 @@ import java.util.Map;
 
 import edu.mscd.thesis.controller.CityProperty;
 import edu.mscd.thesis.controller.UserData;
-import edu.mscd.thesis.model.City;
+import edu.mscd.thesis.model.city.City;
 import edu.mscd.thesis.util.WeightVector;
 import javafx.scene.chart.XYChart.Series;
 

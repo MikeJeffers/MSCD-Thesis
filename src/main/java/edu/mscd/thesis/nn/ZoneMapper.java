@@ -17,6 +17,7 @@ import edu.mscd.thesis.model.Pos2D;
 import edu.mscd.thesis.model.Tile;
 import edu.mscd.thesis.model.World;
 import edu.mscd.thesis.model.zones.ZoneType;
+import edu.mscd.thesis.util.ModelToVec;
 import edu.mscd.thesis.util.Rules;
 
 /**
@@ -57,10 +58,10 @@ public class ZoneMapper implements Learner, Mapper {
 	private void initTraining() {
 		double[][] input = new double[10][INPUT_LAYER_SIZE];
 		double[][] output = new double[10][OUTPUT_LAYER_SIZE];
-		double[] r = WorldRepresentation.getZoneAsVector(ZoneType.RESIDENTIAL);
-		double[] c = WorldRepresentation.getZoneAsVector(ZoneType.COMMERICAL);
-		double[] indy = WorldRepresentation.getZoneAsVector(ZoneType.INDUSTRIAL);
-		double[] empty = WorldRepresentation.getZoneAsVector(ZoneType.EMPTY);
+		double[] r = ModelToVec.getZoneAsVector(ZoneType.RESIDENTIAL);
+		double[] c = ModelToVec.getZoneAsVector(ZoneType.COMMERICAL);
+		double[] indy = ModelToVec.getZoneAsVector(ZoneType.INDUSTRIAL);
+		double[] empty = ModelToVec.getZoneAsVector(ZoneType.EMPTY);
 		input[0] = constructSampleInput(r, empty);
 		output[0] = new double[] { 0 };
 		input[1] = constructSampleInput(c, empty);
@@ -122,7 +123,7 @@ public class ZoneMapper implements Learner, Mapper {
 	@Override
 	public double[] getMapOfValues(Model<UserData, CityData> state, UserData action) {
 		ZoneType zoneAction = action.getZoneSelection();
-		double[] zoneVector = WorldRepresentation.getZoneAsVector(zoneAction);
+		double[] zoneVector = ModelToVec.getZoneAsVector(zoneAction);
 		World w = state.getWorld();
 		Tile[] tiles = w.getTiles();
 		double[] map = new double[tiles.length];
@@ -145,7 +146,7 @@ public class ZoneMapper implements Learner, Mapper {
 		double currentScore = Rules.score(state.getWorld().getTileAt(pos));
 		double normalizedScoreDiff = ((currentScore - prevScore) / 2.0) + 0.5;
 		double[] input = addActionVector(getInputAroundTile(prev.getWorld(), pos),
-				WorldRepresentation.getZoneAsVector(zoneAct));
+				ModelToVec.getZoneAsVector(zoneAct));
 		learn(input, new double[] { normalizedScoreDiff });
 
 	}
@@ -161,7 +162,7 @@ public class ZoneMapper implements Learner, Mapper {
 		Tile[] tiles = getNeighbors(w, p);
 		double[] vals = new double[tiles.length * ZONETYPES];
 		for (int i = 0; i < tiles.length; i++) {
-			double[] zVector = WorldRepresentation.getTileAsZoneVector(tiles[i]);
+			double[] zVector = ModelToVec.getTileAsZoneVector(tiles[i]);
 			int index = i * ZONETYPES;
 			for (int j = 0; j < ZONETYPES; j++) {
 				vals[index + j] = zVector[j];

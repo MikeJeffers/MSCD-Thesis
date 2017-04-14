@@ -17,6 +17,7 @@ import edu.mscd.thesis.model.Pos2D;
 import edu.mscd.thesis.model.Tile;
 import edu.mscd.thesis.model.World;
 import edu.mscd.thesis.model.zones.ZoneType;
+import edu.mscd.thesis.util.ModelToVec;
 import edu.mscd.thesis.util.Rules;
 import edu.mscd.thesis.util.Util;
 
@@ -28,7 +29,7 @@ public class TileMapper implements Learner, Mapper {
 	 * 
 	 */
 	private static final int ZONETYPES = ZoneType.values().length;
-	private static final int TILE_ATTRIBUTES = WorldRepresentation.getTileAttributesAsVector(null).length;
+	private static final int TILE_ATTRIBUTES = ModelToVec.getTileAttributesAsVector(null).length;
 	private static final int INPUT_LAYER_SIZE = ZONETYPES+TILE_ATTRIBUTES;
 	private static final int OUTPUT_LAYER_SIZE = 1;
 	public static final BasicNetwork network = new BasicNetwork();
@@ -61,8 +62,8 @@ public class TileMapper implements Learner, Mapper {
 		for(int i=0; i<tiles.length; i++){
 			Tile t = tiles[i];
 			ZoneType z = ZoneType.values()[i%ZONETYPES];
-			double[] tileRepr =  WorldRepresentation.getTileAttributesAsVector(t);
-			double[] zoneRepr = WorldRepresentation.getZoneAsVector(z);
+			double[] tileRepr =  ModelToVec.getTileAttributesAsVector(t);
+			double[] zoneRepr = ModelToVec.getZoneAsVector(z);
 			input[i] = Util.appendVectors(tileRepr, zoneRepr);
 			output[i] = new double[]{Util.mapValue(Rules.getValueForZoneOnTile(t.getType(), z), src, target)};
 		}
@@ -97,7 +98,7 @@ public class TileMapper implements Learner, Mapper {
 	@Override
 	public double[] getMapOfValues(Model<UserData, CityData> state, UserData action) {
 		ZoneType zoneAction = action.getZoneSelection();
-		double[] zoneVector = WorldRepresentation.getZoneAsVector(zoneAction);
+		double[] zoneVector = ModelToVec.getZoneAsVector(zoneAction);
 		World w = state.getWorld();
 		Tile[] tiles = w.getTiles();
 		double[] map = new double[tiles.length];
@@ -105,7 +106,7 @@ public class TileMapper implements Learner, Mapper {
 		for (int i = 0; i < tiles.length; i++) {
 			Pos2D p = tiles[i].getPos();
 			locations[i] = p;
-			double[] tileRepr =  WorldRepresentation.getTileAttributesAsVector(tiles[i]);
+			double[] tileRepr =  ModelToVec.getTileAttributesAsVector(tiles[i]);
 			double[] input = Util.appendVectors(tileRepr, zoneVector);
 			double output = getOutput(input);
 			map[i]=output;
@@ -123,7 +124,7 @@ public class TileMapper implements Learner, Mapper {
 		double prevScore = Rules.score(prev);
 		double currentScore = Rules.score(state);
 		double normalizedScoreDiff = ((currentScore - prevScore) / 2.0) + 0.5;
-		double[] input = Util.appendVectors(WorldRepresentation.getTileAttributesAsVector(targetTile), WorldRepresentation.getZoneAsVector(zoneAct));
+		double[] input = Util.appendVectors(ModelToVec.getTileAttributesAsVector(targetTile), ModelToVec.getZoneAsVector(zoneAct));
 		learn(input, new double[] { currentScore });
 
 	}

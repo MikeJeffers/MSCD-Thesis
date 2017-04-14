@@ -1,6 +1,5 @@
 package edu.mscd.thesis.nn;
 
-import java.util.Map;
 
 import org.encog.Encog;
 import org.encog.engine.network.activation.ActivationSigmoid;
@@ -15,18 +14,18 @@ import org.encog.neural.networks.training.propagation.resilient.ResilientPropaga
 import edu.mscd.thesis.controller.CityData;
 import edu.mscd.thesis.controller.CityProperty;
 import edu.mscd.thesis.controller.UserData;
-import edu.mscd.thesis.model.City;
 import edu.mscd.thesis.model.Model;
 import edu.mscd.thesis.model.zones.ZoneType;
 import edu.mscd.thesis.util.ModelStripper;
+import edu.mscd.thesis.util.ModelToVec;
 import edu.mscd.thesis.util.Rules;
 import edu.mscd.thesis.util.Util;
 
 public class ZoneDecider implements Actor, Learner{
 	private Model<UserData, CityData> state;
 	
-	public final static BasicNetwork network = new BasicNetwork();
-	public final static MLDataSet DATASET = new BasicMLDataSet();
+	private static final  BasicNetwork network = new BasicNetwork();
+	private static final MLDataSet DATASET = new BasicMLDataSet();
 	private static final int INPUT_LAYER_SIZE = CityProperty.values().length+ZoneType.values().length;
 	private static final int OUTPUT_LAYER_SIZE = 1;
 	
@@ -48,9 +47,9 @@ public class ZoneDecider implements Actor, Learner{
 			dataVec.setProperty(prop, 0);
 		}
 		//Empty model
-		double[] emptyCityData = WorldRepresentation.getCityDataVector(dataVec);
+		double[] emptyCityData = ModelToVec.getCityDataVector(dataVec);
 		for(ZoneType zone: ZoneType.values()){
-			double[] zoneAction = WorldRepresentation.getZoneAsVector(zone);
+			double[] zoneAction = ModelToVec.getZoneAsVector(zone);
 			input[i] = Util.appendVectors(emptyCityData, zoneAction);
 			if(ZoneType.EMPTY==zone){
 				output[i] = new double[]{0};
@@ -66,10 +65,10 @@ public class ZoneDecider implements Actor, Learner{
 		
 		//High R demand
 		dataVec.setProperty(CityProperty.R_DEMAND, 1.0);
-		double[] highR = WorldRepresentation.getCityDataVector(dataVec);
+		double[] highR = ModelToVec.getCityDataVector(dataVec);
 		dataVec.setProperty(CityProperty.R_DEMAND, 0);
 		for(ZoneType zone: ZoneType.values()){
-			double[] zoneAction = WorldRepresentation.getZoneAsVector(zone);
+			double[] zoneAction = ModelToVec.getZoneAsVector(zone);
 			input[i] = Util.appendVectors(highR, zoneAction);
 			if(ZoneType.EMPTY==zone){
 				output[i] = new double[]{0};
@@ -85,10 +84,10 @@ public class ZoneDecider implements Actor, Learner{
 		
 		//High C demand
 		dataVec.setProperty(CityProperty.C_DEMAND, 1.0);
-		double[] highC = WorldRepresentation.getCityDataVector(dataVec);
+		double[] highC = ModelToVec.getCityDataVector(dataVec);
 		dataVec.setProperty(CityProperty.C_DEMAND, 0);
 		for(ZoneType zone: ZoneType.values()){
-			double[] zoneAction = WorldRepresentation.getZoneAsVector(zone);
+			double[] zoneAction = ModelToVec.getZoneAsVector(zone);
 			input[i] = Util.appendVectors(highC, zoneAction);
 			if(ZoneType.EMPTY==zone){
 				output[i] = new double[]{0};
@@ -104,10 +103,10 @@ public class ZoneDecider implements Actor, Learner{
 		
 		//High industrial demand
 		dataVec.setProperty(CityProperty.I_DEMAND, 1.0);
-		double[] highIndy = WorldRepresentation.getCityDataVector(dataVec);
+		double[] highIndy = ModelToVec.getCityDataVector(dataVec);
 		dataVec.setProperty(CityProperty.I_DEMAND, 0);
 		for(ZoneType zone: ZoneType.values()){
-			double[] zoneAction = WorldRepresentation.getZoneAsVector(zone);
+			double[] zoneAction = ModelToVec.getZoneAsVector(zone);
 			input[i] = Util.appendVectors(highIndy, zoneAction);
 			if(ZoneType.EMPTY==zone){
 				output[i] = new double[]{0};
@@ -123,10 +122,10 @@ public class ZoneDecider implements Actor, Learner{
 		
 		//high homelessness
 		dataVec.setProperty(CityProperty.HOMELESS, 1.0);
-		double[] highHomeless = WorldRepresentation.getCityDataVector(dataVec);
+		double[] highHomeless = ModelToVec.getCityDataVector(dataVec);
 		dataVec.setProperty(CityProperty.HOMELESS, 0);
 		for(ZoneType zone: ZoneType.values()){
-			double[] zoneAction = WorldRepresentation.getZoneAsVector(zone);
+			double[] zoneAction = ModelToVec.getZoneAsVector(zone);
 			input[i] = Util.appendVectors(highHomeless, zoneAction);
 			if(ZoneType.EMPTY==zone){
 				output[i] = new double[]{0};
@@ -143,11 +142,11 @@ public class ZoneDecider implements Actor, Learner{
 		//high unemployment with high C
 		dataVec.setProperty(CityProperty.UNEMPLOY, 1.0);
 		dataVec.setProperty(CityProperty.C_DEMAND, 1.0);
-		double[] highJoblessC = WorldRepresentation.getCityDataVector(dataVec);
+		double[] highJoblessC = ModelToVec.getCityDataVector(dataVec);
 		dataVec.setProperty(CityProperty.UNEMPLOY, 0);
 		dataVec.setProperty(CityProperty.C_DEMAND, 0);
 		for(ZoneType zone: ZoneType.values()){
-			double[] zoneAction = WorldRepresentation.getZoneAsVector(zone);
+			double[] zoneAction = ModelToVec.getZoneAsVector(zone);
 			input[i] = Util.appendVectors(highJoblessC, zoneAction);
 			if(ZoneType.EMPTY==zone){
 				output[i] = new double[]{0};
@@ -165,11 +164,11 @@ public class ZoneDecider implements Actor, Learner{
 		//High unemployment with high indy demand
 		dataVec.setProperty(CityProperty.UNEMPLOY, 1.0);
 		dataVec.setProperty(CityProperty.I_DEMAND, 1.0);
-		double[] highJobLessI = WorldRepresentation.getCityDataVector(dataVec);
+		double[] highJobLessI = ModelToVec.getCityDataVector(dataVec);
 		dataVec.setProperty(CityProperty.UNEMPLOY, 0);
 		dataVec.setProperty(CityProperty.I_DEMAND, 0);
 		for(ZoneType zone: ZoneType.values()){
-			double[] zoneAction = WorldRepresentation.getZoneAsVector(zone);
+			double[] zoneAction = ModelToVec.getZoneAsVector(zone);
 			input[i] = Util.appendVectors(highJobLessI, zoneAction);
 			if(ZoneType.EMPTY==zone){
 				output[i] = new double[]{0};
@@ -215,21 +214,17 @@ public class ZoneDecider implements Actor, Learner{
 		network.reset();
 	}
 
-	private int getZoneIndex(double[] input) {
-		MLData data = new BasicMLData(input);
-		return network.winner(data);
-	}
 
 
 	@Override
 	public UserData takeNextAction() {
 		CityData cityData = state.getWorld().getCity().getData();
-		double[] modelVector = WorldRepresentation.getCityDataVector(cityData);
+		double[] modelVector = ModelToVec.getCityDataVector(cityData);
 		double[] qValues = new double[ZoneType.values().length];
 		int maxIndex = 0;
 		double maxScore = -1;
 		for(int i=0; i<ZoneType.values().length; i++){
-			double[] zoneAction = WorldRepresentation.getZoneAsVector(ZoneType.values()[i]);
+			double[] zoneAction = ModelToVec.getZoneAsVector(ZoneType.values()[i]);
 			double[] input = Util.appendVectors(modelVector,zoneAction);
 			MLData data = new BasicMLData(input);
 			double qValue = network.compute(data).getData(0);
@@ -239,10 +234,7 @@ public class ZoneDecider implements Actor, Learner{
 				maxIndex = i;
 			}
 		}
-		
-		
-		
-		
+
 		int strength = (int)Math.round(Util.mapValue(maxScore, new double[]{0,1}, new double[]{0,3}));
 		
 		ZoneType AIselection = ZoneType.values()[maxIndex];
@@ -261,36 +253,14 @@ public class ZoneDecider implements Actor, Learner{
 		double currentScore = Rules.score(state);
 		double prevScore = Rules.score(prev);
 		CityData cityData = prev.getWorld().getCity().getData();
-		double[] modelVector = WorldRepresentation.getCityDataVector(cityData);
-		double[] zoneAction = WorldRepresentation.getZoneAsVector(action.getZoneSelection());
+		double[] modelVector = ModelToVec.getCityDataVector(cityData);
+		double[] zoneAction = ModelToVec.getZoneAsVector(action.getZoneSelection());
 		double[] input = Util.appendVectors(modelVector, zoneAction);
 		double[] output = new double[]{currentScore};
 		MLData trainingIn = new BasicMLData(input);
 		MLData idealOut = new BasicMLData(output);
 		DATASET.add(trainingIn, idealOut);
 		this.trainResilient();
-		
-		//Train on positive cases,online learning
-		if (currentScore > prevScore) {
-			/*
-			int zoneChoice = action.getZoneSelection().ordinal();
-			double[] input = new double[4];
-			double[] output = new double[4];
-			for(int i=0; i<ZoneType.values().length; i++){
-				input[i]= Rules.getDemandForZoneType(ZoneType.values()[i], prev.getWorld());
-			}
-			output[zoneChoice] = 1;
-			MLData trainingIn = new BasicMLData(input);
-			MLData idealOut = new BasicMLData(output);
-			DATASET.add(trainingIn, idealOut);
-			this.trainResilient();
-			*/
-			System.out.println("AI move improvedScore! " + currentScore + " from " + prevScore);
-
-		} else {
-			System.out.println("AI move dropped score =( " + currentScore + " from " + prevScore);
-		}
-
 	}
 
 

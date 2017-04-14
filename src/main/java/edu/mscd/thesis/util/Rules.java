@@ -4,11 +4,11 @@ package edu.mscd.thesis.util;
 import edu.mscd.thesis.controller.CityData;
 import edu.mscd.thesis.controller.CityProperty;
 import edu.mscd.thesis.controller.UserData;
-import edu.mscd.thesis.model.City;
 import edu.mscd.thesis.model.Model;
 import edu.mscd.thesis.model.Tile;
 import edu.mscd.thesis.model.TileType;
 import edu.mscd.thesis.model.World;
+import edu.mscd.thesis.model.city.City;
 import edu.mscd.thesis.model.zones.Density;
 import edu.mscd.thesis.model.zones.ZoneType;
 

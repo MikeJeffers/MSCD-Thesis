@@ -1,4 +1,4 @@
-package edu.mscd.thesis.nn;
+package edu.mscd.thesis.util;
 
 import java.util.Map;
 
@@ -8,10 +8,8 @@ import edu.mscd.thesis.model.Tile;
 import edu.mscd.thesis.model.TileType;
 import edu.mscd.thesis.model.World;
 import edu.mscd.thesis.model.zones.ZoneType;
-import edu.mscd.thesis.util.Rules;
-import edu.mscd.thesis.util.Util;
 
-public class WorldRepresentation {
+public class ModelToVec {
 
 	public static double[] getWorldAsEnumeratedInputData(World w) {
 		Tile[] tiles = w.getTiles();

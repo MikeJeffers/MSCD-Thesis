@@ -7,6 +7,7 @@ import java.util.Map.Entry;
 import edu.mscd.thesis.model.Model;
 import edu.mscd.thesis.model.Pos2D;
 import edu.mscd.thesis.nn.AI;
+import edu.mscd.thesis.util.ArrayObservableList;
 import edu.mscd.thesis.util.ModelStripper;
 import edu.mscd.thesis.util.Rules;
 import edu.mscd.thesis.util.Util;
@@ -110,11 +111,9 @@ public class GameLoop extends AnimationTimer implements Controller {
 	
 	private void render(){
 		double[] map = ai.getMapOfValues(model, currentSelection);
-		System.out.println(Arrays.toString(map));
 		double[] norm = new double[]{0,1};
 		map = Util.mapValues(map, norm);
 		model.setOverlay(map);
-		System.out.println(Arrays.toString(map));
 		view.renderView(model);
 	}
 	

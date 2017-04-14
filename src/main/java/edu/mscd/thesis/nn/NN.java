@@ -1,6 +1,8 @@
 package edu.mscd.thesis.nn;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import org.encog.Encog;
 import org.encog.engine.network.activation.ActivationSigmoid;
@@ -19,6 +21,7 @@ import edu.mscd.thesis.model.Model;
 import edu.mscd.thesis.model.Pos2D;
 import edu.mscd.thesis.model.zones.ZoneType;
 import edu.mscd.thesis.util.ModelStripper;
+import edu.mscd.thesis.util.ModelToVec;
 import edu.mscd.thesis.util.Rules;
 import edu.mscd.thesis.util.Util;
 
@@ -50,7 +53,7 @@ public class NN implements AI{
 		int i=0;
 		for(ZoneType zone: ZoneType.values()){
 			double[] modelVec = new double[]{0.5,0.5};
-			input[i] = Util.appendVectors(modelVec, WorldRepresentation.getZoneAsVector(zone));
+			input[i] = Util.appendVectors(modelVec, ModelToVec.getZoneAsVector(zone));
 			output[i] = new double[]{0.5};
 		}
 
@@ -99,27 +102,30 @@ public class NN implements AI{
 		double maxScore = 0;
 		double minScore = Rules.MAX;
 		assert(mapA.length==mapB.length && locations.length==mapA.length);
-		double[] zoneVec = WorldRepresentation.getZoneAsVector(zoneType);
+		double[] zoneVec = ModelToVec.getZoneAsVector(zoneType);
+		List<Integer> ties  = new ArrayList<Integer>();
 		for(int i=0; i<mapA.length; i++){
 			locations[i] = this.state.getWorld().getTiles()[i].getPos();
-			double[] modelMapValues = new double[]{mapA[i], mapB[i]};
-			
+			double[] modelMapValues = new double[]{mapA[i], mapB[i]};	
 			double[] inputVec = Util.appendVectors(modelMapValues, zoneVec);
-			
 			MLData input = new BasicMLData(inputVec);
-			
 			double value = network.compute(input).getData(0);
-			//double value =  Util.mapValue(mapA[i]+mapB[i], src, targ);
 			combined[i]=value;
-			if(value<minScore){
+			if(value<=minScore){
 				minScore = value;
 				minIndex = i;
 			}
-			if(value>maxScore){
+			if(value>=maxScore){
+				if(value>maxScore){
+					ties.clear();
+				}
 				maxScore = value;
 				maxIndex = i;
+				ties.add(i);	
 			}
 		}
+		maxIndex = ties.get((int)Math.random()*ties.size());
+		
 		System.out.println("Possible actions based on Mapped Score domain["+combined[minIndex]+","+combined[maxIndex]+"]");
 		System.out.print("Best move:{");
 		System.out.print(locations[maxIndex]);
@@ -157,7 +163,7 @@ public class NN implements AI{
 		double score = Rules.score(current);
 		double[]output = new double[]{score};
 		double[] modelVec = new double[]{tileValues[index], zoneValues[index]};
-		double[] actionVec = WorldRepresentation.getZoneAsVector(action.getZoneSelection());
+		double[] actionVec = ModelToVec.getZoneAsVector(action.getZoneSelection());
 		double[] input = Util.appendVectors(modelVec, actionVec);
 		MLData trainingIn = new BasicMLData(input);
 		MLData idealOut = new BasicMLData(output);
@@ -178,7 +184,7 @@ public class NN implements AI{
 		double[] mapA = this.tileMap.getMapOfValues(state, action);
 		double[] mapB = this.zoneMap.getMapOfValues(state, action);
 		double[] combined = new double[mapA.length];
-		double[] zoneVec = WorldRepresentation.getZoneAsVector(action.getZoneSelection());
+		double[] zoneVec = ModelToVec.getZoneAsVector(action.getZoneSelection());
 		for(int i=0; i<mapA.length; i++){
 			double[] modelMapValues = new double[]{mapA[i], mapB[i]};
 			double[] inputVec = Util.appendVectors(modelMapValues, zoneVec);
