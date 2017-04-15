@@ -1,13 +1,15 @@
-package edu.mscd.thesis.nn;
+package edu.mscd.thesis.util;
+
+import java.util.Map;
 
 import edu.mscd.thesis.model.Tile;
 import edu.mscd.thesis.model.TileType;
 import edu.mscd.thesis.model.World;
+import edu.mscd.thesis.model.city.CityData;
+import edu.mscd.thesis.model.city.CityProperty;
 import edu.mscd.thesis.model.zones.ZoneType;
-import edu.mscd.thesis.util.Rules;
-import edu.mscd.thesis.util.Util;
 
-public class WorldRepresentation {
+public class ModelToVec {
 
 	public static double[] getWorldAsEnumeratedInputData(World w) {
 		Tile[] tiles = w.getTiles();
@@ -93,9 +95,44 @@ public class WorldRepresentation {
 		attributes[1]=Util.mapValue(t.getCurrentLandValue(), srcDomain, normDomain);
 		attributes[2]=Util.mapValue(t.getPollution(), srcDomain, normDomain);
 		attributes[3]=Util.mapValue(t.materialValue(), srcDomain, normDomain);
-		attributes[4]=Util.mapValue(getTileDensityScore(t), srcDomain, normDomain);
+		attributes[4]=getTileDensityScore(t);
 		return attributes;
 		
+	}
+	
+	public static double[] getTileTypeAsVector(TileType t){
+		double[] attributes = new double[5];
+		if(t==null){
+			return attributes;
+		}
+		double[]normDomain = new double[]{0.0, 1.0};
+		double[] srcDomain = new double[]{0, Rules.MAX};
+		attributes[0]=Util.mapValue(t.getBaseLandValue(), srcDomain, normDomain);
+		attributes[1]=Util.mapValue(t.getBaseLandValue(), srcDomain, normDomain);
+		attributes[2]=Util.mapValue(0, srcDomain, normDomain);
+		attributes[3]=Util.mapValue(t.getMaterialValue(), srcDomain, normDomain);
+		attributes[4]=0;
+		return attributes;
+		
+	}
+	
+	
+	public static double[] getCityDataVector(CityData data){
+		double[] vector = new double[CityProperty.values().length];
+		if(data!=null){
+			Map<CityProperty, Double> map = data.getDataMap();
+			for(CityProperty prop: CityProperty.values()){
+				if(map.containsKey(prop)){
+					double value = data.getDataMap().get(prop);
+					value = value*prop.getNormalizationFactor();
+					if(prop.needsInversion()){
+						value = 1.0-value;
+					}
+					vector[prop.ordinal()]=value;
+				}
+			}
+		}
+		return vector;
 	}
 
 }

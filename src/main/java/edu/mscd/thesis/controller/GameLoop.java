@@ -4,10 +4,13 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import edu.mscd.thesis.model.Model;
-import edu.mscd.thesis.model.Pos2D;
+import edu.mscd.thesis.model.city.CityData;
+import edu.mscd.thesis.model.city.CityProperty;
 import edu.mscd.thesis.nn.AI;
+import edu.mscd.thesis.util.ArrayObservableList;
 import edu.mscd.thesis.util.ModelStripper;
 import edu.mscd.thesis.util.Rules;
+import edu.mscd.thesis.util.Util;
 import edu.mscd.thesis.view.View;
 import javafx.animation.AnimationTimer;
 import javafx.collections.ListChangeListener;
@@ -18,25 +21,25 @@ import javafx.scene.chart.XYChart.Series;
 public class GameLoop extends AnimationTimer implements Controller {
 
 	private ObservableList<CityData> modelData;
-
 	private Model<UserData, CityData> model;
 	private View<UserData> view;
 	private UserData currentSelection = new UserData();
 	private boolean step = true;
 	private boolean draw = true;
-	private boolean aiMode = true;
+	private AiMode aiMode = AiMode.ON;
 	private int aiObserveCounter;
 	private UserData aiActionPrev;
 	private Model<UserData, CityData> prevModelState;
 	private long previousTime = System.currentTimeMillis();
 	private long timeStep = 500000000;
 	private int turn = 0;
+	private int aiMoveObserveWaitTime = 5;
 
 	private AI ai;
 
+
 	public GameLoop(Model<UserData, CityData> model, View<UserData> view, AI ai) {
 		this.modelData = new ArrayObservableList<CityData>();
-
 		this.modelData.addListener(new ListChangeListener<CityData>() {
 			@Override
 			public void onChanged(ListChangeListener.Change<? extends CityData> c) {
@@ -75,35 +78,46 @@ public class GameLoop extends AnimationTimer implements Controller {
 		}
 
 		if (step) {
+			step = false;
 			turn++;
 			aiObserveCounter++;
-			step = false;
-			model.update();
-			view.renderView(model);
-			ai.setState(model);
-			if (ai != null && aiMode && aiObserveCounter > 5) {
-				UserData nextAction = ai.takeNextAction();
-				if (nextAction != null) {
-					if (aiActionPrev != null) {
-						ai.addCase(model, prevModelState, aiActionPrev, 0.5);
-					}
-					if (!nextAction.equals(aiActionPrev)) {
-						this.makeAIMove(nextAction);
-						aiObserveCounter = 0;
-					} else {
-						System.out.println("AI repeat move ignored");
-					}
-					aiActionPrev = nextAction;
+			if(aiMode!=AiMode.OFF && aiMoveObserveWaitTime<aiObserveCounter){
+				ai.setState(model);
+				prevModelState = ModelStripper.reducedCopy(model);
+				UserData nextAction = this.currentSelection;
+				if(aiMode!=AiMode.OBSERVE){
+					nextAction = ai.takeNextAction();
 				}
+				if (nextAction != null &&aiActionPrev != null) {
+					ai.addCase(model, prevModelState, aiActionPrev, 0.5);
+				}
+				view.updateAIMove(nextAction);
+				if(aiMode==AiMode.ON){
+					model.notifyNewData(nextAction);
+				}
+				aiActionPrev = nextAction;
+				aiObserveCounter=0;
 			}
+			model.update();
+			render();
 			view.screenShot();
-
-		} else if (draw) {
-			draw = false;
-			view.renderView(model);
+		} else if(draw){
+			render();
+			draw=false;
 		}
 
 	}
+
+	
+	private void render(){
+		double[] map = ai.getMapOfValues(model, currentSelection);
+		double[] norm = new double[]{0,1};
+		map = Util.mapValues(map, norm);
+		model.setOverlay(map);
+		view.renderView(model);
+	}
+	
+	
 
 	@Override
 	public void start() {
@@ -120,29 +134,21 @@ public class GameLoop extends AnimationTimer implements Controller {
 		this.start();
 	}
 
-	private void makeAIMove(UserData action) {
-		prevModelState = ModelStripper.reducedCopy(model);
-		model.notifyNewData(action);
-		view.updateAIMove(action);
-	}
-
 	@Override
 	public synchronized void notifyModelEvent(CityData data) {
 		modelData.add(data);
-		view.updateScore(Rules.score(model, view.getWeightVector()));
+		view.updateScore(Rules.score(model, view.getWeightVector()), turn);
 	}
 
 	@Override
 	public synchronized void notifyViewEvent(UserData data) {
-		Pos2D old = this.currentSelection.getClickLocation();
-		Pos2D newClick = data.getClickLocation();
-		// TODO this is messy, only update model on new canvas click?
-		if (!old.equals(newClick)) {
+		if (data.isMakeMove()) {
 			model.notifyNewData(data);
 		}
 		this.currentSelection = data.copy();
 		step = data.isTakeStep();
 		draw = data.isDrawFlag();
+		aiMode = data.isAiMode();
 	}
 
 }

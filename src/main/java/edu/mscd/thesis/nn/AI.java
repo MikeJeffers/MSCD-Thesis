@@ -1,6 +1,9 @@
 package edu.mscd.thesis.nn;
 
-
-public interface AI extends Actor, Learner{
-
+/**
+ * Wrapper Interface for full AI system
+ * @author Mike
+ */
+public interface AI extends Actor, Learner, Mapper{
+	
 }

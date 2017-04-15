@@ -1,7 +1,9 @@
-package edu.mscd.thesis.model;
+package edu.mscd.thesis.model.city;
 
 import java.util.Objects;
 
+import edu.mscd.thesis.model.Person;
+import edu.mscd.thesis.model.Pos2D;
 import edu.mscd.thesis.model.bldgs.Building;
 import edu.mscd.thesis.util.Rules;
 import edu.mscd.thesis.util.Util;

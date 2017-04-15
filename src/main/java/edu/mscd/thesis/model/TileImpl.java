@@ -10,6 +10,7 @@ import edu.mscd.thesis.util.Util;
 
 
 public class TileImpl implements Tile {
+	private double overlay;
 	private Pos2D pos;
 	private TileType type;
 	private Zone zoning;
@@ -168,6 +169,17 @@ public class TileImpl implements Tile {
 	@Override
 	public ZoneType getZoneType() {
 		return this.getZone().getZoneType();
+	}
+
+	@Override
+	public double getOverlayValue() {
+		return this.overlay;
+	}
+
+	@Override
+	public void setOverlayValue(double value) {
+		this.overlay = value;
+		
 	}
 
 }

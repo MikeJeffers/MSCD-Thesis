@@ -1,4 +1,4 @@
-package edu.mscd.thesis.controller;
+package edu.mscd.thesis.util;
 
 import java.util.ArrayList;
 import java.util.List;

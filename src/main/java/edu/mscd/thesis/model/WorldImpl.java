@@ -5,10 +5,12 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Random;
 
-import edu.mscd.thesis.controller.CityData;
 import edu.mscd.thesis.controller.Observer;
 import edu.mscd.thesis.controller.UserData;
 import edu.mscd.thesis.model.bldgs.Building;
+import edu.mscd.thesis.model.city.City;
+import edu.mscd.thesis.model.city.CityData;
+import edu.mscd.thesis.model.city.CityImpl;
 import edu.mscd.thesis.model.zones.Zone;
 import edu.mscd.thesis.model.zones.ZoneFactory;
 import edu.mscd.thesis.model.zones.ZoneFactoryImpl;
@@ -238,5 +240,14 @@ public class WorldImpl implements World {
 		}
 
 	}
+
+	@Override
+	public void setOverlay(double[] data) {
+		for(int i=0; i<tiles.length; i++){
+			tiles[i].setOverlayValue(data[i]);
+		}
+		
+	}
+
 
 }

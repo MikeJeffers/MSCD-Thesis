@@ -1,5 +1,7 @@
 package edu.mscd.thesis.nn;
 
+import java.util.List;
+
 import org.encog.Encog;
 import org.encog.engine.network.activation.ActivationSigmoid;
 import org.encog.ml.data.MLData;
@@ -10,14 +12,16 @@ import org.encog.neural.networks.BasicNetwork;
 import org.encog.neural.networks.layers.BasicLayer;
 import org.encog.neural.networks.training.propagation.resilient.ResilientPropagation;
 
-import edu.mscd.thesis.controller.CityData;
 import edu.mscd.thesis.controller.UserData;
 import edu.mscd.thesis.model.Model;
 import edu.mscd.thesis.model.Pos2D;
 import edu.mscd.thesis.model.Tile;
 import edu.mscd.thesis.model.World;
+import edu.mscd.thesis.model.city.CityData;
 import edu.mscd.thesis.model.zones.ZoneType;
+import edu.mscd.thesis.util.ModelToVec;
 import edu.mscd.thesis.util.Rules;
+import edu.mscd.thesis.util.Util;
 
 /**
  * Input layer:[STATE(9xZoneVectors)+Action(ZoneVector)] where ZoneVector is
@@ -30,7 +34,7 @@ import edu.mscd.thesis.util.Rules;
 public class ZoneMapper implements Learner, Mapper {
 
 	private static final int ZONETYPES = ZoneType.values().length;
-	private static final int INPUT_LAYER_SIZE = 9 * ZONETYPES + ZONETYPES;
+	private static final int INPUT_LAYER_SIZE = 10 * ZONETYPES;
 	private static final int OUTPUT_LAYER_SIZE = 1;
 	private static final BasicNetwork network = new BasicNetwork();
 	private static final MLDataSet DATASET = new BasicMLDataSet();
@@ -47,7 +51,7 @@ public class ZoneMapper implements Learner, Mapper {
 
 	private void initNetwork() {
 		network.addLayer(new BasicLayer(null, true, INPUT_LAYER_SIZE));
-		network.addLayer(new BasicLayer(new ActivationSigmoid(), true, (INPUT_LAYER_SIZE * 3) / 2));
+		network.addLayer(new BasicLayer(new ActivationSigmoid(), true, (INPUT_LAYER_SIZE * 5) / 2));
 		network.addLayer(new BasicLayer(new ActivationSigmoid(), true, (INPUT_LAYER_SIZE / 4)));
 		network.addLayer(new BasicLayer(new ActivationSigmoid(), false, OUTPUT_LAYER_SIZE));
 		network.getStructure().finalizeStructure();
@@ -57,29 +61,29 @@ public class ZoneMapper implements Learner, Mapper {
 	private void initTraining() {
 		double[][] input = new double[10][INPUT_LAYER_SIZE];
 		double[][] output = new double[10][OUTPUT_LAYER_SIZE];
-		double[] r = WorldRepresentation.getZoneAsVector(ZoneType.RESIDENTIAL);
-		double[] c = WorldRepresentation.getZoneAsVector(ZoneType.COMMERICAL);
-		double[] indy = WorldRepresentation.getZoneAsVector(ZoneType.INDUSTRIAL);
-		double[] empty = WorldRepresentation.getZoneAsVector(ZoneType.EMPTY);
+		double[] r = ModelToVec.getZoneAsVector(ZoneType.RESIDENTIAL);
+		double[] c = ModelToVec.getZoneAsVector(ZoneType.COMMERICAL);
+		double[] indy = ModelToVec.getZoneAsVector(ZoneType.INDUSTRIAL);
+		double[] empty = ModelToVec.getZoneAsVector(ZoneType.EMPTY);
 		input[0] = constructSampleInput(r, empty);
 		output[0] = new double[] { 0 };
-		input[1] = constructSampleInput(c, empty);
+		input[1] =  constructSampleInput(c, empty);
 		output[1] = new double[] { 0 };
-		input[2] = constructSampleInput(indy, empty);
+		input[2] =  constructSampleInput(indy, empty);
 		output[2] = new double[] { 0.1 };
-		input[3] = constructSampleInput(empty, empty);
+		input[3] =  constructSampleInput(empty, empty);
 		output[3] = new double[] { 0 };
-		input[4] = constructSampleInput(r, indy);
+		input[4] =  constructSampleInput(r, indy);
 		output[4] = new double[] { 0.1 };
-		input[5] = constructSampleInput(indy, r);
+		input[5] =  constructSampleInput(indy, r);
 		output[5] = new double[] { 0.9 };
-		input[6] = constructSampleInput(empty, r);
+		input[6] =  constructSampleInput(empty, r);
 		output[6] = new double[] { 1 };
-		input[7] = constructSampleInput(empty, c);
+		input[7] =  constructSampleInput(empty, c);
 		output[7] = new double[] { 1 };
-		input[8] = constructSampleInput(empty, indy);
+		input[8] =  constructSampleInput(empty, indy);
 		output[8] = new double[] { 1 };
-		input[9] = constructSampleInput(indy, indy);
+		input[9] =  constructSampleInput(indy, indy);
 		output[9] = new double[] { 1 };
 
 		for (int i = 0; i < input.length; i++) {
@@ -122,7 +126,7 @@ public class ZoneMapper implements Learner, Mapper {
 	@Override
 	public double[] getMapOfValues(Model<UserData, CityData> state, UserData action) {
 		ZoneType zoneAction = action.getZoneSelection();
-		double[] zoneVector = WorldRepresentation.getZoneAsVector(zoneAction);
+		double[] zoneVector = ModelToVec.getZoneAsVector(zoneAction);
 		World w = state.getWorld();
 		Tile[] tiles = w.getTiles();
 		double[] map = new double[tiles.length];
@@ -130,7 +134,7 @@ public class ZoneMapper implements Learner, Mapper {
 		for (int i = 0; i < tiles.length; i++) {
 			Pos2D p = tiles[i].getPos();
 			locations[i] = p;
-			double[] input = addActionVector(getInputAroundTile(w, p), zoneVector);
+			double[] input = Util.appendVectors(getInputAroundTile(w, p), zoneVector);
 			double output = getOutput(input);
 			map[i] = output;
 		}
@@ -141,12 +145,12 @@ public class ZoneMapper implements Learner, Mapper {
 	public void addCase(Model<UserData, CityData> state, Model<UserData, CityData> prev, UserData action, double userRating) {
 		Pos2D pos = action.getClickLocation();
 		ZoneType zoneAct = action.getZoneSelection();
+		ZoneType prevZone = prev.getWorld().getTileAt(action.getClickLocation()).getZoneType();
 		double prevScore = Rules.score(prev.getWorld().getTileAt(pos));
 		double currentScore = Rules.score(state.getWorld().getTileAt(pos));
 		double normalizedScoreDiff = ((currentScore - prevScore) / 2.0) + 0.5;
-		double[] input = addActionVector(getInputAroundTile(prev.getWorld(), pos),
-				WorldRepresentation.getZoneAsVector(zoneAct));
-		learn(input, new double[] { normalizedScoreDiff });
+		double[] input = Util.appendVectors(getInputAroundTile(prev.getWorld(), pos),ModelToVec.getZoneAsVector(zoneAct));
+		learn(input, new double[] { currentScore });
 
 	}
 
@@ -161,7 +165,7 @@ public class ZoneMapper implements Learner, Mapper {
 		Tile[] tiles = getNeighbors(w, p);
 		double[] vals = new double[tiles.length * ZONETYPES];
 		for (int i = 0; i < tiles.length; i++) {
-			double[] zVector = WorldRepresentation.getTileAsZoneVector(tiles[i]);
+			double[] zVector = ModelToVec.getTileAsZoneVector(tiles[i]);
 			int index = i * ZONETYPES;
 			for (int j = 0; j < ZONETYPES; j++) {
 				vals[index + j] = zVector[j];
@@ -170,23 +174,12 @@ public class ZoneMapper implements Learner, Mapper {
 		}
 		return vals;
 	}
-
-	private double[] addActionVector(double[] inputVector, double[] action) {
-		double[] enlongated = new double[inputVector.length + action.length];
-		for (int i = 0; i < action.length; i++) {
-			enlongated[i] = inputVector[i];
-		}
-		for (int i = 0; i < action.length; i++) {
-			enlongated[enlongated.length - action.length + i] = action[i];
-		}
-		return enlongated;
-	}
-
+	
 	private Tile[] getNeighbors(World w, Pos2D p) {
 		Tile[] tiles = new Tile[9];
 		int index = 0;
-		for (int i = -1; i < 2; i++) {
-			for (int j = -1; j < 2; j++) {
+		for (int i = -1; i<=1; i++) {
+			for (int j = -1; j<=1; j++) {
 				Pos2D nLoc = new Pos2D(p.getX() + i, p.getY() + j);
 				tiles[index] = w.getTileAt(nLoc);
 				index++;

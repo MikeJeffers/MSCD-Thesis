@@ -2,9 +2,11 @@ package edu.mscd.thesis.model;
 
 import java.util.List;
 
-import edu.mscd.thesis.controller.CityData;
 import edu.mscd.thesis.controller.Observer;
 import edu.mscd.thesis.controller.UserData;
+import edu.mscd.thesis.model.city.City;
+import edu.mscd.thesis.model.city.CityData;
+import edu.mscd.thesis.model.city.CityReduced;
 import edu.mscd.thesis.model.zones.Zone;
 import edu.mscd.thesis.model.zones.ZoneType;
 import edu.mscd.thesis.util.Util;
@@ -126,5 +128,14 @@ public class WorldReduced implements World{
 	public void notifyObserver() {
 		// TODO never called
 	}
+
+
+
+	@Override
+	public void setOverlay(double[] data) {
+		// TODO never called
+		
+	}
+
 
 }

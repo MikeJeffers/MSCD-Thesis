@@ -5,6 +5,7 @@ import edu.mscd.thesis.model.zones.Zone;
 import edu.mscd.thesis.model.zones.ZoneType;
 
 public class TileReduced implements Tile {
+	private double overlay;
 	private double zoneValue;
 	private Density zoneDensity;
 	private ZoneType zoneType;
@@ -25,6 +26,7 @@ public class TileReduced implements Tile {
 		this.landValue = t.getCurrentLandValue();
 		this.originalLandValue = t.baseLandValue();
 		this.pollution = t.getPollution();
+		this.overlay = t.getOverlayValue();
 	}
 
 	@Override
@@ -112,6 +114,16 @@ public class TileReduced implements Tile {
 	public Zone getZone() {
 		// TODO should fail
 		return null;
+	}
+
+	@Override
+	public double getOverlayValue() {
+		return this.overlay;
+	}
+
+	@Override
+	public void setOverlayValue(double value) {
+		// TODO should fail
 	}
 
 }
