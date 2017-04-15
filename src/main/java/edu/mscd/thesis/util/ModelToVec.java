@@ -100,6 +100,22 @@ public class ModelToVec {
 		
 	}
 	
+	public static double[] getTileTypeAsVector(TileType t){
+		double[] attributes = new double[5];
+		if(t==null){
+			return attributes;
+		}
+		double[]normDomain = new double[]{0.0, 1.0};
+		double[] srcDomain = new double[]{0, Rules.MAX};
+		attributes[0]=Util.mapValue(t.getBaseLandValue(), srcDomain, normDomain);
+		attributes[1]=Util.mapValue(t.getBaseLandValue(), srcDomain, normDomain);
+		attributes[2]=Util.mapValue(0, srcDomain, normDomain);
+		attributes[3]=Util.mapValue(t.getMaterialValue(), srcDomain, normDomain);
+		attributes[4]=0;
+		return attributes;
+		
+	}
+	
 	
 	public static double[] getCityDataVector(CityData data){
 		double[] vector = new double[CityProperty.values().length];
