@@ -25,36 +25,42 @@ import edu.mscd.thesis.util.ModelToVec;
 import edu.mscd.thesis.util.Rules;
 import edu.mscd.thesis.util.Util;
 
-public class NN implements AI{
+/**
+ * Primary AI component and neural network Contains TileMapper, ZoneMapper, and
+ * ZoneDecider MLP Q-learner merges TileZone/maps based on ZoneDecision
+ * 
+ * @author Mike
+ */
+public class NN implements AI {
 	private Model<UserData, CityData> state;
 	private TileMapper tileMap;
 	private ZoneDecider zoneDecider;
 	private ZoneMapper zoneMap;
-	
+
 	private final static BasicNetwork network = new BasicNetwork();
 	private final static MLDataSet DATASET = new BasicMLDataSet();
-	private static final int INPUT_LAYER_SIZE = 2+ZoneType.values().length;
+	private static final int INPUT_LAYER_SIZE = 2 + ZoneType.values().length;
 	private static final int OUTPUT_LAYER_SIZE = 1;
-	
-	public NN(Model<UserData, CityData> state){
+
+	public NN(Model<UserData, CityData> state) {
 		this.state = ModelStripper.reducedCopy(state);
 		this.zoneMap = new ZoneMapper(this.state);
 		this.tileMap = new TileMapper(this.state);
 		this.zoneDecider = new ZoneDecider(this.state);
-		
+
 		this.initNetwork();
 		this.initTraining();
 		this.trainResilient();
 	}
-	
-	private void initTraining(){
+
+	private void initTraining() {
 		double[][] input = new double[4][INPUT_LAYER_SIZE];
 		double[][] output = new double[4][OUTPUT_LAYER_SIZE];
-		int i=0;
-		for(ZoneType zone: ZoneType.values()){
-			double[] modelVec = new double[]{0.5,0.5};
+		int i = 0;
+		for (ZoneType zone : ZoneType.values()) {
+			double[] modelVec = new double[] { 0.5, 0.5 };
 			input[i] = Util.appendVectors(modelVec, ModelToVec.getZoneAsVector(zone));
-			output[i] = new double[]{0.5};
+			output[i] = new double[] { 0.5 };
 			i++;
 		}
 
@@ -64,16 +70,15 @@ public class NN implements AI{
 			DATASET.add(trainingIn, idealOut);
 		}
 	}
-	
+
 	private void initNetwork() {
 		network.addLayer(new BasicLayer(null, true, INPUT_LAYER_SIZE));
-		network.addLayer(new BasicLayer(new ActivationSigmoid(), true, (int) (INPUT_LAYER_SIZE*2)));
+		network.addLayer(new BasicLayer(new ActivationSigmoid(), true, (int) (INPUT_LAYER_SIZE * 2)));
 		network.addLayer(new BasicLayer(new ActivationSigmoid(), false, OUTPUT_LAYER_SIZE));
 		network.getStructure().finalizeStructure();
 		network.reset();
 	}
 
-	
 	private void trainResilient() {
 		ResilientPropagation train = new ResilientPropagation(network, DATASET);
 		int epoch = 1;
@@ -86,7 +91,7 @@ public class NN implements AI{
 
 		Encog.getInstance().shutdown();
 	}
-	
+
 	@Override
 	public UserData takeNextAction() {
 		UserData zoneAction = this.zoneDecider.takeNextAction();
@@ -96,47 +101,48 @@ public class NN implements AI{
 		double[] mapA = this.tileMap.getMapOfValues(this.state, zoneAction);
 		double[] mapB = this.zoneMap.getMapOfValues(this.state, zoneAction);
 		double[] combined = new double[mapA.length];
-		double[] src = new double[]{0,2.0};
-		double[] targ = new double[]{0, 1.0};
+		double[] src = new double[] { 0, 2.0 };
+		double[] targ = new double[] { 0, 1.0 };
 		int maxIndex = 0;
 		int minIndex = 0;
 		double maxScore = 0;
 		double minScore = Rules.MAX;
-		assert(mapA.length==mapB.length && locations.length==mapA.length);
+		assert (mapA.length == mapB.length && locations.length == mapA.length);
 		double[] zoneVec = ModelToVec.getZoneAsVector(zoneType);
-		List<Integer> ties  = new ArrayList<Integer>();
-		for(int i=0; i<mapA.length; i++){
+		List<Integer> ties = new ArrayList<Integer>();
+		for (int i = 0; i < mapA.length; i++) {
 			locations[i] = this.state.getWorld().getTiles()[i].getPos();
-			double[] modelMapValues = new double[]{mapA[i], mapB[i]};	
+			double[] modelMapValues = new double[] { mapA[i], mapB[i] };
 			double[] inputVec = Util.appendVectors(modelMapValues, zoneVec);
 			MLData input = new BasicMLData(inputVec);
 			double value = network.compute(input).getData(0);
-			combined[i]=value;
-			if(value<=minScore){
+			combined[i] = value;
+			if (value <= minScore) {
 				minScore = value;
 				minIndex = i;
 			}
-			if(value>=maxScore){
-				if(value>maxScore){
+			if (value >= maxScore) {
+				if (value > maxScore) {
 					ties.clear();
 				}
 				maxScore = value;
 				maxIndex = i;
-				ties.add(i);	
+				ties.add(i);
 			}
 		}
-		maxIndex = ties.get((int)Math.random()*ties.size());
-		
-		System.out.println("Possible actions based on Mapped Score domain["+combined[minIndex]+","+combined[maxIndex]+"]");
+		maxIndex = ties.get((int) Math.random() * ties.size());
+
+		System.out.println(
+				"Possible actions based on Mapped Score domain[" + combined[minIndex] + "," + combined[maxIndex] + "]");
 		System.out.print("Best move:{");
 		System.out.print(locations[maxIndex]);
 		System.out.println();
 		System.out.print("Worst move:{");
 		System.out.print(locations[minIndex]);
 		System.out.println();
-		
-		System.out.println("ZoneDecider picked:{"+zoneType+"}");
-		if(minIndex==maxIndex){
+
+		System.out.println("ZoneDecider picked:{" + zoneType + "}");
+		if (minIndex == maxIndex) {
 			System.out.println("AI can not find ideal move to make");
 			return null;
 		}
@@ -152,9 +158,9 @@ public class NN implements AI{
 		return fake;
 	}
 
-
 	@Override
-	public void addCase(Model<UserData, CityData> prev, Model<UserData, CityData> current, UserData action, double userRating) {
+	public void addCase(Model<UserData, CityData> prev, Model<UserData, CityData> current, UserData action,
+			double userRating) {
 		this.zoneDecider.addCase(state, prev, action, userRating);
 		this.tileMap.addCase(state, prev, action, userRating);
 		this.zoneMap.addCase(state, prev, action, userRating);
@@ -163,22 +169,22 @@ public class NN implements AI{
 		int index = Util.getIndexOf(prev.getWorld().getTileAt(action.getClickLocation()), prev.getWorld().getTiles());
 		double currentScore = Rules.score(current);
 		double prevScore = Rules.score(prev);
-		double[]output = new double[]{currentScore};
-		double[] modelVec = new double[]{tileValues[index], zoneValues[index]};
+		double[] output = new double[] { currentScore };
+		double[] modelVec = new double[] { tileValues[index], zoneValues[index] };
 		double[] actionVec = ModelToVec.getZoneAsVector(action.getZoneSelection());
 		double[] input = Util.appendVectors(modelVec, actionVec);
 		MLData trainingIn = new BasicMLData(input);
 		MLData idealOut = new BasicMLData(output);
 		DATASET.add(trainingIn, idealOut);
 		this.trainResilient();
-		
+
 	}
 
 	@Override
 	public void setState(Model<UserData, CityData> state) {
 		this.state = ModelStripper.reducedCopy(state);
 		this.zoneDecider.setState(this.state);
-		
+
 	}
 
 	@Override
@@ -187,12 +193,12 @@ public class NN implements AI{
 		double[] mapB = this.zoneMap.getMapOfValues(state, action);
 		double[] combined = new double[mapA.length];
 		double[] zoneVec = ModelToVec.getZoneAsVector(action.getZoneSelection());
-		for(int i=0; i<mapA.length; i++){
-			double[] modelMapValues = new double[]{mapA[i], mapB[i]};
+		for (int i = 0; i < mapA.length; i++) {
+			double[] modelMapValues = new double[] { mapA[i], mapB[i] };
 			double[] inputVec = Util.appendVectors(modelMapValues, zoneVec);
 			MLData input = new BasicMLData(inputVec);
 			double value = network.compute(input).getData(0);
-			combined[i]=value;
+			combined[i] = value;
 		}
 		return combined;
 	}

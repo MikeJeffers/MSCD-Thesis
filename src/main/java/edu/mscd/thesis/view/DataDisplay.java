@@ -14,7 +14,7 @@ public interface DataDisplay {
 	
 	public WeightVector<CityProperty> getWeightVector();
 	
-	public void updateScore(double value);
+	public void updateScore(double value, int turn);
 	
 	public void updateAIMove(UserData action);
 

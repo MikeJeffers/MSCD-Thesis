@@ -25,6 +25,13 @@ import edu.mscd.thesis.util.ModelToVec;
 import edu.mscd.thesis.util.Rules;
 import edu.mscd.thesis.util.Util;
 
+
+/**
+ * MLP Q-learner that outputs Q value for Tile neighborhood(state) and ZoneType (action)
+ * Input Layer - 9xTileAttributeVectors + 1xZoneTypeVector 
+ * Implements Mapper to produce Q-values for entire World-space
+ * @author Mike
+ */
 public class TileMapper implements Learner, Mapper {
 	/**
 	 * input is a single Tile Representation(decomposition of its attributes) and a Zone vector
@@ -43,7 +50,7 @@ public class TileMapper implements Learner, Mapper {
 
 	public TileMapper(Model<UserData, CityData> state) {
 		initNetwork();
-		initTraining(state);
+		initTraining();
 		trainResilient();
 	}
 
@@ -56,24 +63,13 @@ public class TileMapper implements Learner, Mapper {
 		network.reset();
 	}
 
-	private void initTraining(Model<UserData, CityData> initialState) {
-		Tile[] tiles = initialState.getWorld().getTiles();
+	private void initTraining() {
 		int total = TileType.values().length*ZoneType.values().length;
 		double[][] input = new double[total][INPUT_LAYER_SIZE];
 		double[][] output = new double[total][OUTPUT_LAYER_SIZE];
 		
 		double[] src = new double[]{0, Rules.MAX};
 		double[] target = new double[]{0.0, 1.0};
-		/*
-		for(int i=0; i<tiles.length; i++){
-			Tile t = tiles[i];
-			ZoneType z = ZoneType.values()[i%ZONETYPES];
-
-			double[] zoneRepr = ModelToVec.getZoneAsVector(z);
-			input[i] = Util.appendVectors(getInputAroundTile(initialState.getWorld(), t.getPos()), zoneRepr);
-			output[i] = new double[]{Util.mapValue(Rules.getValueForZoneOnTile(t.getType(), z), src, target)};
-		}
-		*/
 		int j=0;
 		for(TileType t: TileType.values()){
 			double[] tileRepr = ModelToVec.getTileTypeAsVector(t);

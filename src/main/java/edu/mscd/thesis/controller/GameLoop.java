@@ -1,11 +1,9 @@
 package edu.mscd.thesis.controller;
 
-import java.util.Arrays;
 import java.util.Map;
 import java.util.Map.Entry;
 
 import edu.mscd.thesis.model.Model;
-import edu.mscd.thesis.model.Pos2D;
 import edu.mscd.thesis.model.city.CityData;
 import edu.mscd.thesis.model.city.CityProperty;
 import edu.mscd.thesis.nn.AI;
@@ -23,13 +21,12 @@ import javafx.scene.chart.XYChart.Series;
 public class GameLoop extends AnimationTimer implements Controller {
 
 	private ObservableList<CityData> modelData;
-
 	private Model<UserData, CityData> model;
 	private View<UserData> view;
 	private UserData currentSelection = new UserData();
 	private boolean step = true;
 	private boolean draw = true;
-	private boolean aiMode = true;
+	private AiMode aiMode = AiMode.ON;
 	private int aiObserveCounter;
 	private UserData aiActionPrev;
 	private Model<UserData, CityData> prevModelState;
@@ -39,11 +36,10 @@ public class GameLoop extends AnimationTimer implements Controller {
 	private int aiMoveObserveWaitTime = 5;
 
 	private AI ai;
-	private boolean isAIon = true;
+
 
 	public GameLoop(Model<UserData, CityData> model, View<UserData> view, AI ai) {
 		this.modelData = new ArrayObservableList<CityData>();
-
 		this.modelData.addListener(new ListChangeListener<CityData>() {
 			@Override
 			public void onChanged(ListChangeListener.Change<? extends CityData> c) {
@@ -82,27 +78,28 @@ public class GameLoop extends AnimationTimer implements Controller {
 		}
 
 		if (step) {
+			step = false;
 			turn++;
 			aiObserveCounter++;
-			step = false;
+			if(aiMode!=AiMode.OFF && aiMoveObserveWaitTime<aiObserveCounter){
+				ai.setState(model);
+				prevModelState = ModelStripper.reducedCopy(model);
+				UserData nextAction = this.currentSelection;
+				if(aiMode!=AiMode.OBSERVE){
+					nextAction = ai.takeNextAction();
+				}
+				if (nextAction != null &&aiActionPrev != null) {
+					ai.addCase(model, prevModelState, aiActionPrev, 0.5);
+				}
+				view.updateAIMove(nextAction);
+				if(aiMode==AiMode.ON){
+					model.notifyNewData(nextAction);
+				}
+				aiActionPrev = nextAction;
+				aiObserveCounter=0;
+			}
 			model.update();
 			render();
-			ai.setState(model);
-			if (ai != null && aiMode && aiObserveCounter > aiMoveObserveWaitTime) {
-				UserData nextAction = ai.takeNextAction();
-				if (nextAction != null) {
-					if (aiActionPrev != null) {
-						ai.addCase(model, prevModelState, aiActionPrev, 0.5);
-					}
-					if (!nextAction.equals(aiActionPrev)) {
-						this.makeAIMove(nextAction);
-						aiObserveCounter = 0;
-					} else {
-						System.out.println("AI repeat move ignored");
-					}
-					aiActionPrev = nextAction;
-				}
-			}
 			view.screenShot();
 		} else if(draw){
 			render();
@@ -110,6 +107,7 @@ public class GameLoop extends AnimationTimer implements Controller {
 		}
 
 	}
+
 	
 	private void render(){
 		double[] map = ai.getMapOfValues(model, currentSelection);
@@ -136,16 +134,10 @@ public class GameLoop extends AnimationTimer implements Controller {
 		this.start();
 	}
 
-	private void makeAIMove(UserData action) {
-		prevModelState = ModelStripper.reducedCopy(model);
-		model.notifyNewData(action);
-		view.updateAIMove(action);
-	}
-
 	@Override
 	public synchronized void notifyModelEvent(CityData data) {
 		modelData.add(data);
-		view.updateScore(Rules.score(model, view.getWeightVector()));
+		view.updateScore(Rules.score(model, view.getWeightVector()), turn);
 	}
 
 	@Override
@@ -156,6 +148,7 @@ public class GameLoop extends AnimationTimer implements Controller {
 		this.currentSelection = data.copy();
 		step = data.isTakeStep();
 		draw = data.isDrawFlag();
+		aiMode = data.isAiMode();
 	}
 
 }
