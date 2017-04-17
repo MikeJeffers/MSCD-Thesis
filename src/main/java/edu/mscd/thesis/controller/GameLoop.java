@@ -36,6 +36,8 @@ public class GameLoop extends AnimationTimer implements Controller {
 	private int aiMoveObserveWaitTime = 5;
 
 	private AI ai;
+	
+	private boolean takeScreen = false;
 
 
 	public GameLoop(Model<UserData, CityData> model, View<UserData> view, AI ai) {
@@ -97,10 +99,14 @@ public class GameLoop extends AnimationTimer implements Controller {
 				}
 				aiActionPrev = nextAction;
 				aiObserveCounter=0;
+				takeScreen = true;
 			}
 			model.update();
 			render();
-			view.screenShot();
+			if(takeScreen){
+				takeScreen=false;
+				view.screenShot();
+			}
 		} else if(draw){
 			render();
 			draw=false;
@@ -111,8 +117,8 @@ public class GameLoop extends AnimationTimer implements Controller {
 	
 	private void render(){
 		double[] map = ai.getMapOfValues(model, currentSelection);
-		double[] norm = new double[]{0,1};
-		map = Util.mapValues(map, norm);
+		//double[] norm = new double[]{0,1};
+		//map = Util.mapValues(map, norm);
 		model.setOverlay(map);
 		view.renderView(model);
 	}

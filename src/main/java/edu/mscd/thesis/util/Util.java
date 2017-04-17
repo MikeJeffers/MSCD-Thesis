@@ -36,9 +36,11 @@ public class Util {
 	public static final int WINDOW_HEIGHT = 900;
 	public static final double SCALE_FACTOR = Util.getScaleFactor(Rules.WORLD_X, Rules.WORLD_Y, WINDOW_WIDTH,
 			WINDOW_HEIGHT);
-	public static final boolean SCREENSHOT = false;
+	public static final boolean SCREENSHOT = true;
 	private static Random random = new Random();
 	private static DateFormat df = new SimpleDateFormat("yyMMdd_HHmmss_SSS");
+	private static final Date compileTime = new Date();
+	
 
 	/**
 	 * Get all Tiles in tile array that are within ManhattanDistance of
@@ -228,8 +230,13 @@ public class Util {
 		WritableImage img = stage.getScene().snapshot(null);
 		Date date = Calendar.getInstance().getTime();
 		String stamp = df.format(date);
+		String dirString = "screenshots/Take_"+df.format(compileTime);
 		System.out.print("Taking Screen @"+stamp+"....");
-		File file = new File("screenshots/screen" + stamp + ".png");
+		File dir = new File(dirString);
+		if(!dir.exists()){
+			dir.mkdirs();
+		}
+		File file = new File(dirString+"/screen" + stamp + ".png");
 
 		try {
 			RenderedImage renderedImage = SwingFXUtils.fromFXImage(img, null);

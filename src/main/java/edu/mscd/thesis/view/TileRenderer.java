@@ -48,10 +48,20 @@ public class TileRenderer implements Renderer<Tile>{
 			g.setFill(densityColor);
 		}else if(renderMode==RenderMode.POLICY){
 			double value = tile.getOverlayValue();
-			double red = 1.0-value;
-			double blue = 0.5-(value/2.0);
+			double red = value;
+			double blue = 0;
 			double green = value;
-			double intensity = value/2.0+0.5;
+			if(value<0.5){
+				red = 1.0;
+				green = value*2.0;
+				blue = 0.0;
+			}else{
+				red = 1.0-(value-0.5)*2.0;
+				green = 1.0;
+				blue = 0.0;
+			}
+			
+			double intensity = 1.0;
 			Color color = new Color(red, green, blue, intensity);
 			g.setFill(color);
 		}
