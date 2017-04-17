@@ -19,3 +19,10 @@ The Mappers are creating a Q-value map given the Zone Action, with a current Sta
 
 See it in action here (AI only):
 ![AI playing game solo](https://cloud.githubusercontent.com/assets/2634337/24819773/0a195a06-1bb4-11e7-99de-ac70f52b815a.gif)
+
+4/17:  
+ZoneDecider is now also an online Q-learner MLP using CityData (includes RCI demands) to learn other city factors that could influence zoning decisions.
+Addtionally the main AI class is now also a Q-learner MLP that learns how much weight to place on TileMapper or ZoneMapper values (given ZoneAction) instead of taking the average of the two.  Though this was an effective placeholder.  
+Since the Q-values are attributed to each cell on the game-world, it is also possible to extract the Q-scores for a given world-state (given an action).  This leads to the new Policy-Map overlay selectable on the GUI.  When a user selects a Zone (R, C, I, or 0) and picks this overlay, the AI system computes a Q-map based on the selected zone, as if it were an output from the ZoneDecider.  This can be an assistive tool for players.  The AI system can indicate by color the tiles most appropriate for the selected zone type.  
+Here is the AI-Policy map with zone-R selected:
+![policymap_v06_cropped_1200x900](https://cloud.githubusercontent.com/assets/2634337/25106448/7db97b40-2397-11e7-8cae-9b982abaa994.gif)
