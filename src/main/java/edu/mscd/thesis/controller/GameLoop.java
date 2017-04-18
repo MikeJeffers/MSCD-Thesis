@@ -91,7 +91,7 @@ public class GameLoop extends AnimationTimer implements Controller {
 					nextAction = ai.takeNextAction();
 				}
 				if (nextAction != null &&aiActionPrev != null) {
-					ai.addCase(model, prevModelState, aiActionPrev, 0.5);
+					ai.addCase(model, prevModelState, aiActionPrev, view.getWeightVector());
 				}
 				view.updateAIMove(nextAction);
 				if(aiMode==AiMode.ON){
@@ -117,8 +117,8 @@ public class GameLoop extends AnimationTimer implements Controller {
 	
 	private void render(){
 		double[] map = ai.getMapOfValues(model, currentSelection);
-		//double[] norm = new double[]{0,1};
-		//map = Util.mapValues(map, norm);
+		double[] norm = new double[]{0,1};
+		map = Util.mapValues(map, norm);
 		model.setOverlay(map);
 		view.renderView(model);
 	}

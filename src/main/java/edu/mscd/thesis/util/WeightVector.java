@@ -8,4 +8,6 @@ public interface WeightVector<T> {
 	
 	public double getSum();
 	
+	public int getNumWeights();
+	
 }

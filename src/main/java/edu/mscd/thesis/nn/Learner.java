@@ -3,6 +3,8 @@ package edu.mscd.thesis.nn;
 import edu.mscd.thesis.controller.UserData;
 import edu.mscd.thesis.model.Model;
 import edu.mscd.thesis.model.city.CityData;
+import edu.mscd.thesis.model.city.CityProperty;
+import edu.mscd.thesis.util.WeightVector;
 
 /**
  * Interface for all subsystems that can be trained online, and given cases to
@@ -24,10 +26,11 @@ public interface Learner {
 	 *            afterward!)
 	 * @param action
 	 *            - UserData package of action attributes
-	 * @param userRating
-	 *            - A manual rating of the action taken to label case as "good"
-	 *            >0.5 or "bad"<0.5
+	 * @param weights
+	 *            - User defined weight-vector to bias values of input data from
+	 *            City metrics
 	 */
-	public void addCase(Model<UserData, CityData> prev, Model<UserData, CityData> current, UserData action, double userRating);
+	public void addCase(Model<UserData, CityData> prev, Model<UserData, CityData> current, UserData action,
+			WeightVector<CityProperty> weights);
 
 }

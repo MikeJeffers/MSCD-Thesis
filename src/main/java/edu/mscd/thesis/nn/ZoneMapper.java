@@ -1,7 +1,5 @@
 package edu.mscd.thesis.nn;
 
-import java.util.List;
-
 import org.encog.Encog;
 import org.encog.engine.network.activation.ActivationSigmoid;
 import org.encog.ml.data.MLData;
@@ -18,10 +16,12 @@ import edu.mscd.thesis.model.Pos2D;
 import edu.mscd.thesis.model.Tile;
 import edu.mscd.thesis.model.World;
 import edu.mscd.thesis.model.city.CityData;
+import edu.mscd.thesis.model.city.CityProperty;
 import edu.mscd.thesis.model.zones.ZoneType;
 import edu.mscd.thesis.util.ModelToVec;
 import edu.mscd.thesis.util.Rules;
 import edu.mscd.thesis.util.Util;
+import edu.mscd.thesis.util.WeightVector;
 
 /**
  * Input layer:[STATE(9xZoneVectors)+Action(ZoneVector)] where ZoneVector is
@@ -59,8 +59,8 @@ public class ZoneMapper implements Learner, Mapper {
 	}
 
 	private void initTraining() {
-		double[][] input = new double[10][INPUT_LAYER_SIZE];
-		double[][] output = new double[10][OUTPUT_LAYER_SIZE];
+		double[][] input = new double[9][INPUT_LAYER_SIZE];
+		double[][] output = new double[9][OUTPUT_LAYER_SIZE];
 		double[] r = ModelToVec.getZoneAsVector(ZoneType.RESIDENTIAL);
 		double[] c = ModelToVec.getZoneAsVector(ZoneType.COMMERICAL);
 		double[] indy = ModelToVec.getZoneAsVector(ZoneType.INDUSTRIAL);
@@ -70,7 +70,7 @@ public class ZoneMapper implements Learner, Mapper {
 		input[1] =  constructSampleInput(c, empty);
 		output[1] = new double[] { 0 };
 		input[2] =  constructSampleInput(indy, empty);
-		output[2] = new double[] { 0.1 };
+		output[2] = new double[] { 1 };
 		input[3] =  constructSampleInput(empty, empty);
 		output[3] = new double[] { 0 };
 		input[4] =  constructSampleInput(r, indy);
@@ -83,8 +83,7 @@ public class ZoneMapper implements Learner, Mapper {
 		output[7] = new double[] { 1 };
 		input[8] =  constructSampleInput(empty, indy);
 		output[8] = new double[] { 1 };
-		input[9] =  constructSampleInput(indy, indy);
-		output[9] = new double[] { 1 };
+
 
 		for (int i = 0; i < input.length; i++) {
 			MLData trainingIn = new BasicMLData(input[i]);
@@ -142,15 +141,14 @@ public class ZoneMapper implements Learner, Mapper {
 	}
 
 	@Override
-	public void addCase(Model<UserData, CityData> state, Model<UserData, CityData> prev, UserData action, double userRating) {
+	public void addCase(Model<UserData, CityData> state, Model<UserData, CityData> prev, UserData action, WeightVector<CityProperty> weights) {
 		Pos2D pos = action.getClickLocation();
 		ZoneType zoneAct = action.getZoneSelection();
-		ZoneType prevZone = prev.getWorld().getTileAt(action.getClickLocation()).getZoneType();
-		double prevScore = Rules.score(prev.getWorld().getTileAt(pos));
-		double currentScore = Rules.score(state.getWorld().getTileAt(pos));
-		double normalizedScoreDiff = ((currentScore - prevScore) / 2.0) + 0.5;
+		double prevScore = Rules.score(prev, weights);
+		double currentScore = Rules.score(state, weights);
+		double normalizedScoreDiff = Util.getNormalizedDifference(currentScore, prevScore);
 		double[] input = Util.appendVectors(getInputAroundTile(prev.getWorld(), pos),ModelToVec.getZoneAsVector(zoneAct));
-		learn(input, new double[] { currentScore });
+		learn(input, new double[] { normalizedScoreDiff });
 
 	}
 

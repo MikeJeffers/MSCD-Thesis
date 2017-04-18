@@ -1,8 +1,5 @@
 package edu.mscd.thesis.nn;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.encog.Encog;
 import org.encog.engine.network.activation.ActivationSigmoid;
 import org.encog.ml.data.MLData;
@@ -20,10 +17,12 @@ import edu.mscd.thesis.model.Tile;
 import edu.mscd.thesis.model.TileType;
 import edu.mscd.thesis.model.World;
 import edu.mscd.thesis.model.city.CityData;
+import edu.mscd.thesis.model.city.CityProperty;
 import edu.mscd.thesis.model.zones.ZoneType;
 import edu.mscd.thesis.util.ModelToVec;
 import edu.mscd.thesis.util.Rules;
 import edu.mscd.thesis.util.Util;
+import edu.mscd.thesis.util.WeightVector;
 
 
 /**
@@ -138,15 +137,14 @@ public class TileMapper implements Learner, Mapper {
 
 
 	@Override
-	public void addCase(Model<UserData, CityData> state, Model<UserData, CityData> prev, UserData action, double userRating) {
+	public void addCase(Model<UserData, CityData> state, Model<UserData, CityData> prev, UserData action, WeightVector<CityProperty> weights) {
 		Pos2D pos = action.getClickLocation();
-		Tile targetTile = prev.getWorld().getTileAt(pos);
 		ZoneType zoneAct = action.getZoneSelection();
-		double prevScore = Rules.score(prev);
-		double currentScore = Rules.score(state);
-		double normalizedScoreDiff = ((currentScore - prevScore) / 2.0) + 0.5;
+		double prevScore = Rules.score(prev, weights);
+		double currentScore = Rules.score(state, weights);
+		double normalizedScoreDiff = Util.getNormalizedDifference(currentScore, prevScore);
 		double[] input = Util.appendVectors(getInputAroundTile(prev.getWorld(), pos), ModelToVec.getZoneAsVector(zoneAct));
-		learn(input, new double[] { currentScore });
+		learn(input, new double[] { normalizedScoreDiff });
 
 	}
 

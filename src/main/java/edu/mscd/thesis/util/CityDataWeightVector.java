@@ -31,6 +31,11 @@ public class CityDataWeightVector implements WeightVector<CityProperty>{
 		}
 		return sum;
 	}
+
+	@Override
+	public int getNumWeights() {
+		return this.weightMap.size();
+	}
 	
 	
 

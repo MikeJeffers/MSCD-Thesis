@@ -15,6 +15,7 @@ import javax.imageio.ImageIO;
 
 import edu.mscd.thesis.model.Pos2D;
 import edu.mscd.thesis.model.Tile;
+import edu.mscd.thesis.model.city.CityProperty;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.image.WritableImage;
 import javafx.stage.Stage;
@@ -224,6 +225,22 @@ public class Util {
 		double xScale = ((double) (xBound)) / xToScale;
 		double yScale = ((double) (yBound)) / yToScale;
 		return Math.min(xScale, yScale);
+	}
+	
+	
+	public static boolean isWeightVectorValid(WeightVector<CityProperty> weights){
+		if(weights==null){
+			return false;
+		}
+		return weights.getNumWeights()==CityProperty.values().length;
+	}
+	
+	
+	public static double getNormalizedDifference(double a, double b){
+		double[] norm = new double[]{0, 1};
+		double[]src = new double[]{-1, 1};
+		double diff = a-b;
+		return mapValue(diff, src, norm);
 	}
 
 	public static void takeScreenshot(Stage stage) {

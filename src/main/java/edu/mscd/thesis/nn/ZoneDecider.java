@@ -19,6 +19,7 @@ import edu.mscd.thesis.util.ModelStripper;
 import edu.mscd.thesis.util.ModelToVec;
 import edu.mscd.thesis.util.Rules;
 import edu.mscd.thesis.util.Util;
+import edu.mscd.thesis.util.WeightVector;
 
 /**
  * Neural net that produces ZoneType for next-actions, based on current CityData
@@ -249,14 +250,15 @@ public class ZoneDecider implements Actor, Learner {
 
 	@Override
 	public void addCase(Model<UserData, CityData> prev, Model<UserData, CityData> current, UserData action,
-			double userRating) {
-		double currentScore = Rules.score(state);
-		double prevScore = Rules.score(prev);
+			WeightVector<CityProperty> weights) {
+		double prevScore = Rules.score(prev, weights);
+		double currentScore = Rules.score(state, weights);
+		double normalizedScoreDiff = Util.getNormalizedDifference(currentScore, prevScore);
 		CityData cityData = prev.getWorld().getCity().getData();
 		double[] modelVector = ModelToVec.getCityDataVector(cityData);
 		double[] zoneAction = ModelToVec.getZoneAsVector(action.getZoneSelection());
 		double[] input = Util.appendVectors(modelVector, zoneAction);
-		double[] output = new double[] { currentScore };
+		double[] output = new double[] { normalizedScoreDiff };
 		MLData trainingIn = new BasicMLData(input);
 		MLData idealOut = new BasicMLData(output);
 		DATASET.add(trainingIn, idealOut);

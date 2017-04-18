@@ -21,8 +21,8 @@ import edu.mscd.thesis.model.zones.ZoneType;
  *
  */
 public class Rules {
-	public static final int WORLD_X = 20;
-	public static final int WORLD_Y = 15;
+	public static final int WORLD_X = 40;
+	public static final int WORLD_Y = 30;
 	public static final int TILE_COUNT = WORLD_X*WORLD_Y;
 	//Game Constants and factors
 	public static final int MAX = 255;
@@ -110,6 +110,15 @@ public class Rules {
 		return cityScore;
 	}
 	
+	
+	/**
+	 * Model Scoring algorithm with given Weightvector
+	 * Each parameter of CityData from the current world state is scored, normalized and then weighted
+	 * 
+	 * @param model - Model state to score
+	 * @param weights - WeightVector of CityProperties - typically from GUI
+	 * @return double [0-1.0] where 1.0 is high score.
+	 */
 	public static double score(Model<UserData, CityData>model, WeightVector<CityProperty> weights){
 		if(weights==null){
 			return score(model);
@@ -121,15 +130,15 @@ public class Rules {
 		double cityScore = 0;
 		for(CityProperty prop: CityProperty.values()){
 			if(data.getDataMap().containsKey(prop)){
-				double value = data.getDataMap().get(prop)*weights.getWeightFor(prop);
+				double value = data.getDataMap().get(prop);
 				value = value*prop.getNormalizationFactor();
 				if(prop.needsInversion()){
 					value = 1.0-value;
 				}
-				cityScore+=value;
+				cityScore+=value*weights.getWeightFor(prop);
 			}
 		}
-		cityScore = cityScore/CityProperty.values().length;
+		cityScore = cityScore/weightSum;
 		cityScore = Util.boundValue(cityScore, 0, 1);
 		
 		return cityScore;

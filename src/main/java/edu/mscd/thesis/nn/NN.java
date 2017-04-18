@@ -24,6 +24,7 @@ import edu.mscd.thesis.util.ModelStripper;
 import edu.mscd.thesis.util.ModelToVec;
 import edu.mscd.thesis.util.Rules;
 import edu.mscd.thesis.util.Util;
+import edu.mscd.thesis.util.WeightVector;
 
 /**
  * Primary AI component and neural network Contains TileMapper, ZoneMapper, and
@@ -58,9 +59,9 @@ public class NN implements AI {
 		double[][] output = new double[4][OUTPUT_LAYER_SIZE];
 		int i = 0;
 		for (ZoneType zone : ZoneType.values()) {
-			double[] modelVec = new double[] { 0.5, 0.5 };
+			double[] modelVec = new double[] { 1.0, 0.0 };
 			input[i] = Util.appendVectors(modelVec, ModelToVec.getZoneAsVector(zone));
-			output[i] = new double[] { 0.5 };
+			output[i] = new double[] { 1.0 };
 			i++;
 		}
 
@@ -160,16 +161,21 @@ public class NN implements AI {
 
 	@Override
 	public void addCase(Model<UserData, CityData> prev, Model<UserData, CityData> current, UserData action,
-			double userRating) {
-		this.zoneDecider.addCase(state, prev, action, userRating);
-		this.tileMap.addCase(state, prev, action, userRating);
-		this.zoneMap.addCase(state, prev, action, userRating);
+			WeightVector<CityProperty> weights) {
+		if (!Util.isWeightVectorValid(weights)) {
+			return;
+		}
+		this.zoneDecider.addCase(state, prev, action, weights);
+		this.tileMap.addCase(state, prev, action, weights);
+		this.zoneMap.addCase(state, prev, action, weights);
+		
 		double[] tileValues = this.tileMap.getMapOfValues(prev, action);
 		double[] zoneValues = this.tileMap.getMapOfValues(prev, action);
 		int index = Util.getIndexOf(prev.getWorld().getTileAt(action.getClickLocation()), prev.getWorld().getTiles());
-		double currentScore = Rules.score(current);
-		double prevScore = Rules.score(prev);
-		double[] output = new double[] { currentScore };
+		double prevScore = Rules.score(prev, weights);
+		double currentScore = Rules.score(state, weights);
+		double normalizedScoreDiff = Util.getNormalizedDifference(currentScore, prevScore);
+		double[] output = new double[] { normalizedScoreDiff };
 		double[] modelVec = new double[] { tileValues[index], zoneValues[index] };
 		double[] actionVec = ModelToVec.getZoneAsVector(action.getZoneSelection());
 		double[] input = Util.appendVectors(modelVec, actionVec);
@@ -202,5 +208,6 @@ public class NN implements AI {
 		}
 		return combined;
 	}
+
 
 }
