@@ -10,7 +10,8 @@ import org.encog.neural.networks.BasicNetwork;
 import org.encog.neural.networks.layers.BasicLayer;
 import org.encog.neural.networks.training.propagation.resilient.ResilientPropagation;
 
-import edu.mscd.thesis.controller.UserData;
+import edu.mscd.thesis.controller.Action;
+import edu.mscd.thesis.controller.AiAction;
 import edu.mscd.thesis.model.Model;
 import edu.mscd.thesis.model.city.CityData;
 import edu.mscd.thesis.model.city.CityProperty;
@@ -30,15 +31,15 @@ import edu.mscd.thesis.util.WeightVector;
  * @author Mike
  */
 public class ZoneDecider implements Actor, Learner {
-	private Model<UserData, CityData> state;
+	private Model state;
 
 	private static final BasicNetwork network = new BasicNetwork();
 	private static final MLDataSet DATASET = new BasicMLDataSet();
 	private static final int INPUT_LAYER_SIZE = CityProperty.values().length + ZoneType.values().length;
 	private static final int OUTPUT_LAYER_SIZE = 1;
 
-	public ZoneDecider(Model<UserData, CityData> initialState) {
-		this.state = ModelStripper.reducedCopy(initialState);
+	public ZoneDecider(Model initialState) {
+		this.state = initialState;
 		initNetwork();
 		initTraining();
 		trainResilient();
@@ -218,7 +219,7 @@ public class ZoneDecider implements Actor, Learner {
 	}
 
 	@Override
-	public UserData takeNextAction() {
+	public Action takeNextAction() {
 		CityData cityData = state.getWorld().getCity().getData();
 		double[] modelVector = ModelToVec.getCityDataVector(cityData);
 		double[] qValues = new double[ZoneType.values().length];
@@ -240,23 +241,22 @@ public class ZoneDecider implements Actor, Learner {
 
 		ZoneType AIselection = ZoneType.values()[maxIndex];
 
-		UserData fake = new UserData();
-		fake.setZoneSelection(AIselection);
+		AiAction fake = new AiAction();	
+		fake.setZoneType(AIselection);
 		fake.setRadius(strength);
-		fake.setAI(true);
 		return fake;
 
 	}
 
 	@Override
-	public void addCase(Model<UserData, CityData> prev, Model<UserData, CityData> current, UserData action,
+	public void addCase(Model prev, Model current, Action action,
 			WeightVector<CityProperty> weights) {
 		double prevScore = Rules.score(prev, weights);
 		double currentScore = Rules.score(state, weights);
 		double normalizedScoreDiff = Util.getNormalizedDifference(currentScore, prevScore);
 		CityData cityData = prev.getWorld().getCity().getData();
 		double[] modelVector = ModelToVec.getCityDataVector(cityData);
-		double[] zoneAction = ModelToVec.getZoneAsVector(action.getZoneSelection());
+		double[] zoneAction = ModelToVec.getZoneAsVector(action.getZoneType());
 		double[] input = Util.appendVectors(modelVector, zoneAction);
 		double[] output = new double[] { normalizedScoreDiff };
 		MLData trainingIn = new BasicMLData(input);
@@ -266,7 +266,7 @@ public class ZoneDecider implements Actor, Learner {
 	}
 
 	@Override
-	public void setState(Model<UserData, CityData> state) {
+	public void setState(Model state) {
 		this.state = state;
 
 	}

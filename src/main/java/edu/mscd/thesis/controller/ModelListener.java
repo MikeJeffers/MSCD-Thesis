@@ -1,8 +1,7 @@
 package edu.mscd.thesis.controller;
 
-import edu.mscd.thesis.model.city.CityData;
 
-public class ModelListener implements Observer<CityData>{
+public class ModelListener implements Observer<ModelData>{
 	private Controller parent;
 	
 	public ModelListener(Controller parent){
@@ -10,7 +9,7 @@ public class ModelListener implements Observer<CityData>{
 	}
 
 	@Override
-	public void notifyNewData(CityData data) {
+	public void notifyNewData(ModelData data) {
 		this.parent.notifyModelEvent(data);
 		
 	}

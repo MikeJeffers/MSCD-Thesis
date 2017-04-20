@@ -10,7 +10,7 @@ import org.encog.neural.networks.BasicNetwork;
 import org.encog.neural.networks.layers.BasicLayer;
 import org.encog.neural.networks.training.propagation.resilient.ResilientPropagation;
 
-import edu.mscd.thesis.controller.UserData;
+import edu.mscd.thesis.controller.Action;
 import edu.mscd.thesis.model.Model;
 import edu.mscd.thesis.model.Pos2D;
 import edu.mscd.thesis.model.Tile;
@@ -47,7 +47,7 @@ public class TileMapper implements Learner, Mapper {
 
 
 
-	public TileMapper(Model<UserData, CityData> state) {
+	public TileMapper(Model state) {
 		initNetwork();
 		initTraining();
 		trainResilient();
@@ -117,8 +117,8 @@ public class TileMapper implements Learner, Mapper {
 
 	
 	@Override
-	public double[] getMapOfValues(Model<UserData, CityData> state, UserData action) {
-		ZoneType zoneAction = action.getZoneSelection();
+	public double[] getMapOfValues(Model state, Action action) {
+		ZoneType zoneAction = action.getZoneType();
 		double[] zoneVector = ModelToVec.getZoneAsVector(zoneAction);
 		World w = state.getWorld();
 		Tile[] tiles = w.getTiles();
@@ -137,9 +137,9 @@ public class TileMapper implements Learner, Mapper {
 
 
 	@Override
-	public void addCase(Model<UserData, CityData> state, Model<UserData, CityData> prev, UserData action, WeightVector<CityProperty> weights) {
-		Pos2D pos = action.getClickLocation();
-		ZoneType zoneAct = action.getZoneSelection();
+	public void addCase(Model state, Model prev, Action action, WeightVector<CityProperty> weights) {
+		Pos2D pos = action.getTarget();
+		ZoneType zoneAct = action.getZoneType();
 		double prevScore = Rules.score(prev, weights);
 		double currentScore = Rules.score(state, weights);
 		double normalizedScoreDiff = Util.getNormalizedDifference(currentScore, prevScore);

@@ -1,6 +1,6 @@
 package edu.mscd.thesis.controller;
 
-public class ViewListener implements Observer<UserData>{
+public class ViewListener implements Observer<ViewData>{
 	private Controller parent;
 	
 	public ViewListener(Controller parent){
@@ -8,7 +8,7 @@ public class ViewListener implements Observer<UserData>{
 	}
 
 	@Override
-	public void notifyNewData(UserData data) {
+	public void notifyNewData(ViewData data) {
 		this.parent.notifyViewEvent(data);
 		
 	}

@@ -4,14 +4,17 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
 
+import edu.mscd.thesis.controller.Action;
+import edu.mscd.thesis.controller.AiAction;
+import edu.mscd.thesis.controller.AiConfigImpl;
 import edu.mscd.thesis.controller.AiMode;
+import edu.mscd.thesis.controller.GameConfigImpl;
 import edu.mscd.thesis.controller.Observer;
-import edu.mscd.thesis.controller.UserData;
+import edu.mscd.thesis.controller.UserAction;
+import edu.mscd.thesis.controller.ViewData;
 import edu.mscd.thesis.model.Model;
 import edu.mscd.thesis.model.Pos2D;
-import edu.mscd.thesis.model.city.CityData;
 import edu.mscd.thesis.model.city.CityProperty;
 import edu.mscd.thesis.model.zones.ZoneType;
 import edu.mscd.thesis.util.CityDataWeightVector;
@@ -23,7 +26,6 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
-import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.event.EventType;
 import javafx.geometry.HPos;
@@ -35,7 +37,6 @@ import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.chart.Axis;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
@@ -47,40 +48,38 @@ import javafx.scene.control.Label;
 import javafx.scene.control.Slider;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.Tooltip;
-import javafx.scene.input.DragEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
-import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.CornerRadii;
-import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
-import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Rectangle;
 import javafx.scene.transform.Affine;
 import javafx.scene.transform.NonInvertibleTransformException;
 import javafx.stage.Stage;
 
-public class GUI implements View<UserData> {
-	private Collection<Observer<UserData>> observers = new ArrayList<Observer<UserData>>();
+public class GUI implements View {
+	private Collection<Observer<ViewData>> observers = new ArrayList<Observer<ViewData>>();
 	private ModelRenderer renderer = new ModelRenderer(RenderMode.NORMAL);
 	private GraphicsContext gc;
 	private Stage stage;
 
 	// User selections on UI elements
-	private static UserData selection = new UserData();
-	private static UserData ai_selection = new UserData();
+	private static UserAction userAct = new UserAction();
+	private static Action aiAct = new AiAction();
 	private static EventType<DataReceived> dataReceipt = new EventType<>("DataReceived");
+
+	private static GameConfigImpl gameConfig = new GameConfigImpl();
+	private static AiConfigImpl aiConfig = new AiConfigImpl();
 
 	private Node aiMoveEventTarget;
 	private Node scoreEventTarget;
 
 	private double score;
-	private Series<Number, Number> scoreData = new Series<Number,Number>();
+	private Series<Number, Number> scoreData = new Series<Number, Number>();
 	private Map<CityProperty, Series<Number, Number>> chartData = new HashMap<CityProperty, Series<Number, Number>>();
 
 	private WeightVector<CityProperty> weightVectorForNN = new CityDataWeightVector();
@@ -108,7 +107,7 @@ public class GUI implements View<UserData> {
 		Pane weightSliders = makeSliderPane();
 		Pane moveReporter = makeAIMoveReport();
 		Pane aiModePane = makeAiModePane();
-		
+
 		controlPane.setHgap(5);
 		controlPane.setVgap(5);
 		controlPane.setPadding(new Insets(5, 5, 5, 25));
@@ -123,8 +122,8 @@ public class GUI implements View<UserData> {
 		controlPane.add(weightSliders, 0, 10);
 		controlPane.add(moveReporter, 0, 11);
 		controlPane.add(aiModePane, 1, 5);
-		
-		//setGridVisible(controlPane);
+
+		// setGridVisible(controlPane);
 
 		root.getChildren().add(canvas);
 		root.getChildren().add(controlPane);
@@ -135,19 +134,19 @@ public class GUI implements View<UserData> {
 		this.stage = stage;
 		stage.show();
 	}
-	
-	private static void setGridVisible(Node n){
-		if(n instanceof GridPane){
+
+	private static void setGridVisible(Node n) {
+		if (n instanceof GridPane) {
 			GridPane grid = (GridPane) n;
 			grid.setGridLinesVisible(true);
-			for(Node child: grid.getChildren()){
+			for (Node child : grid.getChildren()) {
 				setGridVisible(child);
 			}
 		}
-		
+
 	}
-	
-	private Pane makeAiModePane(){
+
+	private Pane makeAiModePane() {
 		Pane aiModePane = new GridPane();
 		Label aiModeLabel = new Label("AI Mode: ");
 		ComboBox<AiMode> combo = new ComboBox<AiMode>();
@@ -155,12 +154,9 @@ public class GUI implements View<UserData> {
 		combo.setValue(AiMode.ON);
 		combo.valueProperty().addListener(new ChangeListener<AiMode>() {
 			@Override
-			public void changed(ObservableValue<? extends AiMode> observable, AiMode oldValue,
-					AiMode newValue) {
-				selection.setAiMode(newValue);
-				selection.setMakeMove(false);
-				selection.setTakeStep(false);
-				notifyObserver();
+			public void changed(ObservableValue<? extends AiMode> observable, AiMode oldValue, AiMode newValue) {
+				gameConfig.setAiMode(newValue);
+				notifyObserver((ViewData) gameConfig.copy());
 			}
 		});
 		GridPane.setColumnIndex(aiModeLabel, 0);
@@ -180,12 +176,11 @@ public class GUI implements View<UserData> {
 		GridPane.setColumnIndex(aiMove, 1);
 		GridPane.setRowIndex(aiMove, 0);
 		GridPane.setConstraints(aiMoveLabel, 0, 0, 1, 1, HPos.LEFT, VPos.TOP);
-		
 
 		aiMoveEventTarget.addEventHandler(dataReceipt, new EventHandler<DataReceived>() {
 			@Override
 			public void handle(DataReceived event) {
-				aiMove.setText(ai_selection.getLabelText());
+				aiMove.setText(aiAct.getLabelText());
 			}
 
 		});
@@ -312,10 +307,9 @@ public class GUI implements View<UserData> {
 				double dy = pt.getY();
 				Pos2D modelCoordinate = new Pos2D(dx, dy);
 				if (Util.isValidPos2D(modelCoordinate, Rules.WORLD_X, Rules.WORLD_Y)) {
-					selection.setTakeStep(true);
-					selection.setClickLocation(modelCoordinate);
-					selection.setMakeMove(true);
-					notifyObserver();
+					userAct.setTarget(modelCoordinate);
+					userAct.setMove(true);
+					notifyObserver((ViewData) userAct.copy());
 				}
 				if (Util.SCREENSHOT) {
 					Util.takeScreenshot(stage);
@@ -346,7 +340,7 @@ public class GUI implements View<UserData> {
 			lineChart.setBackground(new Background(new BackgroundFill(Color.WHITE, CornerRadii.EMPTY, Insets.EMPTY)));
 			stackCharts.getChildren().add(lineChart);
 		}
-		//Add scorechart
+		// Add scorechart
 		scoreData.setName("Score");
 		NumberAxis xAxis = new NumberAxis();
 		NumberAxis yAxis = new NumberAxis();
@@ -447,8 +441,7 @@ public class GUI implements View<UserData> {
 		combine.add(playButton, 1, 0);
 		Pane brushPane = brushShapeButton();
 		Pane radiusPane = radiusSelect();
-		
-		
+
 		GridPane.setConstraints(zoneLabel, 0, 0, 1, 1, HPos.LEFT, VPos.BASELINE);
 		GridPane.setConstraints(zonePane, 1, 0, 1, 1, HPos.RIGHT, VPos.BASELINE);
 		GridPane.setConstraints(turnLabel, 0, 1, 1, 1, HPos.LEFT, VPos.BASELINE);
@@ -458,7 +451,8 @@ public class GUI implements View<UserData> {
 		GridPane.setConstraints(radiusLabel, 0, 3, 1, 1, HPos.LEFT, VPos.BASELINE);
 		GridPane.setConstraints(radiusPane, 1, 3, 1, 1, HPos.RIGHT, VPos.BASELINE);
 
-		zonePanel.getChildren().addAll(zoneLabel, zonePane, turnLabel, combine, brushLabel, brushPane, radiusLabel, radiusPane);
+		zonePanel.getChildren().addAll(zoneLabel, zonePane, turnLabel, combine, brushLabel, brushPane, radiusLabel,
+				radiusPane);
 		return zonePanel;
 	}
 
@@ -469,17 +463,16 @@ public class GUI implements View<UserData> {
 		for (ZoneType zType : ZoneType.values()) {
 			Button button = new Button(zType.toString());
 			theButtons[zType.ordinal()] = button;
-			button.setTooltip(new Tooltip("Set Zone Selection to: "+zType.name()));
-			button.setOnAction(new EventHandler<ActionEvent>(){
+			button.setTooltip(new Tooltip("Set Zone Selection to: " + zType.name()));
+			button.setOnAction(new EventHandler<ActionEvent>() {
 				@Override
 				public void handle(ActionEvent event) {
-					selection.setZoneSelection(zType);
-					selection.setMakeMove(false);
-					selection.setTakeStep(false);
-					notifyObserver();
+					userAct.setZoneType(zType);
+					userAct.setMove(false);
+					notifyObserver((ViewData) userAct.copy());
 					button.setDisable(true);
-					for(int i=0; i<theButtons.length; i++){
-						if(theButtons[i]!= null && !theButtons[i].equals(button)){
+					for (int i = 0; i < theButtons.length; i++) {
+						if (theButtons[i] != null && !theButtons[i].equals(button)) {
 							theButtons[i].setDisable(false);
 						}
 					}
@@ -499,13 +492,13 @@ public class GUI implements View<UserData> {
 		step.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent event) {
-				if(selection.isStepMode()){
-					selection.setTakeStep(true);
-					selection.setMakeMove(true);
-					notifyObserver();
+				if (gameConfig.isPaused()) {
+					gameConfig.setStep(true);
+					notifyObserver((ViewData) gameConfig.copy());
 					if (Util.SCREENSHOT) {
 						Util.takeScreenshot(stage);
 					}
+					gameConfig.setStep(false);
 				}
 			}
 		});
@@ -518,13 +511,13 @@ public class GUI implements View<UserData> {
 		playButton.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent event) {
-				selection.setStepMode(!selection.isStepMode());
-				notifyObserver();
-				if (selection.isStepMode()) {
+				gameConfig.setPaused(!gameConfig.isPaused());
+				if (gameConfig.isPaused()) {
 					playButton.setText("PLAY");
 				} else {
 					playButton.setText("PAUSE");
 				}
+				notifyObserver((ViewData) gameConfig.copy());
 			}
 		});
 		return playButton;
@@ -537,13 +530,12 @@ public class GUI implements View<UserData> {
 		brushShape.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent event) {
-				selection.setSquare(!selection.isSquare());
-				if (selection.isSquare()) {
+				userAct.setSquare(!userAct.isSquare());
+				if (userAct.isSquare()) {
 					brushShape.setText("Square");
 				} else {
 					brushShape.setText("Circle");
 				}
-
 			}
 		});
 		brushPane.add(brushShape, 0, 0);
@@ -558,7 +550,7 @@ public class GUI implements View<UserData> {
 		radiusSelector.valueProperty().addListener(new ChangeListener<Integer>() {
 			@Override
 			public void changed(ObservableValue<? extends Integer> observable, Integer oldValue, Integer newValue) {
-				selection.setRadius(newValue);
+				userAct.setRadius(newValue);
 			}
 		});
 		radiusSelectPane.add(radiusSelector, 0, 0);
@@ -585,7 +577,7 @@ public class GUI implements View<UserData> {
 
 		Button resetView = new Button("Reset View");
 		resetView.setOnAction(e -> resetMatrix(gc));
-		
+
 		GridPane.setHalignment(zoomOut, HPos.LEFT);
 		GridPane.setHalignment(zoomIn, HPos.RIGHT);
 		GridPane.setHalignment(upButton, HPos.CENTER);
@@ -600,7 +592,7 @@ public class GUI implements View<UserData> {
 		pane.add(zoomIn, 0, 1);
 		pane.add(zoomOut, 2, 1);
 		pane.add(resetView, 3, 2);
-		
+
 		return pane;
 	}
 
@@ -631,33 +623,31 @@ public class GUI implements View<UserData> {
 	private void redraw(GraphicsContext gc) {
 		gc.setFill(Color.DARKGRAY);
 		gc.fillRect(0, 0, gc.getCanvas().getWidth(), gc.getCanvas().getHeight());
-		selection.setDrawFlag(true);
-		selection.setTakeStep(false);
-		notifyObserver();
-
+		userAct.setMove(false);
+		notifyObserver((ViewData) userAct.copy());
 	}
 
 	@Override
-	public void attachObserver(Observer<UserData> obs) {
+	public void attachObserver(Observer<ViewData> obs) {
 		this.observers.add(obs);
 
 	}
 
 	@Override
-	public void detachObserver(Observer<UserData> obs) {
+	public void detachObserver(Observer<ViewData> obs) {
 		this.observers.remove(obs);
 
 	}
 
 	@Override
-	public void notifyObserver() {
-		for (Observer<UserData> o : observers) {
-			o.notifyNewData(selection);
+	public void notifyObserver(ViewData data) {
+		for (Observer<ViewData> o : observers) {
+			o.notifyNewData(data);
 		}
 	}
 
 	@Override
-	public void renderView(Model<UserData, CityData> model) {
+	public void renderView(Model model) {
 		this.renderer.draw(model, this.gc);
 	}
 
@@ -674,8 +664,8 @@ public class GUI implements View<UserData> {
 	}
 
 	@Override
-	public void updateAIMove(UserData action) {
-		ai_selection = action.copy();
+	public void updateAIMove(Action action) {
+		aiAct = action.copy();
 		this.aiMoveEventTarget.fireEvent(new DataReceived(dataReceipt));
 	}
 

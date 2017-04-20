@@ -2,16 +2,16 @@ package edu.mscd.thesis.model;
 
 import java.util.List;
 
+import edu.mscd.thesis.controller.Action;
+import edu.mscd.thesis.controller.ModelData;
 import edu.mscd.thesis.controller.Observer;
-import edu.mscd.thesis.controller.UserData;
 import edu.mscd.thesis.model.city.City;
-import edu.mscd.thesis.model.city.CityData;
 import edu.mscd.thesis.model.city.CityReduced;
 import edu.mscd.thesis.model.zones.Zone;
 import edu.mscd.thesis.model.zones.ZoneType;
 import edu.mscd.thesis.util.Util;
 
-public class WorldReduced implements World{
+public class WorldReduced implements World {
 	private Tile[] tiles;
 	private int cols, rows;
 	private City city;
@@ -22,18 +22,15 @@ public class WorldReduced implements World{
 		this.cols = w.width();
 		Tile[] originalTiles = w.getTiles();
 		this.tiles = new Tile[originalTiles.length];
-		for(int i=0; i<originalTiles.length; i++){
+		for (int i = 0; i < originalTiles.length; i++) {
 			tiles[i] = new TileReduced(originalTiles[i]);
 		}
 	}
 
-
-
 	@Override
 	public void update() {
-		//DOES NOTHING
+		// DOES NOTHING
 	}
-
 
 	@Override
 	public boolean setZoneAt(Pos2D pos, ZoneType zt) {
@@ -62,13 +59,10 @@ public class WorldReduced implements World{
 		return true;
 	}
 
-	
 	@Override
-	public Tile[] getTiles(){
+	public Tile[] getTiles() {
 		return this.tiles;
 	}
-
-
 
 	@Override
 	public Tile getTileAt(Pos2D pos) {
@@ -91,14 +85,14 @@ public class WorldReduced implements World{
 	}
 
 	@Override
-	public void notifyNewData(UserData userData) {
-		this.setAllZonesAround(userData.getClickLocation(), userData.getZoneSelection(), userData.getRadius(), userData.isSquare());
-		
+	public void notifyNewData(Action data) {
+		this.setAllZonesAround(data.getTarget(), data.getZoneType(), data.getRadius(), data.isSquare());
+
 	}
 
 	@Override
 	public World getWorld() {
-		for(int i=0; i<tiles.length; i++){
+		for (int i = 0; i < tiles.length; i++) {
 			tiles[i] = new TileReduced(tiles[i]);
 		}
 		return this;
@@ -115,26 +109,24 @@ public class WorldReduced implements World{
 	}
 
 	@Override
-	public void attachObserver(Observer<CityData> obs) {
+	public void attachObserver(Observer<ModelData> obs) {
 		// TODO never called
 	}
 
 	@Override
-	public void detachObserver(Observer<CityData> obs) {
+	public void detachObserver(Observer<ModelData> obs) {
 		// TODO never called
 	}
 
 	@Override
-	public void notifyObserver() {
+	public void notifyObserver(ModelData newState) {
 		// TODO never called
 	}
-
-
 
 	@Override
 	public void setOverlay(double[] data) {
 		// TODO never called
-		
+
 	}
 
 

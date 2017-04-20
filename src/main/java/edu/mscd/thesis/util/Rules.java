@@ -3,7 +3,6 @@ package edu.mscd.thesis.util;
 
 import java.util.Map;
 
-import edu.mscd.thesis.controller.UserData;
 import edu.mscd.thesis.model.Model;
 import edu.mscd.thesis.model.Tile;
 import edu.mscd.thesis.model.TileType;
@@ -92,7 +91,7 @@ public class Rules {
 	 * @param m - Model THAT HAS BEEN REDUCED
 	 * @return double score that is some value based on success metrics
 	 */
-	public static double score(Model<UserData, CityData> m){;
+	public static double score(Model m){;
 		Map<CityProperty, Double> data = m.getWorld().getCity().getData().getDataMap();
 		double cityScore = 0;
 		for(CityProperty prop: CityProperty.values()){
@@ -119,7 +118,7 @@ public class Rules {
 	 * @param weights - WeightVector of CityProperties - typically from GUI
 	 * @return double [0-1.0] where 1.0 is high score.
 	 */
-	public static double score(Model<UserData, CityData>model, WeightVector<CityProperty> weights){
+	public static double score(Model model, WeightVector<CityProperty> weights){
 		if(weights==null){
 			return score(model);
 		}

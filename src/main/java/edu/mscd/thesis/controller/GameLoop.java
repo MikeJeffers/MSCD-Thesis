@@ -20,33 +20,40 @@ import javafx.scene.chart.XYChart.Series;
 
 public class GameLoop extends AnimationTimer implements Controller {
 
-	private ObservableList<CityData> modelData;
-	private Model<UserData, CityData> model;
-	private View<UserData> view;
-	private UserData currentSelection = new UserData();
+	private ObservableList<ModelData> modelData;
+	private Model model;
+	private View view;
+	
 	private boolean step = true;
 	private boolean draw = true;
-	private AiMode aiMode = AiMode.ON;
 	private int aiObserveCounter;
-	private UserData aiActionPrev;
-	private Model<UserData, CityData> prevModelState;
+	private Model prevModelState;
 	private long previousTime = System.currentTimeMillis();
-	private long timeStep = 500000000;
+	private long timeStep = 100000000;
 	private int turn = 0;
-	private int aiMoveObserveWaitTime = 5;
+	
+	
+	private Action currentAiMove;
+	private Action previousAiMove;
+	
+	private Action currentUserMove = new UserAction();
+	private Action mostRecentlyAppliedAction = new UserAction();
+	
+	private AiConfig aiConfig = new AiConfigImpl();
+	private GameConfig gameConfig = new GameConfigImpl();
 
 	private AI ai;
 	
 	private boolean takeScreen = false;
 
 
-	public GameLoop(Model<UserData, CityData> model, View<UserData> view, AI ai) {
-		this.modelData = new ArrayObservableList<CityData>();
-		this.modelData.addListener(new ListChangeListener<CityData>() {
+	public GameLoop(Model model, View view, AI ai) {
+		this.modelData = new ArrayObservableList<ModelData>();
+		this.modelData.addListener(new ListChangeListener<ModelData>() {
 			@Override
-			public void onChanged(ListChangeListener.Change<? extends CityData> c) {
+			public void onChanged(ListChangeListener.Change<? extends ModelData> c) {
 				while (c.next()) {
-					for (CityData additem : c.getAddedSubList()) {
+					for (ModelData additem : c.getAddedSubList()) {
 						Map<CityProperty, Series<Number, Number>> dataMap = view.getCityChartData();
 						Map<CityProperty, Double> data = additem.getDataMap();
 						for (Entry<CityProperty, Series<Number, Number>> pair : dataMap.entrySet()) {
@@ -72,7 +79,8 @@ public class GameLoop extends AnimationTimer implements Controller {
 
 	@Override
 	public void handle(long now) {
-		if (!currentSelection.isStepMode() && now - previousTime > timeStep) {
+		
+		if (!gameConfig.isPaused() && now - previousTime > gameConfig.getSpeed()*timeStep) {
 			System.out.println(now - previousTime);
 			step = true;
 			previousTime = now;
@@ -83,21 +91,24 @@ public class GameLoop extends AnimationTimer implements Controller {
 			step = false;
 			turn++;
 			aiObserveCounter++;
-			if(aiMode!=AiMode.OFF && aiMoveObserveWaitTime<aiObserveCounter){
+			if(gameConfig.getAiMode()!=AiMode.OFF && aiConfig.getObservationWaitTime()<aiObserveCounter){
 				ai.setState(model);
 				prevModelState = ModelStripper.reducedCopy(model);
-				UserData nextAction = this.currentSelection;
-				if(aiMode!=AiMode.OBSERVE){
+				Action nextAction = this.currentAiMove;
+				
+				if(gameConfig.getAiMode()!=AiMode.OBSERVE){
 					nextAction = ai.takeNextAction();
 				}
-				if (nextAction != null &&aiActionPrev != null) {
-					ai.addCase(model, prevModelState, aiActionPrev, view.getWeightVector());
+				if (nextAction != null &&previousAiMove != null) {
+					ai.addCase(model, prevModelState, previousAiMove, view.getWeightVector());
 				}
 				view.updateAIMove(nextAction);
-				if(aiMode==AiMode.ON){
+				getCurrentQValueMap(nextAction);
+				if(gameConfig.getAiMode()==AiMode.ON){
 					model.notifyNewData(nextAction);
+					mostRecentlyAppliedAction = nextAction;
 				}
-				aiActionPrev = nextAction;
+				previousAiMove = nextAction;
 				aiObserveCounter=0;
 				takeScreen = true;
 			}
@@ -113,13 +124,16 @@ public class GameLoop extends AnimationTimer implements Controller {
 		}
 
 	}
-
 	
-	private void render(){
-		double[] map = ai.getMapOfValues(model, currentSelection);
+	private void getCurrentQValueMap(Action action){
+		double[] map = ai.getMapOfValues(model, mostRecentlyAppliedAction);
 		double[] norm = new double[]{0,1};
 		map = Util.mapValues(map, norm);
 		model.setOverlay(map);
+	}
+
+	
+	private void render(){
 		view.renderView(model);
 	}
 	
@@ -141,20 +155,38 @@ public class GameLoop extends AnimationTimer implements Controller {
 	}
 
 	@Override
-	public synchronized void notifyModelEvent(CityData data) {
+	public synchronized void notifyModelEvent(ModelData data) {
 		modelData.add(data);
 		view.updateScore(Rules.score(model, view.getWeightVector()), turn);
 	}
 
 	@Override
-	public synchronized void notifyViewEvent(UserData data) {
-		if (data.isMakeMove()) {
-			model.notifyNewData(data);
+	public synchronized void notifyViewEvent(ViewData data) {
+		System.out.println(data);
+		if(data.isAction()){
+			Action a = data.getAction().copy();
+			if(a.isAI()){
+				//handleAiAction ...TODO AI system is not observed
+			}else{
+				currentUserMove = a;
+				if(a.isMove()){
+					mostRecentlyAppliedAction = a;
+					model.notifyNewData(a);
+				}
+				this.draw = true;
+			}
+		}else if(data.isConfig()){
+			ConfigData config = data.getConfig();
+			if(config.isAiConfig()){
+				this.aiConfig = (AiConfig) config.getAiConfig().copy();
+			}else if(config.isGameConfig()){
+				this.gameConfig = (GameConfig) config.getGameConfiguration().copy();
+				this.step = gameConfig.isStep()&&gameConfig.isPaused();
+			}
 		}
-		this.currentSelection = data.copy();
-		step = data.isTakeStep();
-		draw = data.isDrawFlag();
-		aiMode = data.isAiMode();
+		
+
 	}
+
 
 }

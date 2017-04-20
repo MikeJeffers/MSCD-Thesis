@@ -14,7 +14,8 @@ import org.encog.neural.networks.BasicNetwork;
 import org.encog.neural.networks.layers.BasicLayer;
 import org.encog.neural.networks.training.propagation.resilient.ResilientPropagation;
 
-import edu.mscd.thesis.controller.UserData;
+import edu.mscd.thesis.controller.Action;
+import edu.mscd.thesis.controller.AiAction;
 import edu.mscd.thesis.model.Model;
 import edu.mscd.thesis.model.Pos2D;
 import edu.mscd.thesis.model.city.CityData;
@@ -33,7 +34,7 @@ import edu.mscd.thesis.util.WeightVector;
  * @author Mike
  */
 public class NN implements AI {
-	private Model<UserData, CityData> state;
+	private Model state;
 	private TileMapper tileMap;
 	private ZoneDecider zoneDecider;
 	private ZoneMapper zoneMap;
@@ -43,7 +44,7 @@ public class NN implements AI {
 	private static final int INPUT_LAYER_SIZE = 2 + ZoneType.values().length;
 	private static final int OUTPUT_LAYER_SIZE = 1;
 
-	public NN(Model<UserData, CityData> state) {
+	public NN(Model state) {
 		this.state = ModelStripper.reducedCopy(state);
 		this.zoneMap = new ZoneMapper(this.state);
 		this.tileMap = new TileMapper(this.state);
@@ -94,9 +95,9 @@ public class NN implements AI {
 	}
 
 	@Override
-	public UserData takeNextAction() {
-		UserData zoneAction = this.zoneDecider.takeNextAction();
-		ZoneType zoneType = zoneAction.getZoneSelection();
+	public Action takeNextAction() {
+		Action zoneAction = this.zoneDecider.takeNextAction();
+		ZoneType zoneType = zoneAction.getZoneType();
 		int radius = zoneAction.getRadius();
 		Pos2D[] locations = new Pos2D[this.state.getWorld().getTiles().length];
 		double[] mapA = this.tileMap.getMapOfValues(this.state, zoneAction);
@@ -148,20 +149,16 @@ public class NN implements AI {
 			return null;
 		}
 
-		UserData fake = new UserData();
-		fake.setClickLocation(locations[maxIndex]);
-		fake.setZoneSelection(zoneType);
-		fake.setRadius(radius);
-		fake.setSquare(false);
-		fake.setTakeStep(false);
-		fake.setDrawFlag(true);
-		fake.setAI(true);
-		return fake;
+		AiAction move = new AiAction();
+		move.setTarget(locations[maxIndex]);
+		move.setZoneType(zoneType);
+		move.setRadius(radius);
+		move.setSquare(false);
+		return move;
 	}
 
 	@Override
-	public void addCase(Model<UserData, CityData> prev, Model<UserData, CityData> current, UserData action,
-			WeightVector<CityProperty> weights) {
+	public void addCase(Model prev, Model current, Action action, WeightVector<CityProperty> weights) {
 		if (!Util.isWeightVectorValid(weights)) {
 			return;
 		}
@@ -171,13 +168,13 @@ public class NN implements AI {
 		
 		double[] tileValues = this.tileMap.getMapOfValues(prev, action);
 		double[] zoneValues = this.tileMap.getMapOfValues(prev, action);
-		int index = Util.getIndexOf(prev.getWorld().getTileAt(action.getClickLocation()), prev.getWorld().getTiles());
+		int index = Util.getIndexOf(prev.getWorld().getTileAt(action.getTarget()), prev.getWorld().getTiles());
 		double prevScore = Rules.score(prev, weights);
 		double currentScore = Rules.score(state, weights);
 		double normalizedScoreDiff = Util.getNormalizedDifference(currentScore, prevScore);
 		double[] output = new double[] { normalizedScoreDiff };
 		double[] modelVec = new double[] { tileValues[index], zoneValues[index] };
-		double[] actionVec = ModelToVec.getZoneAsVector(action.getZoneSelection());
+		double[] actionVec = ModelToVec.getZoneAsVector(action.getZoneType());
 		double[] input = Util.appendVectors(modelVec, actionVec);
 		MLData trainingIn = new BasicMLData(input);
 		MLData idealOut = new BasicMLData(output);
@@ -187,18 +184,18 @@ public class NN implements AI {
 	}
 
 	@Override
-	public void setState(Model<UserData, CityData> state) {
+	public void setState(Model state) {
 		this.state = ModelStripper.reducedCopy(state);
 		this.zoneDecider.setState(this.state);
 
 	}
 
 	@Override
-	public double[] getMapOfValues(Model<UserData, CityData> state, UserData action) {
+	public double[] getMapOfValues(Model state, Action action) {
 		double[] mapA = this.tileMap.getMapOfValues(state, action);
 		double[] mapB = this.zoneMap.getMapOfValues(state, action);
 		double[] combined = new double[mapA.length];
-		double[] zoneVec = ModelToVec.getZoneAsVector(action.getZoneSelection());
+		double[] zoneVec = ModelToVec.getZoneAsVector(action.getZoneType());
 		for (int i = 0; i < mapA.length; i++) {
 			double[] modelMapValues = new double[] { mapA[i], mapB[i] };
 			double[] inputVec = Util.appendVectors(modelMapValues, zoneVec);
