@@ -2,7 +2,6 @@ package edu.mscd.thesis.nn;
 
 import edu.mscd.thesis.controller.Action;
 import edu.mscd.thesis.model.Model;
-import edu.mscd.thesis.model.city.CityData;
 import edu.mscd.thesis.model.city.CityProperty;
 import edu.mscd.thesis.util.WeightVector;
 
@@ -25,7 +24,7 @@ public interface Learner {
 	 *            - Model after Action taken (can be any number of time-steps
 	 *            afterward!)
 	 * @param action
-	 *            - UserData package of action attributes
+	 *            - Action package of action attributes
 	 * @param weights
 	 *            - User defined weight-vector to bias values of input data from
 	 *            City metrics

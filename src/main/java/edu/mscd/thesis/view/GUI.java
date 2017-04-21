@@ -603,6 +603,7 @@ public class GUI implements View {
 			@Override
 			public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
 				gameConfig.setSpeed(newValue.doubleValue());
+				notifyObserver((ViewData)gameConfig.copy());
 				String toDisplay = Double.toString(newValue.doubleValue());
 				if (toDisplay.length() > 5) {
 					toDisplay = toDisplay.substring(0, 5);

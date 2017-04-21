@@ -113,11 +113,9 @@ public class NN implements AI {
 		double[] mapA = this.tileMap.getMapOfValues(this.state, zoneAction);
 		double[] mapB = this.zoneMap.getMapOfValues(this.state, zoneAction);
 		double[] combined = new double[mapA.length];
-		double[] src = new double[] { 0, 2.0 };
-		double[] targ = new double[] { 0, 1.0 };
 		int maxIndex = 0;
 		int minIndex = 0;
-		double maxScore = 0;
+		double maxScore = -Rules.MAX;
 		double minScore = Rules.MAX;
 		assert (mapA.length == mapB.length && locations.length == mapA.length);
 		double[] zoneVec = ModelToVec.getZoneAsVector(zoneType);

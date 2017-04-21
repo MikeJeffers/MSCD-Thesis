@@ -12,7 +12,7 @@ public enum ActivationFunctions {
     GAUSSIAN(new ActivationGaussian()), 
     LINEAR(new ActivationLinear()), 
     LOG(new ActivationLOG()), 
-    RAMP(new ActivationRamp()), 
+    RAMP(new ActivationRamp(1, 0, 1, 0)), 
     SIGMOID(new ActivationSigmoid()), 
     SIN(new ActivationSIN()), 
     SOFTMAX(new ActivationSoftMax()), 

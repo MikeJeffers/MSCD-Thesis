@@ -27,19 +27,13 @@ import edu.mscd.thesis.util.WeightVector;
 
 /**
  * MLP Q-learner that outputs Q value for Tile neighborhood(state) and ZoneType
- * (action) Input Layer - 9xTileAttributeVectors + 1xZoneTypeVector Implements
+ * (action) Input Layer - NeighborhoodRadiusxTileAttributeVectors + 1xZoneTypeVector Implements
  * Mapper to produce Q-values for entire World-space
  * 
  * @author Mike
  */
 public class TileMapper implements Learner, Mapper, Configurable {
-	/**
-	 * input is a single Tile Representation(decomposition of its attributes)
-	 * and a Zone vector MLP follows the form of a Q-learning approximation
-	 * function output is [0-1.0] where high values indicate optimal locations
-	 * to place Zone of Action, given current state
-	 * 
-	 */
+
 	private AiConfig conf = new AiConfigImpl();
 	private int neighborhoodSize = (int)Math.pow(conf.getObservationRadius()*2+1, 2);
 	private static final int ZONETYPES = ZoneType.values().length;
@@ -172,7 +166,6 @@ public class TileMapper implements Learner, Mapper, Configurable {
 			for (int j = 0; j < tileVec.length; j++) {
 				vals[index + j] = tileVec[j];
 			}
-
 		}
 		return vals;
 	}

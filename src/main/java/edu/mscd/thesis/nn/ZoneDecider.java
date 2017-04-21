@@ -233,7 +233,7 @@ public class ZoneDecider implements Actor, Learner, Configurable {
 		double[] modelVector = ModelToVec.getCityDataVector(cityData);
 		double[] qValues = new double[ZoneType.values().length];
 		int maxIndex = 0;
-		double maxScore = -1;
+		double maxScore = -Rules.MAX;
 		for (int i = 0; i < ZoneType.values().length; i++) {
 			double[] zoneAction = ModelToVec.getZoneAsVector(ZoneType.values()[i]);
 			double[] input = Util.appendVectors(modelVector, zoneAction);

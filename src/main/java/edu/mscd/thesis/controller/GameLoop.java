@@ -93,11 +93,7 @@ public class GameLoop extends AnimationTimer implements Controller {
 			if(gameConfig.getAiMode()!=AiMode.OFF && aiConfig.getObservationWaitTime()<aiObserveCounter){
 				ai.setState(model);
 				prevModelState = ModelStripper.reducedCopy(model);
-				Action nextAction = this.currentAiMove;
-				
-				if(gameConfig.getAiMode()!=AiMode.OBSERVE){
-					nextAction = ai.takeNextAction();
-				}
+				Action nextAction = ai.takeNextAction();
 				if (nextAction != null &&previousAiMove != null) {
 					ai.addCase(model, prevModelState, previousAiMove, view.getWeightVector());
 				}
