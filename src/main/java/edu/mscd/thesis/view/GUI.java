@@ -450,6 +450,41 @@ public class GUI implements View {
 				}
 			}
 		});
+		canvas.addEventHandler(MouseEvent.MOUSE_MOVED, new EventHandler<MouseEvent>(){
+			private Pos2D prev=new Pos2D(-1,-1);
+
+			@Override
+			public void handle(MouseEvent event) {
+				Affine xForm = gc.getTransform();
+				Point2D pt = new Point2D(event.getSceneX(), event.getSceneY());
+				try {
+					pt = xForm.inverseTransform(pt);
+				} catch (NonInvertibleTransformException e) {
+					e.printStackTrace();
+					return;
+				}
+				double dx = (int)Math.floor(pt.getX());
+				double dy = (int)Math.floor(pt.getY());
+				Pos2D modelCoordinate = new Pos2D(dx, dy);
+				if (!modelCoordinate.equals(prev) && Util.isValidPos2D(modelCoordinate, Rules.WORLD_X, Rules.WORLD_Y)) {
+					prev = modelCoordinate;
+					userAct.setTarget(modelCoordinate);
+					userAct.setMove(false);
+					notifyObserver((ViewData) userAct.copy());
+					/*
+					redraw(gc);
+					prev = modelCoordinate;
+					canvas.getGraphicsContext2D().setStroke(Color.MAGENTA);
+					canvas.getGraphicsContext2D().setLineWidth(0.05);
+					canvas.getGraphicsContext2D().strokeRect(dx, dy, 1, 1);
+					System.out.println(modelCoordinate);
+					*/
+				}
+				
+				
+			}
+			
+		});
 	}
 
 	private Pane makeStackedChartPane() {
@@ -781,7 +816,7 @@ public class GUI implements View {
 
 	private void redraw(GraphicsContext gc) {
 		gc.setFill(Color.DARKGRAY);
-		gc.fillRect(0, 0, gc.getCanvas().getWidth(), gc.getCanvas().getHeight());
+		gc.fillRect(-1, -1, gc.getCanvas().getWidth()+1, gc.getCanvas().getHeight()+1);
 		userAct.setMove(false);
 		notifyObserver((ViewData) userAct.copy());
 	}

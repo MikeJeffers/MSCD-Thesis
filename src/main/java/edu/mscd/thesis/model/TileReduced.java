@@ -3,8 +3,10 @@ package edu.mscd.thesis.model;
 import edu.mscd.thesis.model.zones.Density;
 import edu.mscd.thesis.model.zones.Zone;
 import edu.mscd.thesis.model.zones.ZoneType;
+import edu.mscd.thesis.view.Selection;
 
 public class TileReduced implements Tile {
+	private Selection select;
 	private double overlay;
 	private double zoneValue;
 	private Density zoneDensity;
@@ -27,6 +29,7 @@ public class TileReduced implements Tile {
 		this.originalLandValue = t.baseLandValue();
 		this.pollution = t.getPollution();
 		this.overlay = t.getOverlayValue();
+		this.select = t.getSelection();
 	}
 
 	@Override
@@ -125,5 +128,16 @@ public class TileReduced implements Tile {
 	public void setOverlayValue(double value) {
 		// TODO should fail
 	}
+
+	@Override
+	public Selection getSelection() {
+		return this.select;
+	}
+
+	@Override
+	public void setSelection(Selection select) {
+		// TODO should fail
+	}
+
 
 }

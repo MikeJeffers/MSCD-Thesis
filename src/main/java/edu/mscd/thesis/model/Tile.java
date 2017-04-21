@@ -6,9 +6,10 @@ import edu.mscd.thesis.model.zones.Density;
 import edu.mscd.thesis.model.zones.Zone;
 import edu.mscd.thesis.model.zones.ZoneType;
 import edu.mscd.thesis.view.OverlayNode;
+import edu.mscd.thesis.view.SelectableNode;
 
 
-public interface Tile extends OverlayNode{
+public interface Tile extends OverlayNode, SelectableNode{
 	
 	double getZoneValue();
 	

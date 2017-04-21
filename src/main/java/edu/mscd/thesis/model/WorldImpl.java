@@ -17,6 +17,7 @@ import edu.mscd.thesis.model.zones.ZoneFactoryImpl;
 import edu.mscd.thesis.model.zones.ZoneType;
 import edu.mscd.thesis.util.TileUpdaterService;
 import edu.mscd.thesis.util.Util;
+import edu.mscd.thesis.view.Selection;
 
 public class WorldImpl implements World {
 	private Tile[] tiles;
@@ -157,7 +158,8 @@ public class WorldImpl implements World {
 	}
 
 	@Override
-	public boolean setAllZonesAround(Pos2D pos, ZoneType zt, int radius, boolean squareSelect) {
+	public boolean setAllZonesAround(Pos2D pos, ZoneType zt, int radius, boolean squareSelect, boolean commitAction) {
+		clearSelectionOnWorld();
 		Tile t = this.getTileAt(pos);
 		if (t == null) {
 			return false;
@@ -168,10 +170,22 @@ public class WorldImpl implements World {
 		} else {
 			tilesInRange = Util.getNeighborsCircularDist(t, tiles, radius);
 		}
+
 		for (Tile reZone : tilesInRange) {
-			reZone.setZone(zt);
+			if (commitAction) {
+				reZone.setZone(zt);
+			} else {
+				reZone.setSelection(new Selection(true, zt));
+			}
+
 		}
 		return true;
+	}
+
+	private void clearSelectionOnWorld() {
+		for (Tile t : tiles) {
+			t.setSelection(new Selection(false, t.getZoneType()));
+		}
 	}
 
 	@Override
@@ -201,8 +215,7 @@ public class WorldImpl implements World {
 
 	@Override
 	public void notifyNewData(Action data) {
-		this.setAllZonesAround(data.getTarget(), data.getZoneType(), data.getRadius(), data.isSquare());
-
+		this.setAllZonesAround(data.getTarget(), data.getZoneType(), data.getRadius(), data.isSquare(), data.isMove());
 	}
 
 	@Override
@@ -242,12 +255,27 @@ public class WorldImpl implements World {
 
 	@Override
 	public void setOverlay(double[] data) {
+		if (data == null || data.length != this.tiles.length) {
+			System.err.println("length mismatch");
+			return;
+		}
 		for (int i = 0; i < tiles.length; i++) {
 			tiles[i].setOverlayValue(data[i]);
 		}
 
 	}
 
+	@Override
+	public void setSelected(Selection[] selections) {
+		if (selections == null || selections.length != this.tiles.length) {
+			System.err.println("length mismatch");
+			return;
+		}
+		for (int i = 0; i < tiles.length; i++) {
+			tiles[i].setSelection(selections[i]);
+		}
+		
+	}
 
 
 }

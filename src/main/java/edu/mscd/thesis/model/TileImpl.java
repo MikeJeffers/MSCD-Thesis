@@ -7,9 +7,11 @@ import edu.mscd.thesis.model.zones.ZoneFactory;
 import edu.mscd.thesis.model.zones.ZoneType;
 import edu.mscd.thesis.util.Rules;
 import edu.mscd.thesis.util.Util;
+import edu.mscd.thesis.view.Selection;
 
 
 public class TileImpl implements Tile {
+	private Selection select;
 	private double overlay;
 	private Pos2D pos;
 	private TileType type;
@@ -26,6 +28,7 @@ public class TileImpl implements Tile {
 		this.zoning = this.factory.createZone(ZoneType.EMPTY, pos, this);
 		this.landValue = this.baseLandValue();
 		this.pollution = 0;
+		this.select = new Selection(false, ZoneType.EMPTY);
 	}
 	
 	@Override
@@ -181,5 +184,17 @@ public class TileImpl implements Tile {
 		this.overlay = value;
 		
 	}
+
+	@Override
+	public Selection getSelection() {
+		return this.select;
+	}
+
+	@Override
+	public void setSelection(Selection select) {
+		this.select = select;
+	}
+
+
 
 }

@@ -10,6 +10,7 @@ import edu.mscd.thesis.model.city.CityReduced;
 import edu.mscd.thesis.model.zones.Zone;
 import edu.mscd.thesis.model.zones.ZoneType;
 import edu.mscd.thesis.util.Util;
+import edu.mscd.thesis.view.Selection;
 
 public class WorldReduced implements World {
 	private Tile[] tiles;
@@ -42,7 +43,8 @@ public class WorldReduced implements World {
 	}
 
 	@Override
-	public boolean setAllZonesAround(Pos2D pos, ZoneType zt, int radius, boolean squareSelect) {
+	public boolean setAllZonesAround(Pos2D pos, ZoneType zt, int radius, boolean squareSelect, boolean commitAction) {
+		clearSelectionOnWorld();
 		Tile t = this.getTileAt(pos);
 		if (t == null) {
 			return false;
@@ -53,11 +55,24 @@ public class WorldReduced implements World {
 		} else {
 			tilesInRange = Util.getNeighborsCircularDist(t, tiles, radius);
 		}
+
 		for (Tile reZone : tilesInRange) {
-			reZone.setZone(zt);
+			if (commitAction) {
+				reZone.setZone(zt);
+			} else {
+				reZone.setSelection(new Selection(true, zt));
+			}
+
 		}
 		return true;
 	}
+
+	private void clearSelectionOnWorld() {
+		for (Tile t : tiles) {
+			t.setSelection(new Selection(false, t.getZoneType()));
+		}
+	}
+
 
 	@Override
 	public Tile[] getTiles() {
@@ -86,7 +101,7 @@ public class WorldReduced implements World {
 
 	@Override
 	public void notifyNewData(Action data) {
-		this.setAllZonesAround(data.getTarget(), data.getZoneType(), data.getRadius(), data.isSquare());
+		this.setAllZonesAround(data.getTarget(), data.getZoneType(), data.getRadius(), data.isSquare(), data.isMove());
 
 	}
 
@@ -126,7 +141,12 @@ public class WorldReduced implements World {
 	@Override
 	public void setOverlay(double[] data) {
 		// TODO never called
+	}
 
+	@Override
+	public void setSelected(Selection[] selections) {
+		//TODO never called
+		
 	}
 
 

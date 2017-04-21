@@ -6,6 +6,8 @@ import edu.mscd.thesis.model.zones.Zone;
 import edu.mscd.thesis.util.Rules;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
+import javafx.scene.shape.Rectangle;
 
 public class TileRenderer implements Renderer<Tile>{
 	private Renderer<Zone> zoneRenderer;
@@ -17,6 +19,8 @@ public class TileRenderer implements Renderer<Tile>{
 
 	@Override
 	public void draw(Tile tile, GraphicsContext g) {
+
+		
 		if(renderMode==RenderMode.NORMAL){
 			g.setFill(tile.getType().getColor());
 		}else if(renderMode==RenderMode.POLLUTION){
@@ -61,7 +65,7 @@ public class TileRenderer implements Renderer<Tile>{
 				blue = 0.0;
 			}
 			
-			double intensity = 1.0;
+			double intensity = 0.8;
 			Color color = new Color(red, green, blue, intensity);
 			g.setFill(color);
 		}
@@ -70,6 +74,13 @@ public class TileRenderer implements Renderer<Tile>{
 		if (z != null) {
 			zoneRenderer.draw(z, g);
 		}
+		if(tile.getSelection().isSelected()){
+			g.setLineWidth(0.095);
+			//g.setStroke(tile.getSelection().getType().getColor().deriveColor(0.5, 1, 1, 0.5));
+			g.setStroke(tile.getSelection().getType().getColor().brighter());
+			g.strokeRect(tile.getPos().getX(), tile.getPos().getY(), 1, 1);
+		}
+			
 		
 	}
 

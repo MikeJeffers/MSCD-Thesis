@@ -8,7 +8,7 @@ public interface World extends Model{
 
 	boolean setZoneAt(Pos2D pos, ZoneType zt);
 
-	boolean setAllZonesAround(Pos2D pos, ZoneType zt, int radius, boolean squareSelect);
+	boolean setAllZonesAround(Pos2D pos, ZoneType zt, int radius, boolean squareSelect, boolean commitAction);
 
 	Tile getTileAt(Pos2D pos);
 

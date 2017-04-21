@@ -94,15 +94,19 @@ public class GameLoop extends AnimationTimer implements Controller {
 				ai.setState(model);
 				prevModelState = ModelStripper.reducedCopy(model);
 				Action nextAction = ai.takeNextAction();
+				view.updateAIMove(nextAction);
+				getCurrentQValueMap(nextAction);
 				if (nextAction != null &&previousAiMove != null) {
 					ai.addCase(model, prevModelState, previousAiMove, view.getWeightVector());
 				}
-				view.updateAIMove(nextAction);
-				getCurrentQValueMap(nextAction);
+				
 				if(gameConfig.getAiMode()==AiMode.ON){
-					model.notifyNewData(nextAction);
+					AiAction act = (AiAction)nextAction;
+					act.setMove(true);
+					nextAction = act;
 					mostRecentlyAppliedAction = nextAction;
 				}
+				model.notifyNewData(nextAction);
 				previousAiMove = nextAction;
 				aiObserveCounter=0;
 				takeScreen = true;
@@ -121,7 +125,7 @@ public class GameLoop extends AnimationTimer implements Controller {
 	}
 	
 	private void getCurrentQValueMap(Action action){
-		double[] map = ai.getMapOfValues(model, mostRecentlyAppliedAction);
+		double[] map = ai.getMapOfValues(model, action);
 		double[] norm = new double[]{0,1};
 		map = Util.mapValues(map, norm);
 		model.setOverlay(map);
@@ -166,8 +170,10 @@ public class GameLoop extends AnimationTimer implements Controller {
 				currentUserMove = a;
 				if(a.isMove()){
 					mostRecentlyAppliedAction = a;
-					model.notifyNewData(a);
+					
 				}
+				model.notifyNewData(a);
+				
 				this.draw = true;
 			}
 		}else if(data.isConfig()){
