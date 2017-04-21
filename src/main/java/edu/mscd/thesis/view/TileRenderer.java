@@ -8,6 +8,7 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.Rectangle;
+import javafx.scene.shape.StrokeLineCap;
 
 public class TileRenderer implements Renderer<Tile>{
 	private Renderer<Zone> zoneRenderer;
@@ -52,22 +53,12 @@ public class TileRenderer implements Renderer<Tile>{
 			g.setFill(densityColor);
 		}else if(renderMode==RenderMode.POLICY){
 			double value = tile.getOverlayValue();
-			double red = value;
-			double blue = 0;
-			double green = value;
-			if(value<0.5){
-				red = 1.0;
-				green = value*2.0;
-				blue = 0.0;
-			}else{
-				red = 1.0-(value-0.5)*2.0;
-				green = 1.0;
-				blue = 0.0;
+			Color col = Color.MAGENTA;
+			if(value==1.0){
+				col = Color.CYAN;
 			}
-			
-			double intensity = 0.8;
-			Color color = new Color(red, green, blue, intensity);
-			g.setFill(color);
+			col = col.deriveColor(1, value, value, value);
+			g.setFill(col.brighter());
 		}
 		g.fillRect(tile.getPos().getX(), tile.getPos().getY(), 1, 1);
 		Zone z = tile.getZone();
@@ -76,7 +67,7 @@ public class TileRenderer implements Renderer<Tile>{
 		}
 		if(tile.getSelection().isSelected()){
 			g.setLineWidth(0.095);
-			//g.setStroke(tile.getSelection().getType().getColor().deriveColor(0.5, 1, 1, 0.5));
+			g.setLineCap(StrokeLineCap.ROUND);
 			g.setStroke(tile.getSelection().getType().getColor().brighter());
 			g.strokeRect(tile.getPos().getX(), tile.getPos().getY(), 1, 1);
 		}

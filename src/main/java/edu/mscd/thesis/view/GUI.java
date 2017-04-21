@@ -59,6 +59,7 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.StrokeLineCap;
 import javafx.scene.transform.Affine;
 import javafx.scene.transform.NonInvertibleTransformException;
 import javafx.stage.Stage;
@@ -471,19 +472,8 @@ public class GUI implements View {
 					userAct.setTarget(modelCoordinate);
 					userAct.setMove(false);
 					notifyObserver((ViewData) userAct.copy());
-					/*
-					redraw(gc);
-					prev = modelCoordinate;
-					canvas.getGraphicsContext2D().setStroke(Color.MAGENTA);
-					canvas.getGraphicsContext2D().setLineWidth(0.05);
-					canvas.getGraphicsContext2D().strokeRect(dx, dy, 1, 1);
-					System.out.println(modelCoordinate);
-					*/
 				}
-				
-				
 			}
-			
 		});
 	}
 
