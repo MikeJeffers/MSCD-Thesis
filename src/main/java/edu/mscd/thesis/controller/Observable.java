@@ -6,6 +6,6 @@ public interface Observable<T> {
 
 	public void detachObserver(Observer<T> obs);
 
-	public void notifyObserver();
+	public void notifyObserver(T newState);
 
 }

@@ -1,7 +1,6 @@
 package edu.mscd.thesis.nn;
 
 import org.encog.Encog;
-import org.encog.engine.network.activation.ActivationSigmoid;
 import org.encog.ml.data.MLData;
 import org.encog.ml.data.MLDataSet;
 import org.encog.ml.data.basic.BasicMLData;
@@ -10,15 +9,17 @@ import org.encog.neural.networks.BasicNetwork;
 import org.encog.neural.networks.layers.BasicLayer;
 import org.encog.neural.networks.training.propagation.resilient.ResilientPropagation;
 
-import edu.mscd.thesis.controller.UserData;
+import edu.mscd.thesis.controller.Action;
+import edu.mscd.thesis.controller.AiConfig;
+import edu.mscd.thesis.controller.AiConfigImpl;
 import edu.mscd.thesis.model.Model;
 import edu.mscd.thesis.model.Pos2D;
 import edu.mscd.thesis.model.Tile;
 import edu.mscd.thesis.model.World;
-import edu.mscd.thesis.model.city.CityData;
 import edu.mscd.thesis.model.city.CityProperty;
 import edu.mscd.thesis.model.zones.ZoneType;
 import edu.mscd.thesis.util.ModelToVec;
+import edu.mscd.thesis.util.NNConstants;
 import edu.mscd.thesis.util.Rules;
 import edu.mscd.thesis.util.Util;
 import edu.mscd.thesis.util.WeightVector;
@@ -31,35 +32,43 @@ import edu.mscd.thesis.util.WeightVector;
  * @author Mike
  *
  */
-public class ZoneMapper implements Learner, Mapper {
+public class ZoneMapper implements Learner, Mapper, Configurable {
 
+	private AiConfig conf = new AiConfigImpl();
+	private int neighborhoodSize = (int)Math.pow(conf.getObservationRadius()*2+1, 2);
 	private static final int ZONETYPES = ZoneType.values().length;
-	private static final int INPUT_LAYER_SIZE = 10 * ZONETYPES;
+	private int inputLayerSize = ZONETYPES+ZONETYPES*neighborhoodSize;
 	private static final int OUTPUT_LAYER_SIZE = 1;
-	private static final BasicNetwork network = new BasicNetwork();
-	private static final MLDataSet DATASET = new BasicMLDataSet();
-	private Model<UserData, CityData> state;
+	private BasicNetwork network = new BasicNetwork();
+	private MLDataSet dataSet = new BasicMLDataSet();
 
-	private ZoneType zone;
 
-	public ZoneMapper(Model<UserData, CityData> state) {
-		this.state = state;
+	public ZoneMapper(Model state) {
 		initNetwork();
 		initTraining();
 		trainResilient();
 	}
 
 	private void initNetwork() {
-		network.addLayer(new BasicLayer(null, true, INPUT_LAYER_SIZE));
-		network.addLayer(new BasicLayer(new ActivationSigmoid(), true, (INPUT_LAYER_SIZE * 5) / 2));
-		network.addLayer(new BasicLayer(new ActivationSigmoid(), true, (INPUT_LAYER_SIZE / 4)));
-		network.addLayer(new BasicLayer(new ActivationSigmoid(), false, OUTPUT_LAYER_SIZE));
+		int firstLayerSize =(int) Math.round(NNConstants.getInputLayerSizeFactor(inputLayerSize, conf.getNeuronDensity()));
+		int stepSize = (firstLayerSize-OUTPUT_LAYER_SIZE-1)/conf.getNetworkDepth();
+		network.addLayer(new BasicLayer(null, true, inputLayerSize));
+		for(int i=0; i<this.conf.getNetworkDepth(); i++){
+			network.addLayer(new BasicLayer(conf.getActivationFunc(), true, firstLayerSize-(stepSize*i)));
+		}
+		network.addLayer(new BasicLayer(conf.getActivationFunc(), false, OUTPUT_LAYER_SIZE));
 		network.getStructure().finalizeStructure();
 		network.reset();
+		System.out.println(network.toString());
+		for(int i=0; i<network.getLayerCount(); i++){
+			System.out.println(network.getLayerNeuronCount(i));
+		}
 	}
 
 	private void initTraining() {
-		double[][] input = new double[9][INPUT_LAYER_SIZE];
+		dataSet.close();
+		dataSet = new BasicMLDataSet();
+		double[][] input = new double[9][inputLayerSize];
 		double[][] output = new double[9][OUTPUT_LAYER_SIZE];
 		double[] r = ModelToVec.getZoneAsVector(ZoneType.RESIDENTIAL);
 		double[] c = ModelToVec.getZoneAsVector(ZoneType.COMMERICAL);
@@ -88,14 +97,14 @@ public class ZoneMapper implements Learner, Mapper {
 		for (int i = 0; i < input.length; i++) {
 			MLData trainingIn = new BasicMLData(input[i]);
 			MLData idealOut = new BasicMLData(output[i]);
-			DATASET.add(trainingIn, idealOut);
+			dataSet.add(trainingIn, idealOut);
 		}
 
 	}
 
 	private double[] constructSampleInput(double[] zoneVector, double[] action) {
-		double[] inputSet = new double[INPUT_LAYER_SIZE];
-		for (int cell = 0; cell < 9; cell++) {
+		double[] inputSet = new double[inputLayerSize];
+		for (int cell = 0; cell < this.neighborhoodSize; cell++) {
 			for (int v = 0; v < zoneVector.length; v++) {
 				inputSet[cell * zoneVector.length + v] = zoneVector[v];
 			}
@@ -107,7 +116,7 @@ public class ZoneMapper implements Learner, Mapper {
 	}
 
 	private void trainResilient() {
-		ResilientPropagation train = new ResilientPropagation(network, DATASET);
+		ResilientPropagation train = new ResilientPropagation(network, dataSet);
 		int epoch = 1;
 		do {
 			train.iteration();
@@ -123,8 +132,8 @@ public class ZoneMapper implements Learner, Mapper {
 	}
 
 	@Override
-	public double[] getMapOfValues(Model<UserData, CityData> state, UserData action) {
-		ZoneType zoneAction = action.getZoneSelection();
+	public double[] getMapOfValues(Model state, Action action) {
+		ZoneType zoneAction = action.getZoneType();
 		double[] zoneVector = ModelToVec.getZoneAsVector(zoneAction);
 		World w = state.getWorld();
 		Tile[] tiles = w.getTiles();
@@ -141,9 +150,9 @@ public class ZoneMapper implements Learner, Mapper {
 	}
 
 	@Override
-	public void addCase(Model<UserData, CityData> state, Model<UserData, CityData> prev, UserData action, WeightVector<CityProperty> weights) {
-		Pos2D pos = action.getClickLocation();
-		ZoneType zoneAct = action.getZoneSelection();
+	public void addCase(Model state, Model prev, Action action, WeightVector<CityProperty> weights) {
+		Pos2D pos = action.getTarget();
+		ZoneType zoneAct = action.getZoneType();
 		double prevScore = Rules.score(prev, weights);
 		double currentScore = Rules.score(state, weights);
 		double normalizedScoreDiff = Util.getNormalizedDifference(currentScore, prevScore);
@@ -155,7 +164,7 @@ public class ZoneMapper implements Learner, Mapper {
 	private void learn(double[] input, double[] output) {
 		MLData trainingIn = new BasicMLData(input);
 		MLData idealOut = new BasicMLData(output);
-		DATASET.add(trainingIn, idealOut);
+		dataSet.add(trainingIn, idealOut);
 		trainResilient();
 	}
 
@@ -174,10 +183,11 @@ public class ZoneMapper implements Learner, Mapper {
 	}
 	
 	private Tile[] getNeighbors(World w, Pos2D p) {
-		Tile[] tiles = new Tile[9];
+		Tile[] tiles = new Tile[this.neighborhoodSize];
+		int r = conf.getObservationRadius();
 		int index = 0;
-		for (int i = -1; i<=1; i++) {
-			for (int j = -1; j<=1; j++) {
+		for (int i = -r; i<=r; i++) {
+			for (int j = -r; j<=r; j++) {
 				Pos2D nLoc = new Pos2D(p.getX() + i, p.getY() + j);
 				tiles[index] = w.getTileAt(nLoc);
 				index++;
@@ -186,9 +196,17 @@ public class ZoneMapper implements Learner, Mapper {
 		return tiles;
 	}
 
-	public void setZoneOfAction(ZoneType zoneAction) {
-		this.zone = zoneAction;
 
+	@Override
+	public void configure(AiConfig configuration) {
+		this.conf = configuration;
+		this.neighborhoodSize = (int)Math.pow(conf.getObservationRadius()*2+1, 2);
+		this.inputLayerSize = ZONETYPES+ZONETYPES*neighborhoodSize;
+		this.initNetwork();
+		this.initTraining();
+		this.trainResilient();
+		
+		
 	}
 
 }

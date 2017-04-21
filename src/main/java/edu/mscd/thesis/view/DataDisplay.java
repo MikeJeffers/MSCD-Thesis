@@ -2,8 +2,7 @@ package edu.mscd.thesis.view;
 
 import java.util.Map;
 
-import edu.mscd.thesis.controller.UserData;
-import edu.mscd.thesis.model.city.City;
+import edu.mscd.thesis.controller.Action;
 import edu.mscd.thesis.model.city.CityProperty;
 import edu.mscd.thesis.util.WeightVector;
 import javafx.scene.chart.XYChart.Series;
@@ -16,6 +15,6 @@ public interface DataDisplay {
 	
 	public void updateScore(double value, int turn);
 	
-	public void updateAIMove(UserData action);
+	public void updateAIMove(Action action);
 
 }

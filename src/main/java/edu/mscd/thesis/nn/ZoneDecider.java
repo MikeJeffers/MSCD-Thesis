@@ -1,7 +1,6 @@
 package edu.mscd.thesis.nn;
 
 import org.encog.Encog;
-import org.encog.engine.network.activation.ActivationSigmoid;
 import org.encog.ml.data.MLData;
 import org.encog.ml.data.MLDataSet;
 import org.encog.ml.data.basic.BasicMLData;
@@ -10,13 +9,16 @@ import org.encog.neural.networks.BasicNetwork;
 import org.encog.neural.networks.layers.BasicLayer;
 import org.encog.neural.networks.training.propagation.resilient.ResilientPropagation;
 
-import edu.mscd.thesis.controller.UserData;
+import edu.mscd.thesis.controller.Action;
+import edu.mscd.thesis.controller.AiAction;
+import edu.mscd.thesis.controller.AiConfig;
+import edu.mscd.thesis.controller.AiConfigImpl;
 import edu.mscd.thesis.model.Model;
 import edu.mscd.thesis.model.city.CityData;
 import edu.mscd.thesis.model.city.CityProperty;
 import edu.mscd.thesis.model.zones.ZoneType;
-import edu.mscd.thesis.util.ModelStripper;
 import edu.mscd.thesis.util.ModelToVec;
+import edu.mscd.thesis.util.NNConstants;
 import edu.mscd.thesis.util.Rules;
 import edu.mscd.thesis.util.Util;
 import edu.mscd.thesis.util.WeightVector;
@@ -29,23 +31,24 @@ import edu.mscd.thesis.util.WeightVector;
  * 
  * @author Mike
  */
-public class ZoneDecider implements Actor, Learner {
-	private Model<UserData, CityData> state;
+public class ZoneDecider implements Actor, Learner, Configurable {
+	private Model state;
+	private AiConfig conf = new AiConfigImpl();
 
-	private static final BasicNetwork network = new BasicNetwork();
-	private static final MLDataSet DATASET = new BasicMLDataSet();
-	private static final int INPUT_LAYER_SIZE = CityProperty.values().length + ZoneType.values().length;
+	private BasicNetwork network = new BasicNetwork();
+	private MLDataSet DATASET = new BasicMLDataSet();
+	private int inputLayerSize = CityProperty.values().length + ZoneType.values().length;
 	private static final int OUTPUT_LAYER_SIZE = 1;
 
-	public ZoneDecider(Model<UserData, CityData> initialState) {
-		this.state = ModelStripper.reducedCopy(initialState);
+	public ZoneDecider(Model initialState) {
+		this.state = initialState;
 		initNetwork();
 		initTraining();
 		trainResilient();
 	}
 
 	private void initTraining() {
-		double[][] input = new double[28][INPUT_LAYER_SIZE];
+		double[][] input = new double[28][inputLayerSize];
 		double[][] output = new double[28][OUTPUT_LAYER_SIZE];
 		int i = 0;
 		CityData dataVec = new CityData();
@@ -209,21 +212,28 @@ public class ZoneDecider implements Actor, Learner {
 	}
 
 	private void initNetwork() {
-		network.addLayer(new BasicLayer(null, true, INPUT_LAYER_SIZE));
-		network.addLayer(new BasicLayer(new ActivationSigmoid(), true, (int) (INPUT_LAYER_SIZE * 1.5)));
-		network.addLayer(new BasicLayer(new ActivationSigmoid(), true, INPUT_LAYER_SIZE / 2));
-		network.addLayer(new BasicLayer(new ActivationSigmoid(), false, OUTPUT_LAYER_SIZE));
+		int firstLayerSize =(int) Math.round(NNConstants.getInputLayerSizeFactor(inputLayerSize, conf.getNeuronDensity()));
+		int stepSize = (firstLayerSize-OUTPUT_LAYER_SIZE-1)/conf.getNetworkDepth();
+		network.addLayer(new BasicLayer(null, true, inputLayerSize));
+		for(int i=0; i<this.conf.getNetworkDepth(); i++){
+			network.addLayer(new BasicLayer(conf.getActivationFunc(), true, firstLayerSize-(stepSize*i)));
+		}
+		network.addLayer(new BasicLayer(conf.getActivationFunc(), false, OUTPUT_LAYER_SIZE));
 		network.getStructure().finalizeStructure();
 		network.reset();
+		System.out.println(network.toString());
+		for(int i=0; i<network.getLayerCount(); i++){
+			System.out.println(network.getLayerNeuronCount(i));
+		}
 	}
 
 	@Override
-	public UserData takeNextAction() {
+	public Action takeNextAction() {
 		CityData cityData = state.getWorld().getCity().getData();
 		double[] modelVector = ModelToVec.getCityDataVector(cityData);
 		double[] qValues = new double[ZoneType.values().length];
 		int maxIndex = 0;
-		double maxScore = -1;
+		double maxScore = -Rules.MAX;
 		for (int i = 0; i < ZoneType.values().length; i++) {
 			double[] zoneAction = ModelToVec.getZoneAsVector(ZoneType.values()[i]);
 			double[] input = Util.appendVectors(modelVector, zoneAction);
@@ -240,23 +250,21 @@ public class ZoneDecider implements Actor, Learner {
 
 		ZoneType AIselection = ZoneType.values()[maxIndex];
 
-		UserData fake = new UserData();
-		fake.setZoneSelection(AIselection);
+		AiAction fake = new AiAction();
+		fake.setZoneType(AIselection);
 		fake.setRadius(strength);
-		fake.setAI(true);
 		return fake;
 
 	}
 
 	@Override
-	public void addCase(Model<UserData, CityData> prev, Model<UserData, CityData> current, UserData action,
-			WeightVector<CityProperty> weights) {
+	public void addCase(Model prev, Model current, Action action, WeightVector<CityProperty> weights) {
 		double prevScore = Rules.score(prev, weights);
 		double currentScore = Rules.score(state, weights);
 		double normalizedScoreDiff = Util.getNormalizedDifference(currentScore, prevScore);
 		CityData cityData = prev.getWorld().getCity().getData();
 		double[] modelVector = ModelToVec.getCityDataVector(cityData);
-		double[] zoneAction = ModelToVec.getZoneAsVector(action.getZoneSelection());
+		double[] zoneAction = ModelToVec.getZoneAsVector(action.getZoneType());
 		double[] input = Util.appendVectors(modelVector, zoneAction);
 		double[] output = new double[] { normalizedScoreDiff };
 		MLData trainingIn = new BasicMLData(input);
@@ -266,9 +274,17 @@ public class ZoneDecider implements Actor, Learner {
 	}
 
 	@Override
-	public void setState(Model<UserData, CityData> state) {
+	public void setState(Model state) {
 		this.state = state;
 
+	}
+
+	@Override
+	public void configure(AiConfig configuration) {
+		this.conf = configuration;
+		this.initNetwork();
+		this.initTraining();
+		this.trainResilient();
 	}
 
 }

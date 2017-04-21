@@ -2,10 +2,8 @@ package edu.mscd.thesis.main;
 
 import edu.mscd.thesis.controller.Controller;
 import edu.mscd.thesis.controller.GameLoop;
-import edu.mscd.thesis.controller.UserData;
 import edu.mscd.thesis.model.Model;
 import edu.mscd.thesis.model.WorldImpl;
-import edu.mscd.thesis.model.city.CityData;
 import edu.mscd.thesis.nn.AI;
 import edu.mscd.thesis.nn.NN;
 import edu.mscd.thesis.util.Rules;
@@ -22,8 +20,8 @@ import javafx.stage.Stage;
  */
 public class Launcher extends Application {
 
-	private View<UserData> view;
-	private Model<UserData, CityData> model;
+	private View view;
+	private Model model;
 	private Controller controller;
 	private AI ai;
 
@@ -47,15 +45,15 @@ public class Launcher extends Application {
 		t.run();
 	}
 
-	private static Model<UserData, CityData> initModel() {
+	private static Model initModel() {
 		return new WorldImpl(Rules.WORLD_X, Rules.WORLD_Y);
 	}
 
-	private static Controller initController(Model<UserData, CityData> model, View<UserData> view, AI ai) {
+	private static Controller initController(Model model, View view, AI ai) {
 		return new GameLoop(model, view, ai);
 	}
 
-	private static View<UserData> initView() {
+	private static View initView() {
 		return new GUI();
 	}
 

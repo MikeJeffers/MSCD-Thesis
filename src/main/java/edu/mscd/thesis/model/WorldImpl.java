@@ -5,11 +5,11 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Random;
 
+import edu.mscd.thesis.controller.Action;
+import edu.mscd.thesis.controller.ModelData;
 import edu.mscd.thesis.controller.Observer;
-import edu.mscd.thesis.controller.UserData;
 import edu.mscd.thesis.model.bldgs.Building;
 import edu.mscd.thesis.model.city.City;
-import edu.mscd.thesis.model.city.CityData;
 import edu.mscd.thesis.model.city.CityImpl;
 import edu.mscd.thesis.model.zones.Zone;
 import edu.mscd.thesis.model.zones.ZoneFactory;
@@ -24,10 +24,10 @@ public class WorldImpl implements World {
 	private City city;
 	private TileUpdaterService tileUpdater;
 
-	private List<Observer<CityData>> observers;
+	private List<Observer<ModelData>> observers;
 
 	public WorldImpl(int sizeX, int sizeY) {
-		this.observers = new ArrayList<Observer<CityData>>();
+		this.observers = new ArrayList<Observer<ModelData>>();
 		int size = sizeX * sizeY;
 		tiles = new Tile[size];
 		this.rows = sizeY;
@@ -96,7 +96,7 @@ public class WorldImpl implements World {
 
 		tileUpdater.runUpdates();
 		city.update();
-		this.notifyObserver();
+		this.notifyObserver(city.getData());
 	}
 
 	private Building findClosestOpenHome(Tile t) {
@@ -200,9 +200,8 @@ public class WorldImpl implements World {
 	}
 
 	@Override
-	public void notifyNewData(UserData userData) {
-		this.setAllZonesAround(userData.getClickLocation(), userData.getZoneSelection(), userData.getRadius(),
-				userData.isSquare());
+	public void notifyNewData(Action data) {
+		this.setAllZonesAround(data.getTarget(), data.getZoneType(), data.getRadius(), data.isSquare());
 
 	}
 
@@ -222,32 +221,33 @@ public class WorldImpl implements World {
 	}
 
 	@Override
-	public void attachObserver(Observer<CityData> obs) {
+	public void attachObserver(Observer<ModelData> obs) {
 		this.observers.add(obs);
 
 	}
 
 	@Override
-	public void detachObserver(Observer<CityData> obs) {
+	public void detachObserver(Observer<ModelData> obs) {
 		this.observers.remove(obs);
 
 	}
 
 	@Override
-	public void notifyObserver() {
-		for (Observer<CityData> o : this.observers) {
-			o.notifyNewData(city.getData());
+	public void notifyObserver(ModelData data) {
+		for (Observer<ModelData> o : this.observers) {
+			o.notifyNewData(data);
 		}
 
 	}
 
 	@Override
 	public void setOverlay(double[] data) {
-		for(int i=0; i<tiles.length; i++){
+		for (int i = 0; i < tiles.length; i++) {
 			tiles[i].setOverlayValue(data[i]);
 		}
-		
+
 	}
+
 
 
 }

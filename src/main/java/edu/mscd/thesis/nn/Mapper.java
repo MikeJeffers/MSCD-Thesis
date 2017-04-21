@@ -1,12 +1,25 @@
 package edu.mscd.thesis.nn;
 
-import edu.mscd.thesis.controller.UserData;
+import edu.mscd.thesis.controller.Action;
 import edu.mscd.thesis.model.Model;
-import edu.mscd.thesis.model.city.CityData;
 
+/**
+ * AI subsystem that generates map of Q-values per each Tile of Model's state
+ * 
+ * @author Mike
+ *
+ */
 public interface Mapper {
-	
 
-	public double[] getMapOfValues(Model<UserData, CityData> state, UserData action);
+	/**
+	 * Perform Q(s[i], a)->q[i] for each tile in Model state, given Action
+	 * 
+	 * @param state
+	 *            - Model state to score
+	 * @param action
+	 *            - Action to score state with
+	 * @return Double array of equal length to tiles.length
+	 */
+	public double[] getMapOfValues(Model state, Action action);
 
 }

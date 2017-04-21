@@ -1,12 +1,10 @@
 package edu.mscd.thesis.model;
 
-import edu.mscd.thesis.controller.UserData;
 import edu.mscd.thesis.model.city.City;
-import edu.mscd.thesis.model.city.CityData;
 import edu.mscd.thesis.model.zones.Zone;
 import edu.mscd.thesis.model.zones.ZoneType;
 
-public interface World extends Model<UserData,CityData>{
+public interface World extends Model{
 
 	boolean setZoneAt(Pos2D pos, ZoneType zt);
 
