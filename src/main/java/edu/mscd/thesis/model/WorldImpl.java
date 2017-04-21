@@ -30,7 +30,7 @@ public class WorldImpl implements World {
 
 	private List<Observer<ModelData>> observers;
 
-	BlockingQueue<Action> queue = new LinkedBlockingQueue<Action>();
+	private BlockingQueue<Action> queue = new LinkedBlockingQueue<Action>();
 	private boolean updateCalled;
 
 	public WorldImpl(int sizeX, int sizeY) {

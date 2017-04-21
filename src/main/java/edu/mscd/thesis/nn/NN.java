@@ -1,7 +1,10 @@
 package edu.mscd.thesis.nn;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import org.encog.Encog;
 import org.encog.ml.data.MLData;
@@ -16,6 +19,9 @@ import edu.mscd.thesis.controller.Action;
 import edu.mscd.thesis.controller.AiAction;
 import edu.mscd.thesis.controller.AiConfig;
 import edu.mscd.thesis.controller.AiConfigImpl;
+import edu.mscd.thesis.controller.ModelData;
+import edu.mscd.thesis.controller.Observer;
+import edu.mscd.thesis.controller.ViewData;
 import edu.mscd.thesis.model.Model;
 import edu.mscd.thesis.model.Pos2D;
 import edu.mscd.thesis.model.city.CityProperty;
@@ -26,6 +32,7 @@ import edu.mscd.thesis.util.NNConstants;
 import edu.mscd.thesis.util.Rules;
 import edu.mscd.thesis.util.Util;
 import edu.mscd.thesis.util.WeightVector;
+import javafx.application.Platform;
 
 /**
  * Primary AI component and neural network Contains TileMapper, ZoneMapper, and
@@ -34,12 +41,16 @@ import edu.mscd.thesis.util.WeightVector;
  * @author Mike
  */
 public class NN implements AI {
+	private int counter;
+	private BlockingQueue<AiConfig> queue = new LinkedBlockingQueue<AiConfig>();
+
 	private Model state;
 	private TileMapper tileMap;
 	private ZoneDecider zoneDecider;
 	private ZoneMapper zoneMap;
-	
+
 	private AiConfig conf = new AiConfigImpl();
+	private Collection<Observer<ViewData>> observers = new ArrayList<Observer<ViewData>>();
 
 	private BasicNetwork network = new BasicNetwork();
 	private MLDataSet DATASET = new BasicMLDataSet();
@@ -76,17 +87,18 @@ public class NN implements AI {
 	}
 
 	private void initNetwork() {
-		int firstLayerSize =(int) Math.round(NNConstants.getInputLayerSizeFactor(inputLayerSize, conf.getNeuronDensity()));
-		int stepSize = (firstLayerSize-OUTPUT_LAYER_SIZE-1)/conf.getNetworkDepth();
+		int firstLayerSize = (int) Math
+				.round(NNConstants.getInputLayerSizeFactor(inputLayerSize, conf.getNeuronDensity()));
+		int stepSize = (firstLayerSize - OUTPUT_LAYER_SIZE - 1) / conf.getNetworkDepth();
 		network.addLayer(new BasicLayer(null, true, inputLayerSize));
-		for(int i=0; i<this.conf.getNetworkDepth(); i++){
-			network.addLayer(new BasicLayer(conf.getActivationFunc(), true, firstLayerSize-(stepSize*i)));
+		for (int i = 0; i < this.conf.getNetworkDepth(); i++) {
+			network.addLayer(new BasicLayer(conf.getActivationFunc(), true, firstLayerSize - (stepSize * i)));
 		}
 		network.addLayer(new BasicLayer(conf.getActivationFunc(), false, OUTPUT_LAYER_SIZE));
 		network.getStructure().finalizeStructure();
 		network.reset();
 		System.out.println(network.toString());
-		for(int i=0; i<network.getLayerCount(); i++){
+		for (int i = 0; i < network.getLayerCount(); i++) {
 			System.out.println(network.getLayerNeuronCount(i));
 		}
 	}
@@ -162,6 +174,7 @@ public class NN implements AI {
 		move.setZoneType(zoneType);
 		move.setRadius(radius);
 		move.setSquare(false);
+		move.setMove(false);
 		return move;
 	}
 
@@ -216,6 +229,16 @@ public class NN implements AI {
 
 	@Override
 	public void configure(AiConfig configuration) {
+		try {
+			this.queue.put(configuration);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+	}
+	
+	private void processNewConfig(AiConfig configuration){
 		this.conf = configuration;
 		this.zoneDecider.configure(configuration);
 		this.tileMap.configure(configuration);
@@ -223,7 +246,51 @@ public class NN implements AI {
 		this.initNetwork();
 		this.initTraining();
 		this.trainResilient();
+	}
 
+	@Override
+	public void attachObserver(Observer<ViewData> obs) {
+		this.observers.add(obs);
+
+	}
+
+	@Override
+	public void detachObserver(Observer<ViewData> obs) {
+		this.observers.remove(obs);
+
+	}
+
+	@Override
+	public void notifyObserver(ViewData action) {
+		for (Observer<ViewData> obs : this.observers) {
+			obs.notifyNewData(action);
+		}
+
+	}
+
+	@Override
+	public void run() {
+		while (true) {
+			AiConfig msg;
+			while ((msg = queue.poll()) != null) {
+				processNewConfig(msg);
+			}
+			if (this.counter > conf.getObservationWaitTime()) {
+				counter = 0;
+				Action act = this.takeNextAction();
+				Platform.runLater(new Runnable() {
+		            @Override public void run() {
+		            	notifyObserver(act);
+		            }
+		        });
+			}
+		}
+
+	}
+
+	@Override
+	public synchronized void tick() {
+		counter++;
 	}
 
 }

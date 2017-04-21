@@ -27,6 +27,7 @@ public class Launcher extends Application {
 
 	private Thread modelThread;
 	private Thread controllerThread;
+	private Thread aiThread;
 
 	public Launcher() {
 	}
@@ -35,7 +36,7 @@ public class Launcher extends Application {
 	public void init() {
 
 		model = initModel();
-		ai = new NN(model);
+		ai = initAi(model);
 		view = initView();
 		controller = initController(model, view, ai);
 
@@ -49,10 +50,13 @@ public class Launcher extends Application {
 	}
 
 	@Override
-	public void stop(){
-		//TODO deprecated =(
+	public void stop() {
+		// TODO deprecated =( but works to kill thread on window close
+
 		modelThread.stop();
 		controllerThread.stop();
+		aiThread.stop();
+
 	}
 
 	private Model initModel() {
@@ -68,6 +72,14 @@ public class Launcher extends Application {
 
 	private View initView() {
 		return new GUI();
+	}
+
+	private AI initAi(Model initialState) {
+		AI ai = new NN(model);
+		aiThread = new Thread(ai);
+		aiThread.start();
+		return ai;
+
 	}
 
 }
