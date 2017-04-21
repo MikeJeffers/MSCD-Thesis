@@ -6,7 +6,7 @@ public enum ActivationFunctions {
     BIPOLAR(new ActivationBiPolar()), 
     BIPOLAR_STEEPSIGMOID(new ActivationBipolarSteepenedSigmoid()), 
     CLIPPED_LINEAR(new ActivationClippedLinear()), 
-    COMPETITVE(new ActivationCompetitive()), 
+    //COMPETITVE(new ActivationCompetitive()), 
     ELLIOT(new ActivationElliott()), 
     ELLIOT_SYM(new ActivationElliottSymmetric()), 
     GAUSSIAN(new ActivationGaussian()), 
