@@ -3,6 +3,7 @@ package edu.mscd.thesis.controller;
 import org.encog.engine.network.activation.ActivationFunction;
 
 import edu.mscd.thesis.nn.ActivationFunctions;
+import edu.mscd.thesis.util.NNConstants;
 
 public class AiConfigImpl extends AbstractConfigData implements AiConfig {
 
@@ -16,7 +17,7 @@ public class AiConfigImpl extends AbstractConfigData implements AiConfig {
 	public AiConfigImpl(){
 		this.function = ActivationFunctions.SIGMOID;
 		this.networkDepth = 2;
-		this.neuronDensity = 5;
+		this.neuronDensity = 2;
 		this.radius = 1;
 		this.waitTime = 5;
 	}
@@ -51,25 +52,25 @@ public class AiConfigImpl extends AbstractConfigData implements AiConfig {
 	}
 
 	public void setNetworkDepth(int depth) {
-		if (depth > 0 && depth < 10) {
+		if (depth >= NNConstants.MIN_DEPTH && depth <= NNConstants.MAX_DEPTH) {
 			this.networkDepth = depth;
 		}
 	}
 
 	public void setNeuronDensity(int density) {
-		if (density > 0 && density < 10) {
+		if (density >=NNConstants.MIN_DENSITY && density <= NNConstants.MAX_DENSITY) {
 			this.neuronDensity = density;
 		}
 	}
 
 	public void setObservationRadius(int radius) {
-		if (radius >= 0 && radius < 10) {
+		if (radius >= NNConstants.MIN_RADIUS && radius <= NNConstants.MAX_RADIUS) {
 			this.radius = radius;
 		}
 	}
 
 	public void setObservationWaitTime(int numTurns) {
-		if (numTurns > 0 && numTurns < 10) {
+		if (numTurns >= NNConstants.MIN_WAIT && numTurns <= NNConstants.MAX_WAIT) {
 			this.waitTime = numTurns;
 		}
 	}

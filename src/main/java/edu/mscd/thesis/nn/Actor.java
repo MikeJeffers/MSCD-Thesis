@@ -2,7 +2,6 @@ package edu.mscd.thesis.nn;
 
 import edu.mscd.thesis.controller.Action;
 import edu.mscd.thesis.model.Model;
-import edu.mscd.thesis.model.city.CityData;
 
 /**
  * AI component that is capable of exerting actions in Game-space

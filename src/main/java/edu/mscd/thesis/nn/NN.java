@@ -1,11 +1,9 @@
 package edu.mscd.thesis.nn;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import org.encog.Encog;
-import org.encog.engine.network.activation.ActivationSigmoid;
 import org.encog.ml.data.MLData;
 import org.encog.ml.data.MLDataSet;
 import org.encog.ml.data.basic.BasicMLData;
@@ -16,13 +14,15 @@ import org.encog.neural.networks.training.propagation.resilient.ResilientPropaga
 
 import edu.mscd.thesis.controller.Action;
 import edu.mscd.thesis.controller.AiAction;
+import edu.mscd.thesis.controller.AiConfig;
+import edu.mscd.thesis.controller.AiConfigImpl;
 import edu.mscd.thesis.model.Model;
 import edu.mscd.thesis.model.Pos2D;
-import edu.mscd.thesis.model.city.CityData;
 import edu.mscd.thesis.model.city.CityProperty;
 import edu.mscd.thesis.model.zones.ZoneType;
 import edu.mscd.thesis.util.ModelStripper;
 import edu.mscd.thesis.util.ModelToVec;
+import edu.mscd.thesis.util.NNConstants;
 import edu.mscd.thesis.util.Rules;
 import edu.mscd.thesis.util.Util;
 import edu.mscd.thesis.util.WeightVector;
@@ -38,10 +38,12 @@ public class NN implements AI {
 	private TileMapper tileMap;
 	private ZoneDecider zoneDecider;
 	private ZoneMapper zoneMap;
+	
+	private AiConfig conf = new AiConfigImpl();
 
-	private final static BasicNetwork network = new BasicNetwork();
-	private final static MLDataSet DATASET = new BasicMLDataSet();
-	private static final int INPUT_LAYER_SIZE = 2 + ZoneType.values().length;
+	private BasicNetwork network = new BasicNetwork();
+	private MLDataSet DATASET = new BasicMLDataSet();
+	private int inputLayerSize = 2 + ZoneType.values().length;
 	private static final int OUTPUT_LAYER_SIZE = 1;
 
 	public NN(Model state) {
@@ -56,7 +58,7 @@ public class NN implements AI {
 	}
 
 	private void initTraining() {
-		double[][] input = new double[4][INPUT_LAYER_SIZE];
+		double[][] input = new double[4][inputLayerSize];
 		double[][] output = new double[4][OUTPUT_LAYER_SIZE];
 		int i = 0;
 		for (ZoneType zone : ZoneType.values()) {
@@ -74,11 +76,19 @@ public class NN implements AI {
 	}
 
 	private void initNetwork() {
-		network.addLayer(new BasicLayer(null, true, INPUT_LAYER_SIZE));
-		network.addLayer(new BasicLayer(new ActivationSigmoid(), true, (int) (INPUT_LAYER_SIZE * 2)));
-		network.addLayer(new BasicLayer(new ActivationSigmoid(), false, OUTPUT_LAYER_SIZE));
+		int firstLayerSize =(int) Math.round(NNConstants.getInputLayerSizeFactor(inputLayerSize, conf.getNeuronDensity()));
+		int stepSize = (firstLayerSize-OUTPUT_LAYER_SIZE-1)/conf.getNetworkDepth();
+		network.addLayer(new BasicLayer(null, true, inputLayerSize));
+		for(int i=0; i<this.conf.getNetworkDepth(); i++){
+			network.addLayer(new BasicLayer(conf.getActivationFunc(), true, firstLayerSize-(stepSize*i)));
+		}
+		network.addLayer(new BasicLayer(conf.getActivationFunc(), false, OUTPUT_LAYER_SIZE));
 		network.getStructure().finalizeStructure();
 		network.reset();
+		System.out.println(network.toString());
+		for(int i=0; i<network.getLayerCount(); i++){
+			System.out.println(network.getLayerNeuronCount(i));
+		}
 	}
 
 	private void trainResilient() {
@@ -165,7 +175,7 @@ public class NN implements AI {
 		this.zoneDecider.addCase(state, prev, action, weights);
 		this.tileMap.addCase(state, prev, action, weights);
 		this.zoneMap.addCase(state, prev, action, weights);
-		
+
 		double[] tileValues = this.tileMap.getMapOfValues(prev, action);
 		double[] zoneValues = this.tileMap.getMapOfValues(prev, action);
 		int index = Util.getIndexOf(prev.getWorld().getTileAt(action.getTarget()), prev.getWorld().getTiles());
@@ -206,5 +216,16 @@ public class NN implements AI {
 		return combined;
 	}
 
+	@Override
+	public void configure(AiConfig configuration) {
+		this.conf = configuration;
+		this.zoneDecider.configure(configuration);
+		this.tileMap.configure(configuration);
+		this.zoneMap.configure(configuration);
+		this.initNetwork();
+		this.initTraining();
+		this.trainResilient();
+
+	}
 
 }

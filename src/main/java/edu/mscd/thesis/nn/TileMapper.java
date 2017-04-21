@@ -1,7 +1,6 @@
 package edu.mscd.thesis.nn;
 
 import org.encog.Encog;
-import org.encog.engine.network.activation.ActivationSigmoid;
 import org.encog.ml.data.MLData;
 import org.encog.ml.data.MLDataSet;
 import org.encog.ml.data.basic.BasicMLData;
@@ -11,41 +10,45 @@ import org.encog.neural.networks.layers.BasicLayer;
 import org.encog.neural.networks.training.propagation.resilient.ResilientPropagation;
 
 import edu.mscd.thesis.controller.Action;
+import edu.mscd.thesis.controller.AiConfig;
+import edu.mscd.thesis.controller.AiConfigImpl;
 import edu.mscd.thesis.model.Model;
 import edu.mscd.thesis.model.Pos2D;
 import edu.mscd.thesis.model.Tile;
 import edu.mscd.thesis.model.TileType;
 import edu.mscd.thesis.model.World;
-import edu.mscd.thesis.model.city.CityData;
 import edu.mscd.thesis.model.city.CityProperty;
 import edu.mscd.thesis.model.zones.ZoneType;
 import edu.mscd.thesis.util.ModelToVec;
+import edu.mscd.thesis.util.NNConstants;
 import edu.mscd.thesis.util.Rules;
 import edu.mscd.thesis.util.Util;
 import edu.mscd.thesis.util.WeightVector;
 
-
 /**
- * MLP Q-learner that outputs Q value for Tile neighborhood(state) and ZoneType (action)
- * Input Layer - 9xTileAttributeVectors + 1xZoneTypeVector 
- * Implements Mapper to produce Q-values for entire World-space
+ * MLP Q-learner that outputs Q value for Tile neighborhood(state) and ZoneType
+ * (action) Input Layer - 9xTileAttributeVectors + 1xZoneTypeVector Implements
+ * Mapper to produce Q-values for entire World-space
+ * 
  * @author Mike
  */
-public class TileMapper implements Learner, Mapper {
+public class TileMapper implements Learner, Mapper, Configurable {
 	/**
-	 * input is a single Tile Representation(decomposition of its attributes) and a Zone vector
-	 * MLP follows the form of a Q-learning approximation function
-	 * output is [0-1.0] where high values indicate optimal locations to place Zone of Action, given current state
+	 * input is a single Tile Representation(decomposition of its attributes)
+	 * and a Zone vector MLP follows the form of a Q-learning approximation
+	 * function output is [0-1.0] where high values indicate optimal locations
+	 * to place Zone of Action, given current state
 	 * 
 	 */
+	private AiConfig conf = new AiConfigImpl();
+	private int neighborhoodSize = (int)Math.pow(conf.getObservationRadius()*2+1, 2);
 	private static final int ZONETYPES = ZoneType.values().length;
 	private static final int TILE_ATTRIBUTES = ModelToVec.getTileAttributesAsVector(null).length;
-	private static final int INPUT_LAYER_SIZE = ZONETYPES+TILE_ATTRIBUTES*9;
 	private static final int OUTPUT_LAYER_SIZE = 1;
-	public static final BasicNetwork network = new BasicNetwork();
-	public static final MLDataSet DATASET = new BasicMLDataSet();
-
-
+	private int inputLayerSize = ZONETYPES + TILE_ATTRIBUTES * neighborhoodSize;
+	
+	private BasicNetwork network = new BasicNetwork();
+	private MLDataSet dataSet = new BasicMLDataSet();
 
 	public TileMapper(Model state) {
 		initNetwork();
@@ -54,53 +57,60 @@ public class TileMapper implements Learner, Mapper {
 	}
 
 	private void initNetwork() {
-		network.addLayer(new BasicLayer(null, true, INPUT_LAYER_SIZE));
-		network.addLayer(new BasicLayer(new ActivationSigmoid(), true, (INPUT_LAYER_SIZE * 3) / 2));
-		network.addLayer(new BasicLayer(new ActivationSigmoid(), true, (INPUT_LAYER_SIZE / 2)));
-		network.addLayer(new BasicLayer(new ActivationSigmoid(), false, OUTPUT_LAYER_SIZE));
+		int firstLayerSize =(int) Math.round(NNConstants.getInputLayerSizeFactor(inputLayerSize, conf.getNeuronDensity()));
+		int stepSize = (firstLayerSize-OUTPUT_LAYER_SIZE-1)/conf.getNetworkDepth();
+		network.addLayer(new BasicLayer(null, true, inputLayerSize));
+		for(int i=0; i<this.conf.getNetworkDepth(); i++){
+			network.addLayer(new BasicLayer(conf.getActivationFunc(), true, firstLayerSize-(stepSize*i)));
+		}
+		network.addLayer(new BasicLayer(conf.getActivationFunc(), false, OUTPUT_LAYER_SIZE));
 		network.getStructure().finalizeStructure();
 		network.reset();
+		System.out.println(network.toString());
+		for(int i=0; i<network.getLayerCount(); i++){
+			System.out.println(network.getLayerNeuronCount(i));
+		}
 	}
 
 	private void initTraining() {
-		int total = TileType.values().length*ZoneType.values().length;
-		double[][] input = new double[total][INPUT_LAYER_SIZE];
+		dataSet.close();
+		dataSet = new BasicMLDataSet();
+		int total = TileType.values().length * ZoneType.values().length;
+		double[][] input = new double[total][inputLayerSize];
 		double[][] output = new double[total][OUTPUT_LAYER_SIZE];
-		
-		double[] src = new double[]{0, Rules.MAX};
-		double[] target = new double[]{0.0, 1.0};
-		int j=0;
-		for(TileType t: TileType.values()){
+
+		double[] src = new double[] { 0, Rules.MAX };
+		double[] target = new double[] { 0.0, 1.0 };
+		int j = 0;
+		for (TileType t : TileType.values()) {
 			double[] tileRepr = ModelToVec.getTileTypeAsVector(t);
-			for(ZoneType z: ZoneType.values()){
+			for (ZoneType z : ZoneType.values()) {
 				double[] zoneAct = ModelToVec.getZoneAsVector(z);
-				input[j]=constructSampleInput(tileRepr, zoneAct);
-				output[j] = new double[]{Util.mapValue(Rules.getValueForZoneOnTile(t, z), src, target)};
+				input[j] = constructSampleInput(tileRepr, zoneAct);
+				output[j] = new double[] { Util.mapValue(Rules.getValueForZoneOnTile(t, z), src, target) };
 				j++;
 			}
 		}
-	 
+
 		for (int i = 0; i < input.length; i++) {
 			MLData trainingIn = new BasicMLData(input[i]);
 			MLData idealOut = new BasicMLData(output[i]);
-			DATASET.add(trainingIn, idealOut);
+			dataSet.add(trainingIn, idealOut);
 		}
 
 	}
-	
+
 	private double[] constructSampleInput(double[] tileVector, double[] action) {
 		double[] inputVec = new double[0];
-		for (int cell = 0; cell < 9; cell++) {
+		for (int cell = 0; cell < this.neighborhoodSize; cell++) {
 			inputVec = Util.appendVectors(inputVec, tileVector);
 		}
 		inputVec = Util.appendVectors(inputVec, action);
 		return inputVec;
 	}
-	
-
 
 	private void trainResilient() {
-		ResilientPropagation train = new ResilientPropagation(network, DATASET);
+		ResilientPropagation train = new ResilientPropagation(network, dataSet);
 		int epoch = 1;
 		do {
 			train.iteration();
@@ -115,7 +125,6 @@ public class TileMapper implements Learner, Mapper {
 		return output.getData()[0];
 	}
 
-	
 	@Override
 	public double[] getMapOfValues(Model state, Action action) {
 		ZoneType zoneAction = action.getZoneType();
@@ -129,12 +138,10 @@ public class TileMapper implements Learner, Mapper {
 			locations[i] = p;
 			double[] input = Util.appendVectors(getInputAroundTile(w, p), zoneVector);
 			double output = getOutput(input);
-			map[i]=output;
+			map[i] = output;
 		}
 		return map;
 	}
-
-
 
 	@Override
 	public void addCase(Model state, Model prev, Action action, WeightVector<CityProperty> weights) {
@@ -143,7 +150,8 @@ public class TileMapper implements Learner, Mapper {
 		double prevScore = Rules.score(prev, weights);
 		double currentScore = Rules.score(state, weights);
 		double normalizedScoreDiff = Util.getNormalizedDifference(currentScore, prevScore);
-		double[] input = Util.appendVectors(getInputAroundTile(prev.getWorld(), pos), ModelToVec.getZoneAsVector(zoneAct));
+		double[] input = Util.appendVectors(getInputAroundTile(prev.getWorld(), pos),
+				ModelToVec.getZoneAsVector(zoneAct));
 		learn(input, new double[] { normalizedScoreDiff });
 
 	}
@@ -151,10 +159,10 @@ public class TileMapper implements Learner, Mapper {
 	private void learn(double[] input, double[] output) {
 		MLData trainingIn = new BasicMLData(input);
 		MLData idealOut = new BasicMLData(output);
-		DATASET.add(trainingIn, idealOut);
+		dataSet.add(trainingIn, idealOut);
 		trainResilient();
 	}
-	
+
 	private double[] getInputAroundTile(World w, Pos2D p) {
 		Tile[] tiles = getNeighbors(w, p);
 		double[] vals = new double[tiles.length * TILE_ATTRIBUTES];
@@ -168,12 +176,13 @@ public class TileMapper implements Learner, Mapper {
 		}
 		return vals;
 	}
-	
+
 	private Tile[] getNeighbors(World w, Pos2D p) {
-		Tile[] tiles = new Tile[9];
+		Tile[] tiles = new Tile[this.neighborhoodSize];
+		int r = conf.getObservationRadius();
 		int index = 0;
-		for (int i = -1; i<=1; i++) {
-			for (int j = -1; j<=1; j++) {
+		for (int i = -r; i<=r; i++) {
+			for (int j = -r; j<=r; j++) {
 				Pos2D nLoc = new Pos2D(p.getX() + i, p.getY() + j);
 				tiles[index] = w.getTileAt(nLoc);
 				index++;
@@ -182,8 +191,15 @@ public class TileMapper implements Learner, Mapper {
 		return tiles;
 	}
 
+	@Override
+	public void configure(AiConfig configuration) {
+		this.conf = configuration;
+		this.neighborhoodSize = (int)Math.pow(conf.getObservationRadius()*2+1, 2);
+		this.inputLayerSize = ZONETYPES + TILE_ATTRIBUTES * neighborhoodSize;
+		this.initNetwork();
+		this.initTraining();
+		this.trainResilient();
 
-
-
+	}
 
 }

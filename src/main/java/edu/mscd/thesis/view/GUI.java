@@ -5,8 +5,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.encog.engine.network.activation.ActivationFunction;
-
 import edu.mscd.thesis.controller.Action;
 import edu.mscd.thesis.controller.AiAction;
 import edu.mscd.thesis.controller.AiConfigImpl;
@@ -21,6 +19,7 @@ import edu.mscd.thesis.model.city.CityProperty;
 import edu.mscd.thesis.model.zones.ZoneType;
 import edu.mscd.thesis.nn.ActivationFunctions;
 import edu.mscd.thesis.util.CityDataWeightVector;
+import edu.mscd.thesis.util.NNConstants;
 import edu.mscd.thesis.util.Rules;
 import edu.mscd.thesis.util.Util;
 import edu.mscd.thesis.util.WeightVector;
@@ -126,8 +125,7 @@ public class GUI implements View {
 		controlPane.add(moveReporter, 0, 11);
 		controlPane.add(aiSettingsPane, 1, 5);
 
-
-		setGridVisible(controlPane);
+		//setGridVisible(controlPane);
 
 		root.getChildren().add(canvas);
 		root.getChildren().add(controlPane);
@@ -205,7 +203,7 @@ public class GUI implements View {
 	
 	private Pane makeWaitTimeSelector() {
 		GridPane pane = new GridPane();
-		Spinner<Integer> selector = new Spinner<Integer>(1, 9, 2);
+		Spinner<Integer> selector = new Spinner<Integer>(NNConstants.MIN_WAIT, NNConstants.MAX_WAIT, aiConfig.getObservationWaitTime());
 		selector.setTooltip(new Tooltip("Sets number of turns to observe, learn, and make another move"));
 		selector.setMaxSize(100, 25);
 		selector.valueProperty().addListener(new ChangeListener<Integer>() {
@@ -220,7 +218,7 @@ public class GUI implements View {
 	
 	private Pane learnRadiusSelector() {
 		GridPane pane = new GridPane();
-		Spinner<Integer> selector = new Spinner<Integer>(1, 9, 2);
+		Spinner<Integer> selector = new Spinner<Integer>(NNConstants.MIN_RADIUS, NNConstants.MAX_RADIUS, aiConfig.getObservationRadius());
 		selector.setTooltip(new Tooltip("Sets radius that Q-Mappers can convolutionally observe neighboring tiles"));
 		selector.setMaxSize(100, 25);
 		selector.valueProperty().addListener(new ChangeListener<Integer>() {
@@ -236,7 +234,7 @@ public class GUI implements View {
 	
 	private Pane neuronDensitySelector() {
 		GridPane pane = new GridPane();
-		Spinner<Integer> selector = new Spinner<Integer>(1, 9, 2);
+		Spinner<Integer> selector = new Spinner<Integer>(NNConstants.MIN_DENSITY, NNConstants.MAX_DENSITY, aiConfig.getNeuronDensity());
 		selector.setTooltip(new Tooltip("Sets a factor of how many neurons should be in intermediate layers"));
 		selector.setMaxSize(100, 25);
 		selector.valueProperty().addListener(new ChangeListener<Integer>() {
@@ -252,7 +250,7 @@ public class GUI implements View {
 	
 	private Pane depthSelector() {
 		GridPane pane = new GridPane();
-		Spinner<Integer> selector = new Spinner<Integer>(1, 9, 2);
+		Spinner<Integer> selector = new Spinner<Integer>(NNConstants.MIN_DEPTH, NNConstants.MAX_DEPTH, aiConfig.getNetworkDepth());
 		selector.setTooltip(new Tooltip("Sets number of intermediate layers in the Neural Networks"));
 		selector.setMaxSize(100, 25);
 		selector.valueProperty().addListener(new ChangeListener<Integer>() {

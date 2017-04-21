@@ -4,7 +4,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import edu.mscd.thesis.model.Model;
-import edu.mscd.thesis.model.city.CityData;
 import edu.mscd.thesis.model.city.CityProperty;
 import edu.mscd.thesis.nn.AI;
 import edu.mscd.thesis.util.ArrayObservableList;
@@ -179,6 +178,7 @@ public class GameLoop extends AnimationTimer implements Controller {
 			ConfigData config = data.getConfig();
 			if(config.isAiConfig()){
 				this.aiConfig = (AiConfig) config.getAiConfig().copy();
+				this.ai.configure(aiConfig);
 			}else if(config.isGameConfig()){
 				this.gameConfig = (GameConfig) config.getGameConfiguration().copy();
 				this.step = gameConfig.isStep()&&gameConfig.isPaused();
