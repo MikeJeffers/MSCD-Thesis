@@ -1,6 +1,5 @@
 package edu.mscd.thesis.model;
 
-import java.util.List;
 
 import edu.mscd.thesis.controller.Action;
 import edu.mscd.thesis.controller.ModelData;
@@ -44,34 +43,10 @@ public class WorldReduced implements World {
 
 	@Override
 	public boolean setAllZonesAround(Pos2D pos, ZoneType zt, int radius, boolean squareSelect, boolean commitAction) {
-		clearSelectionOnWorld();
-		Tile t = this.getTileAt(pos);
-		if (t == null) {
-			return false;
-		}
-		List<Tile> tilesInRange;
-		if (squareSelect) {
-			tilesInRange = Util.getNeighborsManhattanDist(t, tiles, radius, cols, rows);
-		} else {
-			tilesInRange = Util.getNeighborsCircularDist(t, tiles, radius);
-		}
-
-		for (Tile reZone : tilesInRange) {
-			if (commitAction) {
-				reZone.setZone(zt);
-			} else {
-				reZone.setSelection(new Selection(true, zt));
-			}
-
-		}
-		return true;
+		//TODO never called
+		return false;
 	}
 
-	private void clearSelectionOnWorld() {
-		for (Tile t : tiles) {
-			t.setSelection(new Selection(false, t.getZoneType()));
-		}
-	}
 
 
 	@Override
@@ -101,8 +76,7 @@ public class WorldReduced implements World {
 
 	@Override
 	public void notifyNewData(Action data) {
-		this.setAllZonesAround(data.getTarget(), data.getZoneType(), data.getRadius(), data.isSquare(), data.isMove());
-
+		//TODO nevercalled
 	}
 
 	@Override
@@ -146,6 +120,12 @@ public class WorldReduced implements World {
 	@Override
 	public void setSelected(Selection[] selections) {
 		//TODO never called
+		
+	}
+
+	@Override
+	public void run() {
+		// TODO Auto-generated method stub
 		
 	}
 

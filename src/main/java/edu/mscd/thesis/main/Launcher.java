@@ -25,6 +25,9 @@ public class Launcher extends Application {
 	private Controller controller;
 	private AI ai;
 
+	private Thread modelThread;
+	private Thread controllerThread;
+
 	public Launcher() {
 	}
 
@@ -41,19 +44,29 @@ public class Launcher extends Application {
 	@Override
 	public void start(Stage primaryStage) throws Exception {
 		view.initView(primaryStage);
-		Thread t = new Thread(controller);
-		t.run();
+		controllerThread = new Thread(controller);
+		controllerThread.start();
 	}
 
-	private static Model initModel() {
-		return new WorldImpl(Rules.WORLD_X, Rules.WORLD_Y);
+	@Override
+	public void stop(){
+		//TODO deprecated =(
+		modelThread.stop();
+		controllerThread.stop();
 	}
 
-	private static Controller initController(Model model, View view, AI ai) {
+	private Model initModel() {
+		Model m = new WorldImpl(Rules.WORLD_X, Rules.WORLD_Y);
+		modelThread = new Thread(m);
+		modelThread.start();
+		return m;
+	}
+
+	private Controller initController(Model model, View view, AI ai) {
 		return new GameLoop(model, view, ai);
 	}
 
-	private static View initView() {
+	private View initView() {
 		return new GUI();
 	}
 

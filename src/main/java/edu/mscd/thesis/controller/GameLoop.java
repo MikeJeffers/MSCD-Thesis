@@ -154,13 +154,13 @@ public class GameLoop extends AnimationTimer implements Controller {
 	}
 
 	@Override
-	public synchronized void notifyModelEvent(ModelData data) {
+	public void notifyModelEvent(ModelData data) {
 		modelData.add(data);
 		view.updateScore(Rules.score(model, view.getWeightVector()), turn);
 	}
 
 	@Override
-	public synchronized void notifyViewEvent(ViewData data) {
+	public void notifyViewEvent(ViewData data) {
 		System.out.println(data);
 		if(data.isAction()){
 			Action a = data.getAction().copy();
