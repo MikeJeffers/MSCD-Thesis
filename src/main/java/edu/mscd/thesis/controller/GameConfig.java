@@ -4,7 +4,7 @@ public interface GameConfig {
 	
 	public boolean isPaused();
 	public boolean isStep();
-	public int getSpeed();
+	public double getSpeed();
 	public AiMode getAiMode();
 	
 	public GameConfig copy();

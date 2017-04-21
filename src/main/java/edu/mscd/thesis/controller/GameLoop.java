@@ -29,7 +29,7 @@ public class GameLoop extends AnimationTimer implements Controller {
 	private int aiObserveCounter;
 	private Model prevModelState;
 	private long previousTime = System.currentTimeMillis();
-	private long timeStep = 100000000;
+	private long timeStep = 1000000000;
 	private int turn = 0;
 	
 	

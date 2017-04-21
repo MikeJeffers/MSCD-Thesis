@@ -5,6 +5,8 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.encog.engine.network.activation.ActivationFunction;
+
 import edu.mscd.thesis.controller.Action;
 import edu.mscd.thesis.controller.AiAction;
 import edu.mscd.thesis.controller.AiConfigImpl;
@@ -17,6 +19,7 @@ import edu.mscd.thesis.model.Model;
 import edu.mscd.thesis.model.Pos2D;
 import edu.mscd.thesis.model.city.CityProperty;
 import edu.mscd.thesis.model.zones.ZoneType;
+import edu.mscd.thesis.nn.ActivationFunctions;
 import edu.mscd.thesis.util.CityDataWeightVector;
 import edu.mscd.thesis.util.Rules;
 import edu.mscd.thesis.util.Util;
@@ -106,11 +109,11 @@ public class GUI implements View {
 		Pane scorePane = makeScorePane();
 		Pane weightSliders = makeSliderPane();
 		Pane moveReporter = makeAIMoveReport();
-		Pane aiModePane = makeAiModePane();
+		Pane aiSettingsPane = makeAiSettingsPane();
 
 		controlPane.setHgap(5);
 		controlPane.setVgap(5);
-		controlPane.setPadding(new Insets(5, 5, 5, 25));
+		controlPane.setPadding(new Insets(0, 50, 5, 25));
 
 		controlPane.setLayoutX(Util.WINDOW_WIDTH);
 		controlPane.add(chartPane, 0, 0, 4, 4);
@@ -121,9 +124,10 @@ public class GUI implements View {
 		controlPane.add(scorePane, 0, 9);
 		controlPane.add(weightSliders, 0, 10);
 		controlPane.add(moveReporter, 0, 11);
-		controlPane.add(aiModePane, 1, 5);
+		controlPane.add(aiSettingsPane, 1, 5);
 
-		// setGridVisible(controlPane);
+
+		setGridVisible(controlPane);
 
 		root.getChildren().add(canvas);
 		root.getChildren().add(controlPane);
@@ -132,7 +136,7 @@ public class GUI implements View {
 		stage.setScene(mainScene);
 
 		this.stage = stage;
-		stage.show();
+		stage.show();	
 	}
 
 	private static void setGridVisible(Node n) {
@@ -145,8 +149,140 @@ public class GUI implements View {
 		}
 
 	}
+	
+	private Pane makeAiSettingsPane() {
+		GridPane pane = new GridPane();
+		Pane aiModeCombo = makeAiModeComboBox();
+		Pane activationFuncCombo = makeFunctionComboBox();
+		Pane depthSelector = depthSelector();
+		Pane neuronDensity = neuronDensitySelector();
+		Pane learnRadius = learnRadiusSelector();
+		Pane waitTime = makeWaitTimeSelector();
+		Pane submitButton = makeSubmitButton();
+		
+		Label modeLabel = new Label("Ai Mode: ");
+		Label funcLabel = new Label("Activation: ");
+		Label depthLabel = new Label("Layers: ");
+		Label densityLabel = new Label("Neurons: ");
+		Label radiusLabel = new Label("Radius: ");
+		Label waitLabel = new Label("Observe cycle: ");
+		Label submitLabel = new Label("Commit Changes: ");
+		
+		
+		GridPane.setConstraints(modeLabel, 0, 0, 1, 1, HPos.LEFT, VPos.BASELINE);
+		GridPane.setConstraints(aiModeCombo, 1, 0, 1, 1, HPos.LEFT, VPos.BASELINE);
+		GridPane.setConstraints(funcLabel, 0, 1, 1, 1, HPos.LEFT, VPos.BASELINE);
+		GridPane.setConstraints(activationFuncCombo, 1, 1, 1, 1, HPos.LEFT, VPos.BASELINE);
+		GridPane.setConstraints(depthLabel, 0, 2, 1, 1, HPos.LEFT, VPos.BASELINE);
+		GridPane.setConstraints(depthSelector, 1, 2, 1, 1, HPos.LEFT, VPos.BASELINE);
+		GridPane.setConstraints(densityLabel, 0, 3, 1, 1, HPos.LEFT, VPos.BASELINE);
+		GridPane.setConstraints(neuronDensity, 1, 3, 1, 1, HPos.LEFT, VPos.BASELINE);
+		GridPane.setConstraints(radiusLabel, 0, 4, 1, 1, HPos.LEFT, VPos.BASELINE);
+		GridPane.setConstraints(learnRadius, 1, 4, 1, 1, HPos.LEFT, VPos.BASELINE);
+		GridPane.setConstraints(waitLabel, 0, 5, 1, 1, HPos.LEFT, VPos.BASELINE);
+		GridPane.setConstraints(waitTime, 1, 5, 1, 1, HPos.LEFT, VPos.BASELINE);
+		GridPane.setConstraints(submitLabel, 0, 6, 1, 1, HPos.LEFT, VPos.BASELINE);
+		GridPane.setConstraints(submitButton, 1, 6, 1, 1, HPos.LEFT, VPos.BASELINE);
+		
+		pane.getChildren().addAll(aiModeCombo, activationFuncCombo, depthSelector, neuronDensity, learnRadius, waitTime, submitButton,
+				modeLabel, funcLabel, depthLabel, densityLabel, radiusLabel, waitLabel, submitLabel);
+		return pane;
+	}
+	
+	private Pane makeSubmitButton(){
+		GridPane pane = new GridPane();
+		Button button = new Button("Submit");
+		button.setTooltip(new Tooltip("Resets AI system with new settings"));
+		button.setOnAction(new EventHandler<ActionEvent>() {
+			@Override
+			public void handle(ActionEvent event) {
+				notifyObserver((ViewData)aiConfig.copy()); 
+			}
+		});
+		pane.add(button, 0, 0);
+		return pane;
+	}
+	
+	private Pane makeWaitTimeSelector() {
+		GridPane pane = new GridPane();
+		Spinner<Integer> selector = new Spinner<Integer>(1, 9, 2);
+		selector.setTooltip(new Tooltip("Sets number of turns to observe, learn, and make another move"));
+		selector.setMaxSize(100, 25);
+		selector.valueProperty().addListener(new ChangeListener<Integer>() {
+			@Override
+			public void changed(ObservableValue<? extends Integer> observable, Integer oldValue, Integer newValue) {
+				aiConfig.setObservationWaitTime(newValue.intValue());
+			}
+		});
+		pane.add(selector, 0, 0);
+		return pane;
+	}
+	
+	private Pane learnRadiusSelector() {
+		GridPane pane = new GridPane();
+		Spinner<Integer> selector = new Spinner<Integer>(1, 9, 2);
+		selector.setTooltip(new Tooltip("Sets radius that Q-Mappers can convolutionally observe neighboring tiles"));
+		selector.setMaxSize(100, 25);
+		selector.valueProperty().addListener(new ChangeListener<Integer>() {
+			@Override
+			public void changed(ObservableValue<? extends Integer> observable, Integer oldValue, Integer newValue) {
+				aiConfig.setObservationRadius(newValue.intValue());
+			}
+		});
+		pane.add(selector, 0, 0);
+		return pane;
+	}
 
-	private Pane makeAiModePane() {
+	
+	private Pane neuronDensitySelector() {
+		GridPane pane = new GridPane();
+		Spinner<Integer> selector = new Spinner<Integer>(1, 9, 2);
+		selector.setTooltip(new Tooltip("Sets a factor of how many neurons should be in intermediate layers"));
+		selector.setMaxSize(100, 25);
+		selector.valueProperty().addListener(new ChangeListener<Integer>() {
+			@Override
+			public void changed(ObservableValue<? extends Integer> observable, Integer oldValue, Integer newValue) {
+				aiConfig.setNeuronDensity(newValue.intValue());
+			}
+		});
+		pane.add(selector, 0, 0);
+		return pane;
+	}
+
+	
+	private Pane depthSelector() {
+		GridPane pane = new GridPane();
+		Spinner<Integer> selector = new Spinner<Integer>(1, 9, 2);
+		selector.setTooltip(new Tooltip("Sets number of intermediate layers in the Neural Networks"));
+		selector.setMaxSize(100, 25);
+		selector.valueProperty().addListener(new ChangeListener<Integer>() {
+			@Override
+			public void changed(ObservableValue<? extends Integer> observable, Integer oldValue, Integer newValue) {
+				aiConfig.setNetworkDepth(newValue.intValue());
+			}
+		});
+		pane.add(selector, 0, 0);
+		return pane;
+	}
+	
+	private Pane makeFunctionComboBox() {
+		GridPane pane = new GridPane();
+		ComboBox<ActivationFunctions> combo = new ComboBox<ActivationFunctions>();
+		combo.getItems().setAll(ActivationFunctions.values());
+		combo.setTooltip(new Tooltip("Sets the activation function of the neurons"));
+		combo.setValue(ActivationFunctions.SIGMOID);
+		combo.valueProperty().addListener(new ChangeListener<ActivationFunctions>() {
+			@Override
+			public void changed(ObservableValue<? extends ActivationFunctions> observable, ActivationFunctions oldValue, ActivationFunctions newValue) {
+				aiConfig.setActivationFunc(newValue);
+				notifyObserver((ViewData) gameConfig.copy());
+			}
+		});
+		pane.add(combo, 0, 0);
+		return pane;
+	}
+
+	private Pane makeAiModeComboBox() {
 		Pane aiModePane = new GridPane();
 		Label aiModeLabel = new Label("AI Mode: ");
 		ComboBox<AiMode> combo = new ComboBox<AiMode>();
@@ -430,6 +566,7 @@ public class GUI implements View {
 	private Pane makeZonePane() {
 		GridPane zonePanel = new GridPane();
 		Label zoneLabel = new Label("Zones: ");
+		Label speedLabel = new Label("Game speed:");
 		Label brushLabel = new Label("Brush: ");
 		Label radiusLabel = new Label("Radius: ");
 		Label turnLabel = new Label("Turn control: ");
@@ -439,6 +576,7 @@ public class GUI implements View {
 		Button playButton = makePlayPauseButton();
 		combine.add(step, 0, 0);
 		combine.add(playButton, 1, 0);
+		Pane gameSpeedSlider = makeGameSpeedSelector();
 		Pane brushPane = brushShapeButton();
 		Pane radiusPane = radiusSelect();
 
@@ -448,12 +586,35 @@ public class GUI implements View {
 		GridPane.setConstraints(combine, 1, 1, 1, 1, HPos.RIGHT, VPos.BASELINE);
 		GridPane.setConstraints(brushLabel, 0, 2, 1, 1, HPos.LEFT, VPos.BASELINE);
 		GridPane.setConstraints(brushPane, 1, 2, 1, 1, HPos.RIGHT, VPos.BASELINE);
-		GridPane.setConstraints(radiusLabel, 0, 3, 1, 1, HPos.LEFT, VPos.BASELINE);
-		GridPane.setConstraints(radiusPane, 1, 3, 1, 1, HPos.RIGHT, VPos.BASELINE);
+		GridPane.setConstraints(speedLabel, 0, 3, 1, 1, HPos.LEFT, VPos.BASELINE);
+		GridPane.setConstraints(gameSpeedSlider, 1, 3, 1, 1, HPos.LEFT, VPos.BASELINE);
+		GridPane.setConstraints(radiusLabel, 0, 4, 1, 1, HPos.LEFT, VPos.BASELINE);
+		GridPane.setConstraints(radiusPane, 1, 4, 1, 1, HPos.RIGHT, VPos.BASELINE);
 
-		zonePanel.getChildren().addAll(zoneLabel, zonePane, turnLabel, combine, brushLabel, brushPane, radiusLabel,
-				radiusPane);
+		zonePanel.getChildren().addAll(zoneLabel, zonePane, turnLabel, combine, brushLabel, brushPane, speedLabel,
+				gameSpeedSlider, radiusLabel, radiusPane);
 		return zonePanel;
+	}
+
+	private Pane makeGameSpeedSelector() {
+		GridPane pane = new GridPane();
+		Label dataLabel = new Label("0.5");
+		Slider slider = new Slider(0.1, 1.0, 0.5);
+		gameConfig.setSpeed(0.5);
+		slider.valueProperty().addListener(new ChangeListener<Number>() {
+			@Override
+			public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
+				gameConfig.setSpeed(newValue.doubleValue());
+				String toDisplay = Double.toString(newValue.doubleValue());
+				if (toDisplay.length() > 5) {
+					toDisplay = toDisplay.substring(0, 5);
+				}
+				dataLabel.setText(toDisplay);
+			}
+		});
+		pane.add(slider, 0, 0);
+		pane.add(dataLabel, 1, 0);
+		return pane;
 	}
 
 	private Pane makeZoneButtonPane() {
@@ -555,7 +716,6 @@ public class GUI implements View {
 		});
 		radiusSelectPane.add(radiusSelector, 0, 0);
 		return radiusSelectPane;
-
 	}
 
 	private Pane makeControlButtons(GraphicsContext gc) {

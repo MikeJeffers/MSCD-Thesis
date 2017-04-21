@@ -4,11 +4,11 @@ public class GameConfigImpl extends AbstractConfigData implements GameConfig{
 	
 	private boolean isPaused;
 	private boolean isStep;
-	private int speed;
+	private double speed;
 	private AiMode aiMode;
 	
 	public GameConfigImpl(){
-		this.speed = 4;
+		this.speed = 0.5;
 		this.isStep =false;
 		this.isPaused = true;
 		this.aiMode = AiMode.ON;
@@ -25,7 +25,7 @@ public class GameConfigImpl extends AbstractConfigData implements GameConfig{
 	}
 
 	@Override
-	public int getSpeed() {
+	public double getSpeed() {
 		return this.speed;
 	}
 
@@ -42,8 +42,8 @@ public class GameConfigImpl extends AbstractConfigData implements GameConfig{
 		this.isStep = isStep;
 	}
 
-	public void setSpeed(int speed) {
-		if(speed>0 && speed<10){
+	public void setSpeed(double speed) {
+		if(speed>0.0 && speed<=1.0){
 			this.speed = speed;
 		}
 	}

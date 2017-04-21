@@ -24,7 +24,7 @@ public class AiAction extends AbstractAction{
 	
 	@Override
 	public String getLabelText(){
-		return "AiMove:"+super.getLabelText();
+		return super.getLabelText();
 	}
 	
 	@Override
