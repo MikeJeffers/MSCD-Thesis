@@ -12,8 +12,10 @@ import org.junit.runners.Suite;
 @Suite.SuiteClasses({
   
   edu.mscd.thesis.model.AllTests.class,
+  
   edu.mscd.thesis.util.AllTests.class,
   TestLaunch.class
+  
   
 })
 
