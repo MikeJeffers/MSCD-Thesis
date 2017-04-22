@@ -39,12 +39,12 @@ public class CityImpl implements City {
 
 
 	@Override
-	public int totalPopulation() {
+	public synchronized int totalPopulation() {
 		return this.population.size();
 	}
 	
 	@Override
-	public double averageHappiness() {
+	public synchronized double averageHappiness() {
 		double total = totalPopulation();
 		double happiness = 0.0;
 		for (Person p : population) {
@@ -57,7 +57,7 @@ public class CityImpl implements City {
 	}
 
 	@Override
-	public double averageWealth() {
+	public synchronized double averageWealth() {
 		double total = totalPopulation();
 		double money = 0.0;
 		for (Person p : population) {
@@ -71,7 +71,7 @@ public class CityImpl implements City {
 	
 
 	@Override
-	public double percentageHomeless() {
+	public synchronized double percentageHomeless() {
 		double total = totalPopulation();
 		double homelessCount = 0.0;
 		for (Person p : population) {
@@ -86,7 +86,7 @@ public class CityImpl implements City {
 	}
 
 	@Override
-	public double percentageUnemployed() {
+	public synchronized double percentageUnemployed() {
 		double total = totalPopulation();
 		double unemployed = 0.0;
 		for (Person p : population) {

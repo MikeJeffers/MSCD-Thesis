@@ -18,6 +18,8 @@ import edu.mscd.thesis.model.Tile;
 import edu.mscd.thesis.model.World;
 import edu.mscd.thesis.model.city.CityProperty;
 import edu.mscd.thesis.model.zones.ZoneType;
+import edu.mscd.thesis.util.ComputeZoneMapService;
+import edu.mscd.thesis.util.MapExecutorService;
 import edu.mscd.thesis.util.ModelToVec;
 import edu.mscd.thesis.util.NNConstants;
 import edu.mscd.thesis.util.Rules;
@@ -41,12 +43,14 @@ public class ZoneMapper implements Learner, Mapper, Configurable {
 	private static final int OUTPUT_LAYER_SIZE = 1;
 	private BasicNetwork network = new BasicNetwork();
 	private MLDataSet dataSet = new BasicMLDataSet();
+	private MapExecutorService pool;
 
 
 	public ZoneMapper(Model state) {
 		initNetwork();
 		initTraining();
 		trainResilient();
+		this.pool = new ComputeZoneMapService(this.network, this.conf);
 	}
 
 	private void initNetwork() {
@@ -126,27 +130,11 @@ public class ZoneMapper implements Learner, Mapper, Configurable {
 		Encog.getInstance().shutdown();
 	}
 
-	private double getOutput(double[] input) {
-		MLData output = network.compute(new BasicMLData(input));
-		return output.getData()[0];
-	}
-
 	@Override
 	public double[] getMapOfValues(Model state, Action action) {
 		ZoneType zoneAction = action.getZoneType();
 		double[] zoneVector = ModelToVec.getZoneAsVector(zoneAction);
-		World w = state.getWorld();
-		Tile[] tiles = w.getTiles();
-		double[] map = new double[tiles.length];
-		Pos2D[] locations = new Pos2D[tiles.length];
-		for (int i = 0; i < tiles.length; i++) {
-			Pos2D p = tiles[i].getPos();
-			locations[i] = p;
-			double[] input = Util.appendVectors(getInputAroundTile(w, p), zoneVector);
-			double output = getOutput(input);
-			map[i] = output;
-		}
-		return map;
+		return pool.computeMap(state, zoneVector);
 	}
 
 	@Override
@@ -205,6 +193,8 @@ public class ZoneMapper implements Learner, Mapper, Configurable {
 		this.initNetwork();
 		this.initTraining();
 		this.trainResilient();
+		this.pool = new ComputeZoneMapService(this.network, this.conf);
+		
 		
 		
 	}

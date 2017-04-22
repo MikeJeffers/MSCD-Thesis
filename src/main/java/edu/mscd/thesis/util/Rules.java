@@ -54,7 +54,7 @@ public class Rules {
 		return Util.boundValue(value, 0, Rules.MAX);
 	}
 
-	public static double getDemandForZoneType(ZoneType zt, World w) {
+	public synchronized static double getDemandForZoneType(ZoneType zt, World w) {
 		int r = w.getCity().getZoneCount(ZoneType.RESIDENTIAL);
 		int c = w.getCity().getZoneCount(ZoneType.COMMERICAL);
 		int i = w.getCity().getZoneCount(ZoneType.INDUSTRIAL);

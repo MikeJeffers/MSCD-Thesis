@@ -251,6 +251,7 @@ public class NN implements AI {
 	}
 	
 	private void processNewConfig(AiConfig configuration){
+		System.out.println("CONFIGURING AI SYSTEM....");
 		this.conf = configuration;
 		this.zoneDecider.configure(configuration);
 		this.tileMap.configure(configuration);
@@ -258,6 +259,7 @@ public class NN implements AI {
 		this.initNetwork();
 		this.initTraining();
 		this.trainResilient();
+		System.out.println("...CONFIGURATION COMPLETE");
 	}
 
 	@Override

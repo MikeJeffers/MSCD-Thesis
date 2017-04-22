@@ -28,7 +28,7 @@ public class GameLoop extends AnimationTimer implements Controller {
 
 	private Model prevModelState;
 	private long previousTime = System.currentTimeMillis();
-	private long timeStep = 1000000000;
+	
 	private int turn = 0;
 
 	private Action currentAiMove;
@@ -77,7 +77,7 @@ public class GameLoop extends AnimationTimer implements Controller {
 	@Override
 	public void handle(long now) {
 
-		if (!gameConfig.isPaused() && now - previousTime > gameConfig.getSpeed() * timeStep) {
+		if (!gameConfig.isPaused() && now - previousTime > gameConfig.getSpeed() * Util.MAX_FRAME_DURATION) {
 			System.out.println(now - previousTime);
 			step = true;
 			previousTime = now;

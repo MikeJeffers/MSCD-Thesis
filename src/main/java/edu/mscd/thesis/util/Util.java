@@ -17,6 +17,7 @@ import edu.mscd.thesis.controller.Action;
 import edu.mscd.thesis.model.Pos2D;
 import edu.mscd.thesis.model.Tile;
 import edu.mscd.thesis.model.city.CityProperty;
+import edu.mscd.thesis.model.zones.ZoneType;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.image.WritableImage;
 import javafx.stage.Stage;
@@ -36,9 +37,13 @@ public class Util {
 	// GUI constants
 	public static final int WINDOW_WIDTH = 800;
 	public static final int WINDOW_HEIGHT = 600;
+	public static final long MAX_FRAME_DURATION = 2000000000L;
 	public static final double SCALE_FACTOR = Util.getScaleFactor(Rules.WORLD_X, Rules.WORLD_Y, WINDOW_WIDTH,
 			WINDOW_HEIGHT);
 	public static final boolean SCREENSHOT = false;
+	public static final int ZONETYPES = ZoneType.values().length;
+	public static final int TILE_ATTRIBUTES = 5;
+	
 	private static Random random = new Random();
 	private static DateFormat df = new SimpleDateFormat("yyMMdd_HHmmss_SSS");
 	private static final Date compileTime = new Date();
