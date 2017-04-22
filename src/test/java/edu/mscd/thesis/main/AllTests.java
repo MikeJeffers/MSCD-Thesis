@@ -3,7 +3,11 @@ package edu.mscd.thesis.main;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
-
+/**
+ * Test suite entry point
+ * ALWAYS CALL TestLaunch LAST - Kills javafx platform
+ * @author Mike
+ */
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
   
