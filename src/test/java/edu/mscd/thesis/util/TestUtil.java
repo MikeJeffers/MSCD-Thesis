@@ -13,6 +13,11 @@ import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
 
+import edu.mscd.thesis.model.Model;
+import edu.mscd.thesis.model.Pos2D;
+import edu.mscd.thesis.model.World;
+import edu.mscd.thesis.model.WorldImpl;
+
 
 public class TestUtil {
 
@@ -39,6 +44,32 @@ public class TestUtil {
 	public void runAfterTestMethod() {
 		//
 	}
+	
+	@Test
+	public void testValidPos2D(){
+		int yMax = 10;
+		int xMax = 15;
+		for(int i=0; i<10;i++){
+			Pos2D p = new Pos2D(i,i);
+			assertTrue(Util.isValidPos2D(p, xMax, yMax));
+		}
+		assertFalse(Util.isValidPos2D(new Pos2D(-1, 0), xMax, yMax));
+		assertFalse(Util.isValidPos2D(new Pos2D(xMax, 0), xMax, yMax));
+		assertFalse(Util.isValidPos2D(new Pos2D(0, yMax), xMax, yMax));
+		
+	}
+	
+	@Test
+	public void testIndexOf() {
+		Integer[] A = new Integer[]{0, 1, 2, 3, 4, 5, 6};
+		for(int i=0; i<A.length; i++){
+			assertTrue(Util.getIndexOf(i, A)==i);
+		}
+		assertTrue(Util.getIndexOf(-1, A)==-1);
+		assertTrue(Util.getIndexOf(-100, A)==-1);
+		assertTrue(Util.getIndexOf(83, A)==-1);
+		
+	}
 
 	@Test
 	public void testAppendVectors() {
@@ -58,5 +89,76 @@ public class TestUtil {
 		assertTrue(B[B.length-1]==C[C.length-1]);
 		
 	}
+	
+	@Test
+	public void testConcurrentModelCopy() {
+		System.out.println("Testing concurrent World copies");
+		Model m = new WorldImpl(Rules.WORLD_X, Rules.WORLD_Y);
+		Thread modelThread = new Thread(m);
+		modelThread.start();
+		Thread a = new Thread(new Runnable(){
+			@Override
+			public void run() {
+				int trials = 0;
+				while(trials<25){
+					try {
+						Thread.sleep(0);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+					long before = System.currentTimeMillis();
+					assertNotNull(ModelStripper.reducedCopy(m));
+					long after = System.currentTimeMillis();
+					System.out.println("A-Trial#"+trials+" took: "+(before-after)+"ms");
+					trials++;
+				}	
+			}
+		});
+		
+		Thread b = new Thread(new Runnable(){
+			@Override
+			public void run() {
+				int trials = 0;
+				while(trials<25){
+					try {
+						Thread.sleep(0);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+					long before = System.currentTimeMillis();
+					System.out.println("before");
+					assertNotNull(ModelStripper.reducedCopy(m));
+					long after = System.currentTimeMillis();
+					System.out.println("B-Trial#"+trials+" took: "+(before-after)+"ms");
+					trials++;
+				}	
+			}
+		});
+		System.out.println("Starting Thread A");
+		a.start();
+		System.out.println("Starting Thread B");
+		b.start();
+		
+		try {
+			System.out.println("Waiting 5s for joins");
+			b.join(5000);
+			System.out.println("B rejoined main");
+			a.join(5000);
+			System.out.println("A rejoined main");
+			modelThread.join(5000);
+		} catch (InterruptedException e) {
+			System.out.println("Joins interrupted");
+			e.printStackTrace();
+		}finally{
+			System.out.println("Kill Threads");
+			a.stop();
+			b.stop();
+			modelThread.stop();
+		}
+		System.out.println("..Done testing concurrent model copies!");
+		
+	}
+	
+	
 
 }

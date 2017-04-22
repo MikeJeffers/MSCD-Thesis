@@ -32,6 +32,7 @@ public class WorldImpl implements World {
 
 	private BlockingQueue<Action> queue = new LinkedBlockingQueue<Action>();
 	private boolean updateCalled;
+	private volatile boolean isRunning = true;
 
 	public WorldImpl(int sizeX, int sizeY) {
 		this.observers = new ArrayList<Observer<ModelData>>();
@@ -55,10 +56,11 @@ public class WorldImpl implements World {
 			tiles[i] = t;
 		}
 	}
+	
 
 	@Override
 	public void run() {
-		while (true) {
+		while (isRunning) {
 			Action msg;
 			while ((msg = queue.poll()) != null) {
 				processAction(msg);
@@ -304,6 +306,12 @@ public class WorldImpl implements World {
 			tiles[i].setSelection(selections[i]);
 		}
 
+	}
+
+	@Override
+	public void halt() {
+		this.isRunning = false;
+		
 	}
 
 }

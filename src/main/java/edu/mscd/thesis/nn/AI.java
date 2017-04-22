@@ -15,4 +15,9 @@ public interface AI extends Actor, Learner, Mapper, Configurable, Observable<Vie
 	
 	public void update(Model state, Action action, WeightVector<CityProperty> weights);
 	
+	/**
+	 * Halt run loop, Call before Join!
+	 */
+	public void halt();
+	
 }

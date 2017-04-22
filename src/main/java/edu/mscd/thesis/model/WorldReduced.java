@@ -125,7 +125,13 @@ public class WorldReduced implements World {
 
 	@Override
 	public void run() {
-		// TODO Auto-generated method stub
+		// TODO SHOULD BE NOT CALLED
+		
+	}
+
+	@Override
+	public void halt() {
+		// TODO SHOULD BE NOT CALLED
 		
 	}
 

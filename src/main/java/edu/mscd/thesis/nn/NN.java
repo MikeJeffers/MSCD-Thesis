@@ -43,6 +43,7 @@ import javafx.application.Platform;
  * @author Mike
  */
 public class NN implements AI {
+	private volatile boolean isRunning = true;
 	private int counter;
 	private BlockingQueue<AiConfig> queue = new LinkedBlockingQueue<AiConfig>();
 
@@ -284,7 +285,7 @@ public class NN implements AI {
 
 	@Override
 	public void run() {
-		while (true) {
+		while (isRunning) {
 			AiConfig msg;
 			while ((msg = queue.poll()) != null) {
 				processNewConfig(msg);
@@ -313,6 +314,11 @@ public class NN implements AI {
 		}
 		this.setState(state);
 		counter++;
+	}
+
+	@Override
+	public void halt() {
+		this.isRunning =false;
 	}
 
 }

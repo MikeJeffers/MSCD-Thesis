@@ -15,5 +15,10 @@ public interface Model extends Observer<Action>, Observable<ModelData>, Overlay,
 	public void update();
 	
 	public World getWorld();
+	
+	/**
+	 * Halt run loop, Call before Join!
+	 */
+	public void halt();
 
 }

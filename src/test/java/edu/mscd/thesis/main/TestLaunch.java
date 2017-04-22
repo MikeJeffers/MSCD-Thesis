@@ -9,9 +9,17 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import javafx.application.Application;
+import javafx.application.Platform;
 
 
-
+/**
+ * MUST BE RUN LAST! 
+ * Calls Platform.exit() which kills JavaFx processes
+ * 
+ * Tests full application start and shutdown
+ * @author Mike
+ *
+ */
 public class TestLaunch {
 
 
@@ -39,8 +47,8 @@ public class TestLaunch {
 
 	@Test
 	public void testSomething() {
-		//
-		
+
+		Application.launch(Launcher.class,new String[]{"--TEST=true"});
 		
 	}
 
