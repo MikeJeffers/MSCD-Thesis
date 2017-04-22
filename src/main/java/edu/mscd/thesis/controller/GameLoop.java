@@ -25,7 +25,7 @@ public class GameLoop extends AnimationTimer implements Controller {
 
 	private boolean step = true;
 	private boolean draw = true;
-	private int aiObserveCounter;
+
 	private Model prevModelState;
 	private long previousTime = System.currentTimeMillis();
 	private long timeStep = 1000000000;
@@ -87,8 +87,7 @@ public class GameLoop extends AnimationTimer implements Controller {
 		if (step) {
 			step = false;
 			turn++;
-			ai.setState(model);
-			ai.tick();
+			ai.update(model, mostRecentlyAppliedAction, view.getWeightVector());
 			model.update();
 			render();
 			if (takeScreen) {
@@ -144,9 +143,6 @@ public class GameLoop extends AnimationTimer implements Controller {
 				getCurrentQValueMap(a);
 				view.updateAIMove(a);
 				Action next = a;
-				if (next != null && previousAiMove != null) {
-					ai.addCase(model, prevModelState, previousAiMove, view.getWeightVector());
-				}
 				if (gameConfig.getAiMode() == AiMode.ON) {
 					AiAction act = (AiAction) next;
 					act.setMove(true);

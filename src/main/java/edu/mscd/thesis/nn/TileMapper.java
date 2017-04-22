@@ -138,11 +138,11 @@ public class TileMapper implements Learner, Mapper, Configurable {
 	}
 
 	@Override
-	public void addCase(Model state, Model prev, Action action, WeightVector<CityProperty> weights) {
+	public void addCase(Model prev, Model current, Action action, WeightVector<CityProperty> weights) {
 		Pos2D pos = action.getTarget();
 		ZoneType zoneAct = action.getZoneType();
 		double prevScore = Rules.score(prev, weights);
-		double currentScore = Rules.score(state, weights);
+		double currentScore = Rules.score(current, weights);
 		double normalizedScoreDiff = Util.getNormalizedDifference(currentScore, prevScore);
 		double[] input = Util.appendVectors(getInputAroundTile(prev.getWorld(), pos),
 				ModelToVec.getZoneAsVector(zoneAct));

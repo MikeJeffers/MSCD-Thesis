@@ -1,6 +1,7 @@
 package edu.mscd.thesis.nn;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
@@ -26,6 +27,7 @@ import edu.mscd.thesis.model.Model;
 import edu.mscd.thesis.model.Pos2D;
 import edu.mscd.thesis.model.city.CityProperty;
 import edu.mscd.thesis.model.zones.ZoneType;
+import edu.mscd.thesis.util.CityDataWeightVector;
 import edu.mscd.thesis.util.ModelStripper;
 import edu.mscd.thesis.util.ModelToVec;
 import edu.mscd.thesis.util.NNConstants;
@@ -45,6 +47,10 @@ public class NN implements AI {
 	private BlockingQueue<AiConfig> queue = new LinkedBlockingQueue<AiConfig>();
 
 	private Model state;
+	private Model prev;
+	private Action act;
+	private WeightVector<CityProperty> weights;
+	
 	private TileMapper tileMap;
 	private ZoneDecider zoneDecider;
 	private ZoneMapper zoneMap;
@@ -59,6 +65,8 @@ public class NN implements AI {
 
 	public NN(Model state) {
 		this.state = ModelStripper.reducedCopy(state);
+		this.prev = ModelStripper.reducedCopy(state);
+
 		this.zoneMap = new ZoneMapper(this.state);
 		this.tileMap = new TileMapper(this.state);
 		this.zoneDecider = new ZoneDecider(this.state);
@@ -180,16 +188,21 @@ public class NN implements AI {
 
 	@Override
 	public void addCase(Model prev, Model current, Action action, WeightVector<CityProperty> weights) {
-		if (!Util.isWeightVectorValid(weights)) {
+		if (!Util.isWeightVectorValid(weights) || !Util.isActionValid(action)) {
 			return;
 		}
-		this.zoneDecider.addCase(state, prev, action, weights);
-		this.tileMap.addCase(state, prev, action, weights);
-		this.zoneMap.addCase(state, prev, action, weights);
+		this.zoneDecider.addCase(prev, current, action, weights);
+		this.tileMap.addCase(prev, current, action, weights);
+		this.zoneMap.addCase(prev, current, action, weights);
 
 		double[] tileValues = this.tileMap.getMapOfValues(prev, action);
 		double[] zoneValues = this.tileMap.getMapOfValues(prev, action);
+
 		int index = Util.getIndexOf(prev.getWorld().getTileAt(action.getTarget()), prev.getWorld().getTiles());
+
+		if(index<0){
+			return;
+		}
 		double prevScore = Rules.score(prev, weights);
 		double currentScore = Rules.score(state, weights);
 		double normalizedScoreDiff = Util.getNormalizedDifference(currentScore, prevScore);
@@ -232,7 +245,6 @@ public class NN implements AI {
 		try {
 			this.queue.put(configuration);
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
@@ -276,6 +288,7 @@ public class NN implements AI {
 				processNewConfig(msg);
 			}
 			if (this.counter > conf.getObservationWaitTime()) {
+				this.addCase(this.prev, this.state, this.act, this.weights);
 				counter = 0;
 				Action act = this.takeNextAction();
 				Platform.runLater(new Runnable() {
@@ -283,13 +296,20 @@ public class NN implements AI {
 		            	notifyObserver(act);
 		            }
 		        });
+				this.prev = this.state;
 			}
 		}
 
 	}
 
 	@Override
-	public synchronized void tick() {
+	public synchronized void update(Model state, Action action, WeightVector<CityProperty> weights){
+		if(counter==0){
+			this.prev=ModelStripper.reducedCopy(state);
+			this.act = action.copy();
+			this.weights = weights;
+		}
+		this.setState(state);
 		counter++;
 	}
 

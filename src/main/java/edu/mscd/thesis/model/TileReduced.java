@@ -138,6 +138,15 @@ public class TileReduced implements Tile {
 	public void setSelection(Selection select) {
 		// TODO should fail
 	}
+	
+	@Override
+	public boolean equals(Object other){
+		if(other instanceof Tile){
+			Tile o = (Tile) other;
+			return o.getPos().equals(this.getPos())&&this.getType()==o.getType();
+		}
+		return false;
+	}
 
 
 }
