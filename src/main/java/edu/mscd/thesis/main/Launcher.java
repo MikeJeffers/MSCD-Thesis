@@ -22,8 +22,6 @@ import javafx.stage.Stage;
  *
  */
 public class Launcher extends Application {
-	private Map<String, String> args;
-
 	private View view;
 	private Model model;
 	private Controller controller;
@@ -38,24 +36,17 @@ public class Launcher extends Application {
 
 	@Override
 	public void init() {
-		this.args = super.getParameters().getNamed();
-		
-
 		model = initModel();
 		ai = initAi(model);
 		view = initView();
 		controller = initController(model, view, ai);
-		System.out.println(args);
-
 	}
 
 	@Override
 	public void start(Stage primaryStage) throws Exception {
 		view.initView(primaryStage);
-		
 		controllerThread = new Thread(controller);
 		controllerThread.start();
-		initTestThread();
 	}
 
 	@Override
@@ -95,29 +86,7 @@ public class Launcher extends Application {
 		return ai;
 
 	}
-	
-	/**
-	 * Just for testing boot and close of application
-	 */
-	private void initTestThread(){
-		if(args.containsKey("TEST")){
-			if(args.get("TEST").equals("true")){
-				Thread killer = new Thread(new Runnable(){
-					@Override
-					public void run() {
-						try {
-							Thread.sleep(5000);
-						} catch (InterruptedException e) {
-							e.printStackTrace();
-						}finally{
-							System.out.println("stopping application..");
-							Platform.exit();
-						}
-					}
-				});
-				killer.start();
-			}
-		}
-	}
+
+
 
 }

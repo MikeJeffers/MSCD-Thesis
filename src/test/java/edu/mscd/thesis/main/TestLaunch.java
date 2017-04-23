@@ -1,22 +1,13 @@
 package edu.mscd.thesis.main;
 
-import static org.junit.Assert.*;
-
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Rule;
+
 import org.junit.Test;
 
-import edu.mscd.thesis.util.JavaFXThreadingRule;
 import javafx.application.Application;
 import javafx.application.ConditionalFeature;
 import javafx.application.Platform;
@@ -30,8 +21,6 @@ import javafx.application.Platform;
  *
  */
 public class TestLaunch {
-	//@Rule 
-	//public JavaFXThreadingRule javafxRule = new JavaFXThreadingRule();
 
 	@BeforeClass
 	public static void runOnceBeforeClass() {
@@ -58,11 +47,29 @@ public class TestLaunch {
 	 * @throws Throwable 
 	 */
 	@Test(timeout=15000)
-	public void testSomething() throws Throwable {
+	public void testSomething(){
+		
 		if(Platform.isSupported(ConditionalFeature.GRAPHICS)){
-			Application.launch(Launcher.class, new String[]{"--TEST=true"});
+			System.out.println("start app");
+			Thread t = new Thread(new Runnable(){
+				@Override
+				public void run() {
+					Application.launch(Launcher.class, new String[0]);
+				}
+				
+			});
+			t.start();
+			try {
+				t.join(10000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}finally{
+				Platform.exit();
+			}
 		}
 		
 	}
+	
+
 
 }

@@ -10,13 +10,8 @@ import org.junit.runners.Suite;
  */
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
-  
   edu.mscd.thesis.model.AllTests.class,
-  
-  edu.mscd.thesis.util.AllTests.class,
-  TestLaunch.class
-  
-  
+  edu.mscd.thesis.util.AllTests.class
 })
 
 public class AllTests {
