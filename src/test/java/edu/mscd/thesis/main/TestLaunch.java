@@ -13,9 +13,12 @@ import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Rule;
 import org.junit.Test;
 
+import edu.mscd.thesis.util.JavaFXThreadingRule;
 import javafx.application.Application;
+import javafx.application.Platform;
 
 /**
  * MUST BE RUN LAST! Calls Platform.exit() which kills JavaFx processes
@@ -26,6 +29,8 @@ import javafx.application.Application;
  *
  */
 public class TestLaunch {
+	@Rule 
+	public JavaFXThreadingRule javafxRule = new JavaFXThreadingRule();
 
 	@BeforeClass
 	public static void runOnceBeforeClass() {
