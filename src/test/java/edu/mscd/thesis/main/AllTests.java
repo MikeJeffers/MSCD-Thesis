@@ -4,17 +4,19 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
 /**
- * Test suite entry point
- * ALWAYS CALL TestLaunch LAST - Kills javafx platform
+ * Test suite entry point ALWAYS CALL TestLaunch First to init Javafx environment
+ * 
  * @author Mike
  */
 @RunWith(Suite.class)
-@Suite.SuiteClasses({
-  edu.mscd.thesis.model.AllTests.class,
-  edu.mscd.thesis.util.AllTests.class
+@Suite.SuiteClasses({ 
+	TestLaunch.class, 
+	edu.mscd.thesis.model.TestModelSuite.class,
+	edu.mscd.thesis.util.TestUtilSuite.class,
+
 })
 
 public class AllTests {
-  // the class remains empty,
-  // used only as a holder for the above annotations
+	// the class remains empty,
+	// used only as a holder for the above annotations
 }

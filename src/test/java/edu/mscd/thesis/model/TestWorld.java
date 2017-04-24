@@ -14,8 +14,8 @@ import edu.mscd.thesis.model.zones.ZoneType;
 import edu.mscd.thesis.util.JavaFXThreadingRule;
 
 public class TestWorld {
-	@Rule 
-	public JavaFXThreadingRule javafxRule = new JavaFXThreadingRule();
+	//@Rule 
+	//public JavaFXThreadingRule javafxRule = new JavaFXThreadingRule();
 
 	@BeforeClass
 	public static void runOnceBeforeClass() {

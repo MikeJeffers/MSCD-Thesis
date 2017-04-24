@@ -22,8 +22,8 @@ import edu.mscd.thesis.model.WorldImpl;
 public class TestUtil {
 
 
-	@Rule
-	public JavaFXThreadingRule javafxRule = new JavaFXThreadingRule();
+	//@Rule
+	//public JavaFXThreadingRule javafxRule = new JavaFXThreadingRule();
 
 	@BeforeClass
 	public static void runOnceBeforeClass() {
@@ -90,7 +90,7 @@ public class TestUtil {
 		
 	}
 	
-	@Test
+	@Test(timeout=15000)
 	public void testConcurrentModelCopy() {
 		System.out.println("Testing concurrent World copies");
 		Model m = new WorldImpl(Rules.WORLD_X, Rules.WORLD_Y);
@@ -151,9 +151,6 @@ public class TestUtil {
 			e.printStackTrace();
 		}finally{
 			System.out.println("Kill Threads");
-			a.stop();
-			b.stop();
-			modelThread.stop();
 		}
 		System.out.println("..Done testing concurrent model copies!");
 		
