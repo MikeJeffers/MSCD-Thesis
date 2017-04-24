@@ -1,7 +1,5 @@
 package edu.mscd.thesis.main;
 
-import java.util.Map;
-
 import edu.mscd.thesis.controller.Controller;
 import edu.mscd.thesis.controller.GameLoop;
 import edu.mscd.thesis.model.Model;
@@ -12,7 +10,6 @@ import edu.mscd.thesis.util.Rules;
 import edu.mscd.thesis.view.GUI;
 import edu.mscd.thesis.view.View;
 import javafx.application.Application;
-import javafx.application.Platform;
 import javafx.stage.Stage;
 
 /**

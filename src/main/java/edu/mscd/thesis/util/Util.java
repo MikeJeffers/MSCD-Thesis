@@ -8,6 +8,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 
@@ -18,7 +19,10 @@ import edu.mscd.thesis.model.Pos2D;
 import edu.mscd.thesis.model.Tile;
 import edu.mscd.thesis.model.city.CityProperty;
 import edu.mscd.thesis.model.zones.ZoneType;
+import javafx.collections.ObservableList;
 import javafx.embed.swing.SwingFXUtils;
+import javafx.scene.chart.XYChart.Data;
+import javafx.scene.chart.XYChart.Series;
 import javafx.scene.image.WritableImage;
 import javafx.stage.Stage;
 
@@ -37,7 +41,10 @@ public class Util {
 	// GUI constants
 	public static final int WINDOW_WIDTH = 800;
 	public static final int WINDOW_HEIGHT = 600;
+	public static final int CHART_WIDTH=450;
+	public static final int CHART_HEIGHT=300;
 	public static final long MAX_FRAME_DURATION = 2000000000L;
+	public static final int MAX_CHART_DATAPTS = 100;
 	public static final double SCALE_FACTOR = Util.getScaleFactor(Rules.WORLD_X, Rules.WORLD_Y, WINDOW_WIDTH,
 			WINDOW_HEIGHT);
 	public static final boolean SCREENSHOT = false;
@@ -255,6 +262,69 @@ public class Util {
 		double diff = a-b;
 		return mapValue(diff, src, norm);
 	}
+	
+	
+	public static void pruneChartData(Series<Number,Number> series){
+		int numParts = MAX_CHART_DATAPTS/4;
+		ObservableList<Data<Number,Number>> data = series.getData();
+		if (data.size() > MAX_CHART_DATAPTS) {
+			List<List<Data<Number, Number>>> partitions = new ArrayList<List< Data<Number, Number>>>();
+			int minX = data.get(0).getXValue().intValue();
+			int maxX = data.get(data.size()-1).getXValue().intValue();
+			int xStepSize = (maxX-minX)/numParts;
+			
+			List<Data<Number,Number>> part = new ArrayList<Data<Number,Number>>();
+			for(int i=minX; i<=maxX; i++){
+				for(Data<Number,Number>pt: data){
+					if(i==pt.getXValue().intValue()){
+						part.add(pt);
+						break;
+					}
+				}
+				if(i%xStepSize==0 && !part.isEmpty()){
+					partitions.add(part);
+					part = new ArrayList<Data<Number,Number>>();
+				}
+			}
+
+			List<Number> keepers = new ArrayList<Number>();
+			for (List<Data<Number, Number>> p : partitions) {
+				keepers.addAll(getXValueOfMinMax(p));
+			}
+			Iterator<Data<Number, Number>> it = data.iterator();
+
+			while (it.hasNext()) {
+				Data<Number, Number> pt = it.next();
+				if (!keepers.contains(pt.getXValue())) {
+					it.remove();
+				}
+			}
+		}
+		
+	}
+	
+	private static List<Number> getXValueOfMinMax(List<Data<Number, Number>> part) {
+		List<Number> pair = new ArrayList<Number>();
+		Number maxIndex = 0;
+		double maxValue = Double.MIN_VALUE;
+		Number minIndex = 0;
+		double minValue = Double.MAX_VALUE;
+		for (Data<Number, Number> d : part) {
+			double val = d.getYValue().doubleValue();
+			if (val > maxValue) {
+				maxValue = val;
+				maxIndex = d.getXValue();
+			}
+			if (val < minValue) {
+				minValue = val;
+				minIndex = d.getXValue();
+			}
+		}
+		pair.add(minIndex);
+		pair.add(maxIndex);
+		return pair;
+	}
+	
 
 	public static void takeScreenshot(Stage stage) {
 		WritableImage img = stage.getScene().snapshot(null);

@@ -10,6 +10,7 @@ import edu.mscd.thesis.controller.AiAction;
 import edu.mscd.thesis.controller.AiConfigImpl;
 import edu.mscd.thesis.controller.AiMode;
 import edu.mscd.thesis.controller.GameConfigImpl;
+import edu.mscd.thesis.controller.ModelData;
 import edu.mscd.thesis.controller.Observer;
 import edu.mscd.thesis.controller.UserAction;
 import edu.mscd.thesis.controller.ViewData;
@@ -59,7 +60,6 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.StrokeLineCap;
 import javafx.scene.transform.Affine;
 import javafx.scene.transform.NonInvertibleTransformException;
 import javafx.stage.Stage;
@@ -90,6 +90,8 @@ public class GUI implements View {
 	@Override
 	public void initView(Stage stage) {
 		renderer.changeMode(RenderMode.NORMAL);
+		
+		//this.scoreData.getData().addListener(new DataListener(this.scoreData));
 
 		Group root = new Group();
 
@@ -116,7 +118,7 @@ public class GUI implements View {
 		controlPane.setPadding(new Insets(0, 50, 5, 25));
 
 		controlPane.setLayoutX(Util.WINDOW_WIDTH);
-		controlPane.add(chartPane, 0, 0, 4, 4);
+		controlPane.add(chartPane, 0, 0, 2, 4);
 		controlPane.add(zonePane, 0, 5);
 		controlPane.add(cameraControls, 0, 6);
 		controlPane.add(renderModeControls, 0, 7);
@@ -124,7 +126,7 @@ public class GUI implements View {
 		controlPane.add(scorePane, 0, 9);
 		controlPane.add(weightSliders, 0, 10);
 		controlPane.add(moveReporter, 0, 11);
-		controlPane.add(aiSettingsPane, 1, 5, 2, 2);
+		controlPane.add(aiSettingsPane, 1, 5, 1, 2);
 
 		//setGridVisible(controlPane);
 
@@ -489,13 +491,14 @@ public class GUI implements View {
 			xAxis.setLabel("Turn#");
 			yAxis.setLabel(prop.getLabel());
 			LineChart<Number, Number> lineChart = new LineChart<Number, Number>(xAxis, yAxis);
+			lineChart.setCreateSymbols(false);
 			lineChart.setTitle(prop.getLabel() + " over turn");
 
 			addChartBehaviourListeners(lineChart);
 
 			lineChart.getData().add(chartData.get(prop));
 
-			lineChart.setMaxSize(Util.WINDOW_WIDTH / 3, Util.WINDOW_HEIGHT / 3);
+			lineChart.setMaxSize(Util.CHART_WIDTH, Util.CHART_HEIGHT);
 			lineChart.setBackground(new Background(new BackgroundFill(Color.WHITE, CornerRadii.EMPTY, Insets.EMPTY)));
 			stackCharts.getChildren().add(lineChart);
 		}
@@ -506,10 +509,11 @@ public class GUI implements View {
 		xAxis.setLabel("Turn#");
 		yAxis.setLabel("Score");
 		LineChart<Number, Number> lineChart = new LineChart<Number, Number>(xAxis, yAxis);
+		lineChart.setCreateSymbols(false);
 		lineChart.setTitle("Score by turn");
 		addChartBehaviourListeners(lineChart);
 		lineChart.getData().add(scoreData);
-		lineChart.setMaxSize(Util.WINDOW_WIDTH / 3, Util.WINDOW_HEIGHT / 3);
+		lineChart.setMaxSize(Util.CHART_WIDTH, Util.CHART_HEIGHT);
 		lineChart.setBackground(new Background(new BackgroundFill(Color.WHITE, CornerRadii.EMPTY, Insets.EMPTY)));
 		stackCharts.getChildren().add(lineChart);
 
@@ -843,11 +847,6 @@ public class GUI implements View {
 	}
 
 	@Override
-	public Map<CityProperty, Series<Number, Number>> getCityChartData() {
-		return this.chartData;
-	}
-
-	@Override
 	public void updateAIMove(Action action) {
 		aiAct = action.copy();
 		this.aiMoveEventTarget.fireEvent(new DataReceived(dataReceipt));
@@ -863,7 +862,19 @@ public class GUI implements View {
 		this.score = value;
 		this.scoreData.getData().add(new Data<Number, Number>(turnCount, value));
 		this.scoreEventTarget.fireEvent(new DataReceived(dataReceipt));
+		Util.pruneChartData(this.scoreData);
 
+	}
+
+	@Override
+	public void updateCityData(ModelData data, int turn) {
+		Map<CityProperty, Double> map = data.getDataMap();
+		for(CityProperty prop: map.keySet()){
+			this.chartData.get(prop).getData().add(new Data<Number,Number>(turn, map.get(prop)));
+			Util.pruneChartData(this.chartData.get(prop));
+			
+		}
+		
 	}
 
 }

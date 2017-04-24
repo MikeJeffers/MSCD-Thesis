@@ -1,25 +1,17 @@
 package edu.mscd.thesis.controller;
 
-import java.util.Map;
-import java.util.Map.Entry;
-
 import edu.mscd.thesis.model.Model;
-import edu.mscd.thesis.model.city.CityProperty;
 import edu.mscd.thesis.nn.AI;
-import edu.mscd.thesis.util.ArrayObservableList;
 import edu.mscd.thesis.util.ModelStripper;
 import edu.mscd.thesis.util.Rules;
 import edu.mscd.thesis.util.Util;
 import edu.mscd.thesis.view.View;
 import javafx.animation.AnimationTimer;
-import javafx.collections.ListChangeListener;
-import javafx.collections.ObservableList;
-import javafx.scene.chart.XYChart.Data;
-import javafx.scene.chart.XYChart.Series;
+
 
 public class GameLoop extends AnimationTimer implements Controller {
 
-	private ObservableList<ModelData> modelData;
+
 	private Model model;
 	private View view;
 
@@ -43,27 +35,9 @@ public class GameLoop extends AnimationTimer implements Controller {
 	private AI ai;
 
 	private boolean takeScreen = false;
+	
 
 	public GameLoop(Model model, View view, AI ai) {
-		this.modelData = new ArrayObservableList<ModelData>();
-		this.modelData.addListener(new ListChangeListener<ModelData>() {
-			@Override
-			public void onChanged(ListChangeListener.Change<? extends ModelData> c) {
-				while (c.next()) {
-					for (ModelData additem : c.getAddedSubList()) {
-						Map<CityProperty, Series<Number, Number>> dataMap = view.getCityChartData();
-						Map<CityProperty, Double> data = additem.getDataMap();
-						for (Entry<CityProperty, Series<Number, Number>> pair : dataMap.entrySet()) {
-							Double value = data.get(pair.getKey());
-							if (value != null) {
-								pair.getValue().getData().add(new Data<Number, Number>(turn, value));
-							}
-						}
-					}
-				}
-			}
-		});
-
 		this.model = model;
 		this.view = view;
 		view.attachObserver(new ViewListener(this));
@@ -81,24 +55,29 @@ public class GameLoop extends AnimationTimer implements Controller {
 			System.out.println(now - previousTime);
 			step = true;
 			previousTime = now;
-
 		}
 
 		if (step) {
 			step = false;
-			turn++;
-			ai.update(model, mostRecentlyAppliedAction, view.getWeightVector());
-			model.update();
-			render();
-			if (takeScreen) {
-				takeScreen = false;
-				view.screenShot();
-			}
+			turn();
+			
 		} else if (draw) {
 			render();
 			draw = false;
 		}
 
+	}
+	
+	private void turn(){
+		turn++;
+		ai.update(model, mostRecentlyAppliedAction, view.getWeightVector());
+		model.update();
+		render();
+		if (takeScreen) {
+			takeScreen = false;
+			view.screenShot();
+		}
+		
 	}
 
 	private void getCurrentQValueMap(Action action) {
@@ -129,16 +108,14 @@ public class GameLoop extends AnimationTimer implements Controller {
 
 	@Override
 	public void notifyModelEvent(ModelData data) {
-		modelData.add(data);
+		view.updateCityData(data, turn);
 		view.updateScore(Rules.score(model, view.getWeightVector()), turn);
 	}
 
 	@Override
 	public void notifyViewEvent(ViewData data) {
-		System.out.println(data);
 		if (data.isAction()) {
 			Action a = data.getAction().copy();
-			
 			if(gameConfig.getAiMode()!=AiMode.OFF && a.isAI()){
 				getCurrentQValueMap(a);
 				view.updateAIMove(a);
@@ -158,7 +135,6 @@ public class GameLoop extends AnimationTimer implements Controller {
 			}
 			model.notifyNewData(a);
 			this.draw = true;
-
 		} else if (data.isConfig()) {
 			ConfigData config = data.getConfig();
 			if (config.isAiConfig()) {
@@ -169,7 +145,6 @@ public class GameLoop extends AnimationTimer implements Controller {
 				this.step = gameConfig.isStep() && gameConfig.isPaused();
 			}
 		}
-
 	}
 
 }

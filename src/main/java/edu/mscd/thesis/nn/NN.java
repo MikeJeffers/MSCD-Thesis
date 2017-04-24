@@ -1,7 +1,6 @@
 package edu.mscd.thesis.nn;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
@@ -20,14 +19,12 @@ import edu.mscd.thesis.controller.Action;
 import edu.mscd.thesis.controller.AiAction;
 import edu.mscd.thesis.controller.AiConfig;
 import edu.mscd.thesis.controller.AiConfigImpl;
-import edu.mscd.thesis.controller.ModelData;
 import edu.mscd.thesis.controller.Observer;
 import edu.mscd.thesis.controller.ViewData;
 import edu.mscd.thesis.model.Model;
 import edu.mscd.thesis.model.Pos2D;
 import edu.mscd.thesis.model.city.CityProperty;
 import edu.mscd.thesis.model.zones.ZoneType;
-import edu.mscd.thesis.util.CityDataWeightVector;
 import edu.mscd.thesis.util.ModelStripper;
 import edu.mscd.thesis.util.ModelToVec;
 import edu.mscd.thesis.util.NNConstants;
