@@ -124,7 +124,7 @@ public class GUI implements View {
 		controlPane.add(scorePane, 0, 9);
 		controlPane.add(weightSliders, 0, 10);
 		controlPane.add(moveReporter, 0, 11);
-		controlPane.add(aiSettingsPane, 1, 5);
+		controlPane.add(aiSettingsPane, 1, 5, 2, 2);
 
 		//setGridVisible(controlPane);
 

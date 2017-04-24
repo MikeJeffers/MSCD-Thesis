@@ -8,12 +8,17 @@ import edu.mscd.thesis.controller.Observer;
 import edu.mscd.thesis.view.Overlay;
 import edu.mscd.thesis.view.Selectable;
 
-public interface Model extends Observer<Action>, Observable<ModelData>, Overlay, Selectable{
+public interface Model extends Observer<Action>, Observable<ModelData>, Overlay, Selectable, Runnable{
 	/**
 	 * Run internal model updates based on behaviors of model system
 	 */
 	public void update();
 	
 	public World getWorld();
+	
+	/**
+	 * Halt run loop, Call before Join!
+	 */
+	public void halt();
 
 }

@@ -1,5 +1,7 @@
 package edu.mscd.thesis.main;
 
+import java.util.Map;
+
 import edu.mscd.thesis.controller.Controller;
 import edu.mscd.thesis.controller.GameLoop;
 import edu.mscd.thesis.model.Model;
@@ -10,6 +12,7 @@ import edu.mscd.thesis.util.Rules;
 import edu.mscd.thesis.view.GUI;
 import edu.mscd.thesis.view.View;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.stage.Stage;
 
 /**
@@ -19,42 +22,71 @@ import javafx.stage.Stage;
  *
  */
 public class Launcher extends Application {
-
 	private View view;
 	private Model model;
 	private Controller controller;
 	private AI ai;
+
+	private Thread modelThread;
+	private Thread controllerThread;
+	private Thread aiThread;
 
 	public Launcher() {
 	}
 
 	@Override
 	public void init() {
-
 		model = initModel();
-		ai = new NN(model);
+		ai = initAi(model);
 		view = initView();
 		controller = initController(model, view, ai);
-
 	}
 
 	@Override
 	public void start(Stage primaryStage) throws Exception {
 		view.initView(primaryStage);
-		Thread t = new Thread(controller);
-		t.run();
+		controllerThread = new Thread(controller);
+		controllerThread.start();
 	}
 
-	private static Model initModel() {
-		return new WorldImpl(Rules.WORLD_X, Rules.WORLD_Y);
+	@Override
+	public void stop() {
+		System.out.println("Closing application....");
+		model.halt();
+		ai.halt();
+		try {
+			modelThread.join();
+			controllerThread.join();
+			aiThread.join();
+		} catch (InterruptedException e) {
+
+		}
+		System.out.println("...Application stopped!");
 	}
 
-	private static Controller initController(Model model, View view, AI ai) {
+	private Model initModel() {
+		Model m = new WorldImpl(Rules.WORLD_X, Rules.WORLD_Y);
+		modelThread = new Thread(m);
+		modelThread.start();
+		return m;
+	}
+
+	private Controller initController(Model model, View view, AI ai) {
 		return new GameLoop(model, view, ai);
 	}
 
-	private static View initView() {
+	private View initView() {
 		return new GUI();
 	}
+
+	private AI initAi(Model initialState) {
+		AI ai = new NN(model);
+		aiThread = new Thread(ai);
+		aiThread.start();
+		return ai;
+
+	}
+
+
 
 }

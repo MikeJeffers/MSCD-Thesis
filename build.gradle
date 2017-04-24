@@ -14,5 +14,9 @@ dependencies {
   testCompile group: 'junit', name: 'junit', version: '4.+'
 }
 
+test {
+    include "edu/mscd/thesis/main/AllTests.class"
+}
+
 
 

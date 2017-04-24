@@ -85,7 +85,7 @@ public class ModelToVec {
 	
 	
 	public static double[] getTileAttributesAsVector(Tile t){
-		double[] attributes = new double[5];
+		double[] attributes = new double[Util.TILE_ATTRIBUTES];
 		if(t==null){
 			return attributes;
 		}

@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import edu.mscd.thesis.controller.Action;
 import edu.mscd.thesis.controller.ModelData;
@@ -18,6 +20,7 @@ import edu.mscd.thesis.model.zones.ZoneType;
 import edu.mscd.thesis.util.TileUpdaterService;
 import edu.mscd.thesis.util.Util;
 import edu.mscd.thesis.view.Selection;
+import javafx.application.Platform;
 
 public class WorldImpl implements World {
 	private Tile[] tiles;
@@ -26,6 +29,10 @@ public class WorldImpl implements World {
 	private TileUpdaterService tileUpdater;
 
 	private List<Observer<ModelData>> observers;
+
+	private BlockingQueue<Action> queue = new LinkedBlockingQueue<Action>();
+	private boolean updateCalled;
+	private volatile boolean isRunning = true;
 
 	public WorldImpl(int sizeX, int sizeY) {
 		this.observers = new ArrayList<Observer<ModelData>>();
@@ -49,21 +56,29 @@ public class WorldImpl implements World {
 			tiles[i] = t;
 		}
 	}
+	
 
 	@Override
-	public void update() {
-		// System.out.println(city);
+	public void run() {
+		while (isRunning) {
+			Action msg;
+			while ((msg = queue.poll()) != null) {
+				processAction(msg);
+			}
+			if(updateCalled){
+				updateCalled=false;
+				updateTasks();
+			}
+		}
 
-		// TODO
-		// iterate through all zones: incr/decr value based on conditions
-		// Residential gets new occupants if there is residential demand;
-		// --demand when home found for new citizen
-		// Residents without jobs, seek nearest place of employment (building in
-		// C or I)
-		// New industrial buildings only expand if there is demand; if demand
-		// met -- demand
-		// same for commerce
+	}
 
+	private void processAction(Action data) {
+		this.setAllZonesAround(data.getTarget(), data.getZoneType(), data.getRadius(), data.isSquare(), data.isMove());
+	}
+
+	
+	private void updateTasks(){
 		Collection<Person> homeless = this.city.getHomeless();
 		Collection<Person> unemployed = this.city.getUnemployed();
 
@@ -97,7 +112,17 @@ public class WorldImpl implements World {
 
 		tileUpdater.runUpdates();
 		city.update();
-		this.notifyObserver(city.getData());
+		Platform.runLater(new Runnable() {
+            @Override public void run() {
+            	notifyObserver(city.getData());
+            }
+        });
+		
+	}
+	
+	@Override
+	public void update() {
+		this.updateCalled =true;
 	}
 
 	private Building findClosestOpenHome(Tile t) {
@@ -215,7 +240,13 @@ public class WorldImpl implements World {
 
 	@Override
 	public void notifyNewData(Action data) {
-		this.setAllZonesAround(data.getTarget(), data.getZoneType(), data.getRadius(), data.isSquare(), data.isMove());
+		try {
+			this.queue.put(data);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
 	}
 
 	@Override
@@ -274,8 +305,13 @@ public class WorldImpl implements World {
 		for (int i = 0; i < tiles.length; i++) {
 			tiles[i].setSelection(selections[i]);
 		}
-		
+
 	}
 
+	@Override
+	public void halt() {
+		this.isRunning = false;
+		
+	}
 
 }

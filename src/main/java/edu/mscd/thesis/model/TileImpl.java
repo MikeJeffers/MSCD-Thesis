@@ -126,7 +126,7 @@ public class TileImpl implements Tile {
 	public boolean equals(Object other){
 		if(other instanceof Tile){
 			Tile o = (Tile) other;
-			return o.getPos().equals(this.getPos())&&o.getZone().equals(this.getZone())&&this.getType()==o.getType();
+			return o.getPos().equals(this.getPos())&&this.getType()==o.getType();
 		}
 		return false;
 	}
