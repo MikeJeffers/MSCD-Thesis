@@ -227,8 +227,10 @@ public class NN implements AI {
 
 	@Override
 	public double[] getMapOfValues(Model state, Action action) {
-		double[] mapA = this.tileMap.getMapOfValues(state, action);
-		double[] mapB = this.zoneMap.getMapOfValues(state, action);
+		Model copy = ModelStripper.reducedCopy(state);
+		Action actCopy = action.copy();
+		double[] mapA = this.tileMap.getMapOfValues(copy, actCopy);
+		double[] mapB = this.zoneMap.getMapOfValues(copy, actCopy);
 		double[] combined = new double[mapA.length];
 		double[] zoneVec = ModelToVec.getZoneAsVector(action.getZoneType());
 		for (int i = 0; i < mapA.length; i++) {

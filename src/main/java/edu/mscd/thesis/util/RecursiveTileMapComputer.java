@@ -15,20 +15,15 @@ public class RecursiveTileMapComputer extends RecursiveTask<double[]>{
 	private static final long serialVersionUID = 1L;
 	private BasicNetwork net;
 	private AiConfig config;
-	private double[] map;
 	private double[] actionVector;
-	private Tile[] tiles;
 	private int low;
 	private int high;
 	private World world;
 	private int neighborSize;
 
-	public RecursiveTileMapComputer(BasicNetwork net, AiConfig config, World world, double[] map, double[] actionVector,
-			Tile[] tiles, int lo, int hi) {
-		this.tiles = tiles;
+	public RecursiveTileMapComputer(BasicNetwork net, AiConfig config, World world, double[] actionVector, int lo, int hi) {
 		this.low = lo;
 		this.high = hi;
-		this.map = map;
 		this.net = net;
 		this.world = world;
 		this.config = config;
@@ -39,34 +34,40 @@ public class RecursiveTileMapComputer extends RecursiveTask<double[]>{
 	@Override
 	protected double[] compute() {
 		int diff = high - low;
+		double[] subMap = new double[diff];
+		Tile[] tiles = this.world.getTiles();
 		if (diff < Util.MAX_SEQUENTIAL) {
+			int j=0;
 			for (int i = low; i < high; i++) {
 				Pos2D p = tiles[i].getPos();
 				double[] input = Util.appendVectors(getInputAroundTile(this.world, p), actionVector);
 				double output = getOutput(input);
-				map[i] = output;
+				subMap[j] += output;
+				j++;
 			}
-			return map;
+			return subMap;
 		}
 		int mid = low + (high - low) / 2;
-		RecursiveTileMapComputer left = new RecursiveTileMapComputer(net, config, world, map, actionVector, tiles, low, mid);
-		RecursiveTileMapComputer right = new RecursiveTileMapComputer(net, config, world, map, actionVector, tiles, mid, high);
+		RecursiveTileMapComputer left = new RecursiveTileMapComputer(net, config, world, actionVector, low, mid);
+		RecursiveTileMapComputer right = new RecursiveTileMapComputer(net, config, world, actionVector, mid, high);
 		left.fork();
-		map = right.compute();
-		map = left.join();
-		return map;
+		double[]rightMap = right.compute();
+		double[]leftMap= left.join();
+		return Util.appendVectors(leftMap, rightMap);
 	}
 
 	private double getOutput(double[] input) {
-		MLData output = net.compute(new BasicMLData(input));
-		return output.getData()[0];
+		synchronized(this.net){
+			MLData output = net.compute(new BasicMLData(input));
+			return output.getData()[0];
+		}
 	}
 
 	private double[] getInputAroundTile(World w, Pos2D p) {
 		Tile[] subSet = getNeighbors(w, p);
 		double[] vals = new double[subSet.length * Util.TILE_ATTRIBUTES];
 		for (int i = 0; i < subSet.length; i++) {
-			double[] tileVec = ModelToVec.getTileAttributesAsVector(tiles[i]);
+			double[] tileVec = ModelToVec.getTileAttributesAsVector(subSet[i]);
 			int index = i * tileVec.length;
 			for (int j = 0; j < tileVec.length; j++) {
 				vals[index + j] = tileVec[j];

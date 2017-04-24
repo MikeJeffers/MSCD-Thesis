@@ -23,8 +23,7 @@ public class ComputeTileMapService implements MapExecutorService {
 	@Override
 	public double[] computeMap(Model state, double[] actionVec) {
 		Tile[] tiles = state.getWorld().getTiles();
-		double[] map = new double[tiles.length];
-		map = pool.invoke(new RecursiveTileMapComputer(network, config, state.getWorld(), map, actionVec, tiles, 0, tiles.length));
+		double[] map = pool.invoke(new RecursiveTileMapComputer(network, config, state.getWorld(), actionVec, 0, tiles.length));
 		return map;
 	}
 

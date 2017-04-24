@@ -56,6 +56,9 @@ public class ModelToVec {
 		double densityScore = 1.0-((1.0*currentDensity)/(1.0*maxDensity));
 		return densityScore;
 	}
+	
+	
+
 
 	/**
 	 * Create NN input-layer friendly representation of Zonetypes from a given
