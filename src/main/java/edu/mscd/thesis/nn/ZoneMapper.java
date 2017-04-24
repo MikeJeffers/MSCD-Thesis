@@ -18,7 +18,7 @@ import edu.mscd.thesis.model.Tile;
 import edu.mscd.thesis.model.World;
 import edu.mscd.thesis.model.city.CityProperty;
 import edu.mscd.thesis.model.zones.ZoneType;
-import edu.mscd.thesis.util.ComputeZoneMapService;
+import edu.mscd.thesis.util.ComputeNeuralMapService;
 import edu.mscd.thesis.util.MapExecutorService;
 import edu.mscd.thesis.util.ModelToVec;
 import edu.mscd.thesis.util.NNConstants;
@@ -50,7 +50,7 @@ public class ZoneMapper implements Learner, Mapper, Configurable {
 		initNetwork();
 		initTraining();
 		trainResilient();
-		this.pool = new ComputeZoneMapService(this.network, this.conf);
+		this.pool = new ComputeNeuralMapService(this.network, this.conf, ModelToVec::getTileAsZoneVector, Util.ZONETYPES);
 	}
 
 	private void initNetwork() {
@@ -193,10 +193,7 @@ public class ZoneMapper implements Learner, Mapper, Configurable {
 		this.initNetwork();
 		this.initTraining();
 		this.trainResilient();
-		this.pool = new ComputeZoneMapService(this.network, this.conf);
-		
-		
-		
+		this.pool = new ComputeNeuralMapService(this.network, this.conf, ModelToVec::getTileAsZoneVector, Util.ZONETYPES);
 	}
 
 }

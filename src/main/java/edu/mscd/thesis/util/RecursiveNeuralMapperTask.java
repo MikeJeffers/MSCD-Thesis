@@ -1,6 +1,7 @@
 package edu.mscd.thesis.util;
 
 import java.util.concurrent.RecursiveTask;
+import java.util.function.Function;
 
 import org.encog.ml.data.MLData;
 import org.encog.ml.data.basic.BasicMLData;
@@ -11,7 +12,7 @@ import edu.mscd.thesis.model.Pos2D;
 import edu.mscd.thesis.model.Tile;
 import edu.mscd.thesis.model.World;
 
-public class RecursiveTileMapComputer extends RecursiveTask<double[]>{
+public class RecursiveNeuralMapperTask extends RecursiveTask<double[]>{
 	private static final long serialVersionUID = 1L;
 	private BasicNetwork net;
 	private AiConfig config;
@@ -20,8 +21,10 @@ public class RecursiveTileMapComputer extends RecursiveTask<double[]>{
 	private int high;
 	private World world;
 	private int neighborSize;
+	private Function<Tile, double[]> modelToVector;
+	private int modelSize;
 
-	public RecursiveTileMapComputer(BasicNetwork net, AiConfig config, World world, double[] actionVector, int lo, int hi) {
+	public RecursiveNeuralMapperTask(BasicNetwork net, AiConfig config, World world, double[] actionVector, int lo, int hi, Function<Tile, double[]> modelToVec, int modelSize) {
 		this.low = lo;
 		this.high = hi;
 		this.net = net;
@@ -29,6 +32,8 @@ public class RecursiveTileMapComputer extends RecursiveTask<double[]>{
 		this.config = config;
 		this.actionVector = actionVector;
 		this.neighborSize = (int)Math.pow(this.config.getObservationRadius()*2+1, 2);
+		this.modelToVector = modelToVec;
+		this.modelSize = modelSize;
 	}
 
 	@Override
@@ -48,8 +53,8 @@ public class RecursiveTileMapComputer extends RecursiveTask<double[]>{
 			return subMap;
 		}
 		int mid = low + (high - low) / 2;
-		RecursiveTileMapComputer left = new RecursiveTileMapComputer(net, config, world, actionVector, low, mid);
-		RecursiveTileMapComputer right = new RecursiveTileMapComputer(net, config, world, actionVector, mid, high);
+		RecursiveNeuralMapperTask left = new RecursiveNeuralMapperTask(net, config, world, actionVector, low, mid, modelToVector, modelSize);
+		RecursiveNeuralMapperTask right = new RecursiveNeuralMapperTask(net, config, world, actionVector, mid, high, modelToVector, modelSize);
 		left.fork();
 		double[]rightMap = right.compute();
 		double[]leftMap= left.join();
@@ -61,17 +66,21 @@ public class RecursiveTileMapComputer extends RecursiveTask<double[]>{
 			MLData output = net.compute(new BasicMLData(input));
 			return output.getData()[0];
 		}
+		
+		
 	}
 
 	private double[] getInputAroundTile(World w, Pos2D p) {
 		Tile[] subSet = getNeighbors(w, p);
-		double[] vals = new double[subSet.length * Util.TILE_ATTRIBUTES];
+		double[] vals = new double[subSet.length * modelSize];
 		for (int i = 0; i < subSet.length; i++) {
-			double[] tileVec = ModelToVec.getTileAttributesAsVector(subSet[i]);
-			int index = i * tileVec.length;
-			for (int j = 0; j < tileVec.length; j++) {
-				vals[index + j] = tileVec[j];
+			double[] modelVec = modelToVector.apply(subSet[i]);
+			//double[] zVector = ModelToVec.getTileAsZoneVector(subSet[i]);
+			int index = i * modelSize;
+			for (int j = 0; j < modelSize; j++) {
+				vals[index + j] = modelVec[j];
 			}
+
 		}
 		return vals;
 	}

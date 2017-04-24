@@ -19,7 +19,8 @@ import edu.mscd.thesis.model.TileType;
 import edu.mscd.thesis.model.World;
 import edu.mscd.thesis.model.city.CityProperty;
 import edu.mscd.thesis.model.zones.ZoneType;
-import edu.mscd.thesis.util.ComputeTileMapService;
+import edu.mscd.thesis.util.ComputeNeuralMapService;
+import edu.mscd.thesis.util.MapExecutorService;
 import edu.mscd.thesis.util.ModelToVec;
 import edu.mscd.thesis.util.NNConstants;
 import edu.mscd.thesis.util.Rules;
@@ -45,13 +46,13 @@ public class TileMapper implements Learner, Mapper, Configurable {
 	private BasicNetwork network = new BasicNetwork();
 	private MLDataSet dataSet = new BasicMLDataSet();
 	
-	private ComputeTileMapService pool;
+	private MapExecutorService pool;
 
 	public TileMapper(Model state) {
 		initNetwork();
 		initTraining();
 		trainResilient();
-		this.pool = new ComputeTileMapService(this.network, this.conf);
+		this.pool = new ComputeNeuralMapService(this.network, this.conf, ModelToVec::getTileAttributesAsVector, TILE_ATTRIBUTES);
 	}
 
 	private void initNetwork() {
@@ -181,7 +182,7 @@ public class TileMapper implements Learner, Mapper, Configurable {
 		this.initNetwork();
 		this.initTraining();
 		this.trainResilient();
-		this.pool = new ComputeTileMapService(this.network, this.conf);
+		this.pool = new ComputeNeuralMapService(this.network, this.conf, ModelToVec::getTileAttributesAsVector, TILE_ATTRIBUTES);
 
 	}
 

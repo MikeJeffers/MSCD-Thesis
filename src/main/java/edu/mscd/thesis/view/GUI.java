@@ -140,16 +140,7 @@ public class GUI implements View {
 		stage.show();	
 	}
 
-	private static void setGridVisible(Node n) {
-		if (n instanceof GridPane) {
-			GridPane grid = (GridPane) n;
-			grid.setGridLinesVisible(true);
-			for (Node child : grid.getChildren()) {
-				setGridVisible(child);
-			}
-		}
-
-	}
+	
 	
 	private Pane makeAiSettingsPane() {
 		GridPane pane = new GridPane();
