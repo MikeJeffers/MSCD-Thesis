@@ -21,9 +21,11 @@ import edu.mscd.thesis.model.city.CityProperty;
 import edu.mscd.thesis.model.zones.ZoneType;
 import javafx.collections.ObservableList;
 import javafx.embed.swing.SwingFXUtils;
+import javafx.scene.Node;
 import javafx.scene.chart.XYChart.Data;
 import javafx.scene.chart.XYChart.Series;
 import javafx.scene.image.WritableImage;
+import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
 
 /**
@@ -263,7 +265,12 @@ public class Util {
 		return mapValue(diff, src, norm);
 	}
 	
-	
+	/**
+	 * Prunes data in series trying to preserve local minima while reducing data-pt quantity and resolution
+	 * Typically used to combat chart-data overflow, or excessive buildup, as this is taxing on Gui
+	 * NOTE: provided series will be destructively modified
+	 * @param series - Time/Turn-series data; where X-axis is assumed independent
+	 */
 	public static void pruneChartData(Series<Number,Number> series){
 		int numParts = MAX_CHART_DATAPTS/4;
 		ObservableList<Data<Number,Number>> data = series.getData();
@@ -323,6 +330,20 @@ public class Util {
 		pair.add(minIndex);
 		pair.add(maxIndex);
 		return pair;
+	}
+	
+	/**
+	 * Helper function to draw lines on nested gridPanes
+	 * @param n - parent node on Gui
+	 */
+	public  static void setGridVisible(Node n) {
+		if (n instanceof GridPane) {
+			GridPane grid = (GridPane) n;
+			grid.setGridLinesVisible(true);
+			for (Node child : grid.getChildren()) {
+				setGridVisible(child);
+			}
+		}
 	}
 	
 
