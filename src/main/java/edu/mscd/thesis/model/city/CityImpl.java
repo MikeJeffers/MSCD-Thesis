@@ -37,46 +37,52 @@ public class CityImpl implements City {
 		return this.population;
 	}
 
+	@Override
+	public int totalPopulation() {
+		synchronized (this.population) {
+			return this.population.size();
+		}
+	}
 
 	@Override
-	public synchronized int totalPopulation() {
-		return this.population.size();
-	}
-	
-	@Override
-	public synchronized double averageHappiness() {
+	public double averageHappiness() {
 		double total = totalPopulation();
 		double happiness = 0.0;
-		for (Person p : population) {
-			happiness +=((double)p.getHappiness())/((double)Rules.MAX);
+		synchronized (this.population) {
+			for (Person p : population) {
+				happiness += ((double) p.getHappiness()) / ((double) Rules.MAX);
+			}
 		}
 		if (total < 1) {
 			return 0;
 		}
-		return happiness/total;
+		return happiness / total;
 	}
 
 	@Override
-	public synchronized double averageWealth() {
+	public double averageWealth() {
 		double total = totalPopulation();
 		double money = 0.0;
-		for (Person p : population) {
-			money +=((double)p.getMoney())/((double)Rules.MAX);
+		synchronized (this.population) {
+			for (Person p : population) {
+				money += ((double) p.getMoney()) / ((double) Rules.MAX);
+			}
 		}
 		if (total < 1) {
 			return 0;
 		}
-		return money/total;
+		return money / total;
 	}
-	
 
 	@Override
-	public synchronized double percentageHomeless() {
+	public double percentageHomeless() {
 		double total = totalPopulation();
 		double homelessCount = 0.0;
-		for (Person p : population) {
-			if (p.homeless()) {
-				homelessCount++;
+		synchronized (this.population) {
+			for (Person p : population) {
+				if (p.homeless()) {
+					homelessCount++;
+				}
 			}
 		}
 		if (total < 1) {
@@ -86,12 +92,14 @@ public class CityImpl implements City {
 	}
 
 	@Override
-	public synchronized double percentageUnemployed() {
+	public double percentageUnemployed() {
 		double total = totalPopulation();
 		double unemployed = 0.0;
-		for (Person p : population) {
-			if (!p.employed()) {
-				unemployed++;
+		synchronized (this.population) {
+			for (Person p : population) {
+				if (!p.employed()) {
+					unemployed++;
+				}
 			}
 		}
 		if (total < 1) {
@@ -103,9 +111,11 @@ public class CityImpl implements City {
 	@Override
 	public Collection<Person> getUnemployed() {
 		Collection<Person> people = new HashSet<Person>();
-		for (Person p : population) {
-			if (!p.employed()) {
-				people.add(p);
+		synchronized (this.population) {
+			for (Person p : population) {
+				if (!p.employed()) {
+					people.add(p);
+				}
 			}
 		}
 
@@ -115,9 +125,11 @@ public class CityImpl implements City {
 	@Override
 	public Collection<Person> getHomeless() {
 		Collection<Person> people = new HashSet<Person>();
-		for (Person p : population) {
-			if (p.homeless()) {
-				people.add(p);
+		synchronized (this.population) {
+			for (Person p : population) {
+				if (p.homeless()) {
+					people.add(p);
+				}
 			}
 		}
 		return people;
@@ -135,7 +147,9 @@ public class CityImpl implements City {
 		clearReferencesFrom(p.getWork(), p);
 		p.employAt(null);
 		p.liveAt(null);
-		this.population.remove(p);
+		synchronized (this.population) {
+			this.population.remove(p);
+		}
 	}
 
 	private void clearReferencesFrom(Building b, Person p) {
@@ -148,18 +162,19 @@ public class CityImpl implements City {
 	public void update() {
 		Collection<Person> toRemove = new HashSet<Person>();
 		int toAddCounter = 0;
-		for (Person p : population) {
-			p.update();
-			if (p.getHappiness() < 0 && p.getMoney() < 0 && !p.employed() && p.homeless()) {
-				toRemove.add(p);
-			}else if(p.getAge()>Rules.LIFE_SPAN){
-				toRemove.add(p);
-			} else if (p.employed() && !p.homeless()) {
-				int rand = Util.getRandomBetween(0, 100);
-				if (rand < Rules.BIRTH_RATE) {
-					toAddCounter++;
+		synchronized (this.population) {
+			for (Person p : population) {
+				p.update();
+				if (p.getHappiness() < 0 && p.getMoney() < 0 && !p.employed() && p.homeless()) {
+					toRemove.add(p);
+				} else if (p.getAge() > Rules.LIFE_SPAN) {
+					toRemove.add(p);
+				} else if (p.employed() && !p.homeless()) {
+					int rand = Util.getRandomBetween(0, 100);
+					if (rand < Rules.BIRTH_RATE) {
+						toAddCounter++;
+					}
 				}
-
 			}
 		}
 		for (Person p : toRemove) {
@@ -169,19 +184,18 @@ public class CityImpl implements City {
 			addPerson();
 		}
 		populationControl();
-		
+
 		countZones();
 	}
-	
-	private void populationControl(){
-		while(this.population.size()<Rules.BASE_POPULATION){
+
+	private void populationControl() {
+		while (this.totalPopulation() < Rules.BASE_POPULATION) {
 			addPerson();
 		}
-		while(this.population.size()>Rules.MAX_POPULATION){
+		while (this.totalPopulation() > Rules.MAX_POPULATION) {
 			this.population.remove(this.population.iterator().next());
 		}
 	}
-	
 
 	@Override
 	public String toString() {
@@ -202,13 +216,11 @@ public class CityImpl implements City {
 		return sb.toString();
 	}
 
-
-
-	private void countZones(){
-		for(int i=0; i<zoneCounts.length; i++){
-			zoneCounts[i]=0;
+	private void countZones() {
+		for (int i = 0; i < zoneCounts.length; i++) {
+			zoneCounts[i] = 0;
 		}
-		for(Tile t: this.world.getTiles()){
+		for (Tile t : this.world.getTiles()) {
 			zoneCounts[t.getZoneType().ordinal()]++;
 		}
 	}
@@ -246,6 +258,5 @@ public class CityImpl implements City {
 		data.setProperty(CityProperty.POP, this.totalPopulation());
 		return data;
 	}
-
 
 }
