@@ -89,7 +89,7 @@ public class GameLoop extends AnimationTimer implements Controller {
 	}
 
 	private void render() {
-		view.renderView(model);
+		view.renderView(ModelStripper.reducedCopy(this.model));
 	}
 
 	@Override

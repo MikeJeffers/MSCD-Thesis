@@ -17,6 +17,7 @@ public class TileReduced implements Tile {
 	private double landValue;
 	private double originalLandValue;
 	private double pollution;
+	private Zone zone;
 
 	public TileReduced(Tile t) {
 		this.zoneValue = t.getZoneValue();
@@ -30,6 +31,7 @@ public class TileReduced implements Tile {
 		this.pollution = t.getPollution();
 		this.overlay = t.getOverlayValue();
 		this.select = t.getSelection();
+		this.zone = t.getZone();
 	}
 
 	@Override
@@ -115,8 +117,7 @@ public class TileReduced implements Tile {
 
 	@Override
 	public Zone getZone() {
-		// TODO should fail
-		return null;
+		return this.zone;
 	}
 
 	@Override

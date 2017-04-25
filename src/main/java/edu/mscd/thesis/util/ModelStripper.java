@@ -5,9 +5,12 @@ import edu.mscd.thesis.model.WorldReduced;
 
 public class ModelStripper {
 
-	public synchronized static Model reducedCopy(Model m) {
-		Model copy = new WorldReduced(m.getWorld());
-		return copy;
+	public static Model reducedCopy(Model m) {
+		synchronized (m) {
+			Model copy = new WorldReduced(m.getWorld());
+			return copy;
+		}
+
 	}
 
 }

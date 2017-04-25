@@ -45,6 +45,9 @@ public class WorldImpl implements World {
 		tileUpdater = new TileUpdaterService(this);
 	}
 
+	/**
+	 * old random-tile world initialization
+	 */
 	private void worldInit() {
 		Random r = new Random();
 		TileType[] types = TileType.values();
@@ -52,12 +55,14 @@ public class WorldImpl implements World {
 		for (int i = 0; i < tiles.length; i++) {
 			Pos2D p = new Pos2D((i % cols), (i / cols));
 			int typeSelection = r.nextInt(types.length);
-			
 			Tile t = new TileImpl(p, types[typeSelection], zFact);
 			tiles[i] = t;
 		}
 	}
 	
+	/**
+	 * World created with smooth transitions between random mountain peaks and water bodies
+	 */
 	private void smoothWorldInit(){
 		Random r = new Random();
 		TileType[] types = TileType.values();
@@ -67,7 +72,6 @@ public class WorldImpl implements World {
 			Tile t = new TileImpl(p, TileType.FOREST, zFact);
 			tiles[i] = t;
 		}
-		
 		int totalCells = tiles.length;
 		int numMountains = (int) Math.sqrt(rows+r.nextInt(rows));
 		int numOceans = (int) Math.sqrt(rows+r.nextInt(rows));
