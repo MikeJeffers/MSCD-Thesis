@@ -42,21 +42,20 @@ public class Util {
 	public static final int MAX_SEQUENTIAL = (Rules.WORLD_X * Rules.WORLD_Y) / 8;
 	// GUI constants
 	public static final int WINDOW_WIDTH = 800;
-	public static final int WINDOW_HEIGHT = 600;
-	public static final int CHART_WIDTH=450;
-	public static final int CHART_HEIGHT=300;
+	public static final int WINDOW_HEIGHT = 800;
+	public static final int CHART_WIDTH = 450;
+	public static final int CHART_HEIGHT = 300;
 	public static final long MAX_FRAME_DURATION = 2000000000L;
-	public static final int MAX_CHART_DATAPTS = 100;
+	public static final int MAX_CHART_DATAPTS = 256;
 	public static final double SCALE_FACTOR = Util.getScaleFactor(Rules.WORLD_X, Rules.WORLD_Y, WINDOW_WIDTH,
 			WINDOW_HEIGHT);
 	public static final boolean SCREENSHOT = false;
 	public static final int ZONETYPES = ZoneType.values().length;
 	public static final int TILE_ATTRIBUTES = 5;
-	
+
 	private static Random random = new Random();
 	private static DateFormat df = new SimpleDateFormat("yyMMdd_HHmmss_SSS");
 	private static final Date compileTime = new Date();
-	
 
 	/**
 	 * Get all Tiles in tile array that are within ManhattanDistance of
@@ -171,53 +170,58 @@ public class Util {
 	public static double boundValue(double value, double min, double max) {
 		return Math.min(max, Math.max(min, value));
 	}
-	
-	
-	public static double[] appendVectors(double[] a, double [] b){
-		double[] appended = new double[a.length+b.length];
-		for(int i=0; i<a.length; i++){
-			appended[i]=a[i];
+
+	public static double[] appendVectors(double[] a, double[] b) {
+		double[] appended = new double[a.length + b.length];
+		for (int i = 0; i < a.length; i++) {
+			appended[i] = a[i];
 		}
-		for(int i=0; i<b.length; i++){
-			appended[i+a.length]=b[i];
+		for (int i = 0; i < b.length; i++) {
+			appended[i + a.length] = b[i];
 		}
 		return appended;
 	}
-	
-	
-	public static double[] mapValues(double[] values, double[] targetDomain){
+
+	public static double[] mapValues(double[] values, double[] targetDomain) {
 		double[] scaled = new double[values.length];
 		double min = Double.MAX_VALUE;
 		double max = Double.MIN_VALUE;
-		for(int i=0; i<values.length; i++){
-			if(values[i]<min){
+		for (int i = 0; i < values.length; i++) {
+			if (values[i] < min) {
 				min = values[i];
 			}
-			if(values[i]>max){
+			if (values[i] > max) {
 				max = values[i];
 			}
 		}
-		double[] src = new double[]{min, max};
-		for(int i=0; i<values.length; i++){
+		double[] src = new double[] { min, max };
+		for (int i = 0; i < values.length; i++) {
 			scaled[i] = mapValue(values[i], src, targetDomain);
 		}
 		return scaled;
 	}
-	
+
 	/**
-	 * Map a given value from a known source range to a new target range, scaling the factor
-	 * @param value - value to remap
-	 * @param sourceDomain - double pair, where [0]=start, [1]=end of domain AND start<end
-	 * @param targetDomain - double pair, where [0]=start, [1]=end of domain AND start<end
+	 * Map a given value from a known source range to a new target range,
+	 * scaling the factor
+	 * 
+	 * @param value
+	 *            - value to remap
+	 * @param sourceDomain
+	 *            - double pair, where [0]=start, [1]=end of domain AND
+	 *            start<end
+	 * @param targetDomain
+	 *            - double pair, where [0]=start, [1]=end of domain AND
+	 *            start<end
 	 * @return mapped value
 	 */
-	public static double mapValue(double value, double[] sourceDomain, double[] targetDomain){
-		double temp = value-sourceDomain[0];
-		double rangeOfSource = sourceDomain[1]-sourceDomain[0];
-		double normalizedValue = temp/rangeOfSource;
-		double rangeOfTarget = targetDomain[1]-targetDomain[0];
-		double scaledValue = normalizedValue*rangeOfTarget;
-		double translatedValue = scaledValue+targetDomain[0];
+	public static double mapValue(double value, double[] sourceDomain, double[] targetDomain) {
+		double temp = value - sourceDomain[0];
+		double rangeOfSource = sourceDomain[1] - sourceDomain[0];
+		double normalizedValue = temp / rangeOfSource;
+		double rangeOfTarget = targetDomain[1] - targetDomain[0];
+		double scaledValue = normalizedValue * rangeOfTarget;
+		double translatedValue = scaledValue + targetDomain[0];
 		return translatedValue;
 	}
 
@@ -241,56 +245,57 @@ public class Util {
 		double yScale = ((double) (yBound)) / yToScale;
 		return Math.min(xScale, yScale);
 	}
-	
-	
-	public static boolean isActionValid(Action act){
-		if(act==null){
+
+	public static boolean isActionValid(Action act) {
+		if (act == null) {
 			return false;
 		}
 		return isValidPos2D(act.getTarget(), Rules.WORLD_X, Rules.WORLD_Y);
 	}
-	
-	public static boolean isWeightVectorValid(WeightVector<CityProperty> weights){
-		if(weights==null){
+
+	public static boolean isWeightVectorValid(WeightVector<CityProperty> weights) {
+		if (weights == null) {
 			return false;
 		}
-		return weights.getNumWeights()==CityProperty.values().length;
+		return weights.getNumWeights() == CityProperty.values().length;
 	}
-	
-	
-	public static double getNormalizedDifference(double a, double b){
-		double[] norm = new double[]{0, 1};
-		double[]src = new double[]{-1, 1};
-		double diff = a-b;
+
+	public static double getNormalizedDifference(double a, double b) {
+		double[] norm = new double[] { 0, 1 };
+		double[] src = new double[] { -1, 1 };
+		double diff = a - b;
 		return mapValue(diff, src, norm);
 	}
-	
+
 	/**
-	 * Prunes data in series trying to preserve local minima while reducing data-pt quantity and resolution
-	 * Typically used to combat chart-data overflow, or excessive buildup, as this is taxing on Gui
-	 * NOTE: provided series will be destructively modified
-	 * @param series - Time/Turn-series data; where X-axis is assumed independent
+	 * Prunes data in series trying to preserve local minima while reducing
+	 * data-pt quantity and resolution Typically used to combat chart-data
+	 * overflow, or excessive buildup, as this is taxing on Gui NOTE: provided
+	 * series will be destructively modified
+	 * 
+	 * @param series
+	 *            - Time/Turn-series data; where X-axis is assumed independent
 	 */
-	public static void pruneChartData(Series<Number,Number> series){
-		int numParts = MAX_CHART_DATAPTS/4;
-		ObservableList<Data<Number,Number>> data = series.getData();
+	public static void pruneChartData(Series<Number, Number> series) {
+		int numParts = (int) Math.sqrt(MAX_CHART_DATAPTS);
+		ObservableList<Data<Number, Number>> data = series.getData();
 		if (data.size() > MAX_CHART_DATAPTS) {
-			List<List<Data<Number, Number>>> partitions = new ArrayList<List< Data<Number, Number>>>();
+			List<List<Data<Number, Number>>> partitions = new ArrayList<List<Data<Number, Number>>>();
 			int minX = data.get(0).getXValue().intValue();
-			int maxX = data.get(data.size()-1).getXValue().intValue();
-			int xStepSize = (maxX-minX)/numParts;
-			
-			List<Data<Number,Number>> part = new ArrayList<Data<Number,Number>>();
-			for(int i=minX; i<=maxX; i++){
-				for(Data<Number,Number>pt: data){
-					if(i==pt.getXValue().intValue()){
+			int maxX = data.get(data.size() - 1).getXValue().intValue();
+			int xStepSize = (maxX - minX) / numParts;
+
+			List<Data<Number, Number>> part = new ArrayList<Data<Number, Number>>();
+			for (int i = minX; i <= maxX; i++) {
+				for (Data<Number, Number> pt : data) {
+					if (i == pt.getXValue().intValue()) {
 						part.add(pt);
 						break;
 					}
 				}
-				if(i%xStepSize==0 && !part.isEmpty()){
+				if (i % xStepSize == 0 && !part.isEmpty()) {
 					partitions.add(part);
-					part = new ArrayList<Data<Number,Number>>();
+					part = new ArrayList<Data<Number, Number>>();
 				}
 			}
 
@@ -307,9 +312,9 @@ public class Util {
 				}
 			}
 		}
-		
+
 	}
-	
+
 	private static List<Number> getXValueOfMinMax(List<Data<Number, Number>> part) {
 		List<Number> pair = new ArrayList<Number>();
 		Number maxIndex = 0;
@@ -331,12 +336,14 @@ public class Util {
 		pair.add(maxIndex);
 		return pair;
 	}
-	
+
 	/**
 	 * Helper function to draw lines on nested gridPanes
-	 * @param n - parent node on Gui
+	 * 
+	 * @param n
+	 *            - parent node on Gui
 	 */
-	public  static void setGridVisible(Node n) {
+	public static void setGridVisible(Node n) {
 		if (n instanceof GridPane) {
 			GridPane grid = (GridPane) n;
 			grid.setGridLinesVisible(true);
@@ -345,19 +352,18 @@ public class Util {
 			}
 		}
 	}
-	
 
 	public static void takeScreenshot(Stage stage) {
 		WritableImage img = stage.getScene().snapshot(null);
 		Date date = Calendar.getInstance().getTime();
 		String stamp = df.format(date);
-		String dirString = "screenshots/Take_"+df.format(compileTime);
-		System.out.print("Taking Screen @"+stamp+"....");
+		String dirString = "screenshots/Take_" + df.format(compileTime);
+		System.out.print("Taking Screen @" + stamp + "....");
 		File dir = new File(dirString);
-		if(!dir.exists()){
+		if (!dir.exists()) {
 			dir.mkdirs();
 		}
-		File file = new File(dirString+"/screen" + stamp + ".png");
+		File file = new File(dirString + "/screen" + stamp + ".png");
 
 		try {
 			RenderedImage renderedImage = SwingFXUtils.fromFXImage(img, null);
@@ -369,6 +375,5 @@ public class Util {
 			e.printStackTrace();
 		}
 	}
-	
 
 }

@@ -40,7 +40,7 @@ public class WorldImpl implements World {
 		tiles = new Tile[size];
 		this.rows = sizeY;
 		this.cols = sizeX;
-		this.worldInit();
+		this.smoothWorldInit();
 		this.city = new CityImpl(this);
 		tileUpdater = new TileUpdaterService(this);
 	}
@@ -52,9 +52,73 @@ public class WorldImpl implements World {
 		for (int i = 0; i < tiles.length; i++) {
 			Pos2D p = new Pos2D((i % cols), (i / cols));
 			int typeSelection = r.nextInt(types.length);
+			
 			Tile t = new TileImpl(p, types[typeSelection], zFact);
 			tiles[i] = t;
 		}
+	}
+	
+	private void smoothWorldInit(){
+		Random r = new Random();
+		TileType[] types = TileType.values();
+		ZoneFactory zFact = new ZoneFactoryImpl();
+		for (int i = 0; i < tiles.length; i++) {
+			Pos2D p = new Pos2D((i % cols), (i / cols));
+			Tile t = new TileImpl(p, TileType.FOREST, zFact);
+			tiles[i] = t;
+		}
+		
+		int totalCells = tiles.length;
+		int numMountains = (int) Math.sqrt(rows+r.nextInt(rows));
+		int numOceans = (int) Math.sqrt(rows+r.nextInt(rows));
+		int maxSize = (int)Math.sqrt(cols)/2;
+		for(int i=0; i<numMountains; i++){
+			int location = r.nextInt(totalCells);
+			Tile t = new TileImpl(tiles[location].getPos(), TileType.MOUNTAIN, zFact);
+			tiles[location] = t;	
+			List<Tile> neighbors = Util.getNeighborsCircularDist(t, tiles, r.nextInt(maxSize));
+			for(Tile n: neighbors){
+				int index = Util.getIndexOf(n, this.tiles);
+				tiles[index] = new TileImpl(tiles[index].getPos(), TileType.MOUNTAIN, zFact);
+			}
+		}
+		for(int i=0; i<numOceans; i++){
+			int location = r.nextInt(totalCells);
+			Tile t = new TileImpl(tiles[location].getPos(), TileType.OCEAN, zFact);
+			tiles[location] = t;	
+			List<Tile> neighbors = Util.getNeighborsCircularDist(t, tiles, r.nextInt(maxSize));
+			for(Tile n: neighbors){
+				int index = Util.getIndexOf(n, this.tiles);
+				tiles[index] = new TileImpl(tiles[index].getPos(), TileType.OCEAN, zFact);
+			}
+		}
+		List<Tile> smoothed = new ArrayList<Tile>();
+		for (int i = 0; i < tiles.length; i++) {
+			double distToMtn = distanceTo(tiles[i].getPos(), TileType.MOUNTAIN);
+			double distToOcean = distanceTo(tiles[i].getPos(), TileType.OCEAN);
+			double ratio = distToOcean/(distToOcean+distToMtn+0.001);
+			int typeSelection = (int) Math.floor(ratio*(types.length));
+			typeSelection = typeSelection%types.length;
+			Tile t = new TileImpl(tiles[i].getPos(), types[typeSelection], zFact);
+			smoothed.add(t);
+		}
+		for(int i=0; i<tiles.length; i++){
+			tiles[i] = smoothed.get(i);
+		}
+		
+	}
+	
+	private double distanceTo(Pos2D origin, TileType tileOfThisType){
+		double minDist = Double.MAX_VALUE;
+		for(int i=0; i<this.tiles.length; i++){
+			if(tiles[i].getType()==tileOfThisType){
+				double dist = origin.distBetween(tiles[i].getPos());
+				if(dist<minDist){
+					minDist = dist;
+				}
+			}
+		}
+		return minDist;
 	}
 	
 
@@ -199,9 +263,8 @@ public class WorldImpl implements World {
 		for (Tile reZone : tilesInRange) {
 			if (commitAction) {
 				reZone.setZone(zt);
-			} else {
-				reZone.setSelection(new Selection(true, zt));
 			}
+			reZone.setSelection(new Selection(true, zt));
 
 		}
 		return true;

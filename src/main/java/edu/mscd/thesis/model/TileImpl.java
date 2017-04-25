@@ -32,7 +32,7 @@ public class TileImpl implements Tile {
 	}
 	
 	@Override
-	public void update(){
+	public synchronized void update(){
 		if(zoning!=null){
 			zoning.update();
 		}

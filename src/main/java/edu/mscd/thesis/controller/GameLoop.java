@@ -85,6 +85,7 @@ public class GameLoop extends AnimationTimer implements Controller {
 		double[] norm = new double[] { 0, 1 };
 		map = Util.mapValues(map, norm);
 		model.setOverlay(map);
+		takeScreen = true;
 	}
 
 	private void render() {
@@ -133,8 +134,10 @@ public class GameLoop extends AnimationTimer implements Controller {
 			if (a.isMove()) {
 				mostRecentlyAppliedAction = a;
 			}
-			model.notifyNewData(a);
-			this.draw = true;
+			if(!a.isAI() || !(gameConfig.getAiMode()==AiMode.OFF)){
+				model.notifyNewData(a);
+				this.draw = true;
+			}
 		} else if (data.isConfig()) {
 			ConfigData config = data.getConfig();
 			if (config.isAiConfig()) {

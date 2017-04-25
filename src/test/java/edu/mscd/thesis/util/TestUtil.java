@@ -157,5 +157,16 @@ public class TestUtil {
 	}
 	
 	
+	@Test
+	public void testBounds(){
+		assertTrue(2==Util.boundValue(5, 1, 2));
+		assertTrue(1==Util.boundValue(-1235, 1, 2));
+		assertTrue(1==Util.boundValue(-0.00001, 1, 2));
+		assertTrue(0==Util.boundValue(-0.000001, 0, 255));
+		assertTrue(255==Util.boundValue(13245235, 1, 255));
+		
+	}
+	
+	
 
 }
