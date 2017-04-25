@@ -21,9 +21,7 @@ import edu.mscd.thesis.util.JavaFXThreadingRule;
 public class TestPerson {
 	private static Building work;
 	private static Building home;
-	//@Rule 
-	//public JavaFXThreadingRule javafxRule = new JavaFXThreadingRule();
-	
+
 	@BeforeClass
 	public static void runOnceBeforeClass() {
 			

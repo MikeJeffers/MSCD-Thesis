@@ -21,10 +21,6 @@ import edu.mscd.thesis.model.WorldImpl;
 
 public class TestUtil {
 
-
-	//@Rule
-	//public JavaFXThreadingRule javafxRule = new JavaFXThreadingRule();
-
 	@BeforeClass
 	public static void runOnceBeforeClass() {
 
@@ -92,7 +88,6 @@ public class TestUtil {
 	
 	@Test(timeout=15000)
 	public void testConcurrentModelCopy() {
-		System.out.println("Testing concurrent World copies");
 		Model m = new WorldImpl(Rules.WORLD_X, Rules.WORLD_Y);
 		Thread modelThread = new Thread(m);
 		modelThread.start();
@@ -106,10 +101,7 @@ public class TestUtil {
 					} catch (InterruptedException e) {
 						e.printStackTrace();
 					}
-					long before = System.currentTimeMillis();
 					assertNotNull(ModelStripper.reducedCopy(m));
-					long after = System.currentTimeMillis();
-					System.out.println("A-Trial#"+trials+" took: "+(before-after)+"ms");
 					trials++;
 				}	
 			}
@@ -125,35 +117,21 @@ public class TestUtil {
 					} catch (InterruptedException e) {
 						e.printStackTrace();
 					}
-					long before = System.currentTimeMillis();
-					System.out.println("before");
 					assertNotNull(ModelStripper.reducedCopy(m));
-					long after = System.currentTimeMillis();
-					System.out.println("B-Trial#"+trials+" took: "+(before-after)+"ms");
 					trials++;
 				}	
 			}
 		});
-		System.out.println("Starting Thread A");
 		a.start();
-		System.out.println("Starting Thread B");
 		b.start();
 		
 		try {
-			System.out.println("Waiting 5s for joins");
 			b.join(5000);
-			System.out.println("B rejoined main");
 			a.join(5000);
-			System.out.println("A rejoined main");
 			modelThread.join(5000);
 		} catch (InterruptedException e) {
-			System.out.println("Joins interrupted");
 			e.printStackTrace();
-		}finally{
-			System.out.println("Kill Threads");
 		}
-		System.out.println("..Done testing concurrent model copies!");
-		
 	}
 	
 	

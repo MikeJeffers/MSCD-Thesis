@@ -75,7 +75,7 @@ public class WorldImpl implements World {
 		int totalCells = tiles.length;
 		int numMountains = (int) Math.sqrt(rows+r.nextInt(rows));
 		int numOceans = (int) Math.sqrt(rows+r.nextInt(rows));
-		int maxSize = (int)Math.sqrt(cols)/2;
+		int maxSize = (int) Util.boundValue(Math.sqrt(cols)/2, 1, 5);
 		for(int i=0; i<numMountains; i++){
 			int location = r.nextInt(totalCells);
 			Tile t = new TileImpl(tiles[location].getPos(), TileType.MOUNTAIN, zFact);

@@ -14,8 +14,7 @@ import edu.mscd.thesis.model.zones.ZoneType;
 import edu.mscd.thesis.util.JavaFXThreadingRule;
 
 public class TestWorld {
-	//@Rule 
-	//public JavaFXThreadingRule javafxRule = new JavaFXThreadingRule();
+
 
 	@BeforeClass
 	public static void runOnceBeforeClass() {
@@ -39,12 +38,14 @@ public class TestWorld {
 
 	@Test
 	public void testWorldInit() {
-		int x=2;
-		int y=3;
-		World w = new WorldImpl(x, y);
-		assertNotNull(w);
-		assertNotNull(w.getCity());
-		assertTrue(w.getTiles().length==x*y);
+		for(int i=1; i<5; i++){
+			int x=(i+1)*2;
+			int y=(i+1)*3;
+			World w = new WorldImpl(x, y);
+			assertNotNull(w);
+			assertNotNull(w.getCity());
+			assertTrue(w.getTiles().length==x*y);
+		}
 
 	}
 
