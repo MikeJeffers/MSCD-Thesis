@@ -66,7 +66,8 @@ import javafx.stage.Stage;
 
 public class GUI implements View {
 	private Collection<Observer<ViewData>> observers = new ArrayList<Observer<ViewData>>();
-	private ModelRenderer renderer = new ModelRenderer(RenderMode.NORMAL);
+	private RenderMode currentRenderMode = RenderMode.NORMAL;
+	private ModelRenderer renderer = new ModelRenderer(currentRenderMode);
 	private GraphicsContext gc;
 	private Stage stage;
 
@@ -89,9 +90,7 @@ public class GUI implements View {
 
 	@Override
 	public void initView(Stage stage) {
-		renderer.changeMode(RenderMode.NORMAL);
-		
-		//this.scoreData.getData().addListener(new DataListener(this.scoreData));
+		renderer.changeMode(currentRenderMode);
 
 		Group root = new Group();
 
@@ -128,7 +127,7 @@ public class GUI implements View {
 		controlPane.add(moveReporter, 0, 11);
 		controlPane.add(aiSettingsPane, 1, 5, 1, 2);
 
-		//setGridVisible(controlPane);
+		// setGridVisible(controlPane);
 
 		root.getChildren().add(canvas);
 		root.getChildren().add(controlPane);
@@ -137,11 +136,9 @@ public class GUI implements View {
 		stage.setScene(mainScene);
 
 		this.stage = stage;
-		stage.show();	
+		stage.show();
 	}
 
-	
-	
 	private Pane makeAiSettingsPane() {
 		GridPane pane = new GridPane();
 		Pane aiModeCombo = makeAiModeComboBox();
@@ -151,7 +148,7 @@ public class GUI implements View {
 		Pane learnRadius = learnRadiusSelector();
 		Pane waitTime = makeWaitTimeSelector();
 		Pane submitButton = makeSubmitButton();
-		
+
 		Label modeLabel = new Label("Ai Mode: ");
 		Label funcLabel = new Label("Activation: ");
 		Label depthLabel = new Label("Layers: ");
@@ -159,8 +156,7 @@ public class GUI implements View {
 		Label radiusLabel = new Label("Radius: ");
 		Label waitLabel = new Label("Observe cycle: ");
 		Label submitLabel = new Label("Commit Changes: ");
-		
-		
+
 		GridPane.setConstraints(modeLabel, 0, 0, 1, 1, HPos.LEFT, VPos.BASELINE);
 		GridPane.setConstraints(aiModeCombo, 1, 0, 1, 1, HPos.LEFT, VPos.BASELINE);
 		GridPane.setConstraints(funcLabel, 0, 1, 1, 1, HPos.LEFT, VPos.BASELINE);
@@ -175,29 +171,30 @@ public class GUI implements View {
 		GridPane.setConstraints(waitTime, 1, 5, 1, 1, HPos.LEFT, VPos.BASELINE);
 		GridPane.setConstraints(submitLabel, 0, 6, 1, 1, HPos.LEFT, VPos.BASELINE);
 		GridPane.setConstraints(submitButton, 1, 6, 1, 1, HPos.LEFT, VPos.BASELINE);
-		
-		pane.getChildren().addAll(aiModeCombo, activationFuncCombo, depthSelector, neuronDensity, learnRadius, waitTime, submitButton,
-				modeLabel, funcLabel, depthLabel, densityLabel, radiusLabel, waitLabel, submitLabel);
+
+		pane.getChildren().addAll(aiModeCombo, activationFuncCombo, depthSelector, neuronDensity, learnRadius, waitTime,
+				submitButton, modeLabel, funcLabel, depthLabel, densityLabel, radiusLabel, waitLabel, submitLabel);
 		return pane;
 	}
-	
-	private Pane makeSubmitButton(){
+
+	private Pane makeSubmitButton() {
 		GridPane pane = new GridPane();
 		Button button = new Button("Submit");
 		button.setTooltip(new Tooltip("Resets AI system with new settings"));
 		button.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent event) {
-				notifyObserver((ViewData)aiConfig.copy()); 
+				notifyObserver((ViewData) aiConfig.copy());
 			}
 		});
 		pane.add(button, 0, 0);
 		return pane;
 	}
-	
+
 	private Pane makeWaitTimeSelector() {
 		GridPane pane = new GridPane();
-		Spinner<Integer> selector = new Spinner<Integer>(NNConstants.MIN_WAIT, NNConstants.MAX_WAIT, aiConfig.getObservationWaitTime());
+		Spinner<Integer> selector = new Spinner<Integer>(NNConstants.MIN_WAIT, NNConstants.MAX_WAIT,
+				aiConfig.getObservationWaitTime());
 		selector.setTooltip(new Tooltip("Sets number of turns to observe, learn, and make another move"));
 		selector.setMaxSize(100, 25);
 		selector.valueProperty().addListener(new ChangeListener<Integer>() {
@@ -209,10 +206,11 @@ public class GUI implements View {
 		pane.add(selector, 0, 0);
 		return pane;
 	}
-	
+
 	private Pane learnRadiusSelector() {
 		GridPane pane = new GridPane();
-		Spinner<Integer> selector = new Spinner<Integer>(NNConstants.MIN_RADIUS, NNConstants.MAX_RADIUS, aiConfig.getObservationRadius());
+		Spinner<Integer> selector = new Spinner<Integer>(NNConstants.MIN_RADIUS, NNConstants.MAX_RADIUS,
+				aiConfig.getObservationRadius());
 		selector.setTooltip(new Tooltip("Sets radius that Q-Mappers can convolutionally observe neighboring tiles"));
 		selector.setMaxSize(100, 25);
 		selector.valueProperty().addListener(new ChangeListener<Integer>() {
@@ -225,10 +223,10 @@ public class GUI implements View {
 		return pane;
 	}
 
-	
 	private Pane neuronDensitySelector() {
 		GridPane pane = new GridPane();
-		Spinner<Integer> selector = new Spinner<Integer>(NNConstants.MIN_DENSITY, NNConstants.MAX_DENSITY, aiConfig.getNeuronDensity());
+		Spinner<Integer> selector = new Spinner<Integer>(NNConstants.MIN_DENSITY, NNConstants.MAX_DENSITY,
+				aiConfig.getNeuronDensity());
 		selector.setTooltip(new Tooltip("Sets a factor of how many neurons should be in intermediate layers"));
 		selector.setMaxSize(100, 25);
 		selector.valueProperty().addListener(new ChangeListener<Integer>() {
@@ -241,10 +239,10 @@ public class GUI implements View {
 		return pane;
 	}
 
-	
 	private Pane depthSelector() {
 		GridPane pane = new GridPane();
-		Spinner<Integer> selector = new Spinner<Integer>(NNConstants.MIN_DEPTH, NNConstants.MAX_DEPTH, aiConfig.getNetworkDepth());
+		Spinner<Integer> selector = new Spinner<Integer>(NNConstants.MIN_DEPTH, NNConstants.MAX_DEPTH,
+				aiConfig.getNetworkDepth());
 		selector.setTooltip(new Tooltip("Sets number of intermediate layers in the Neural Networks"));
 		selector.setMaxSize(100, 25);
 		selector.valueProperty().addListener(new ChangeListener<Integer>() {
@@ -256,7 +254,7 @@ public class GUI implements View {
 		pane.add(selector, 0, 0);
 		return pane;
 	}
-	
+
 	private Pane makeFunctionComboBox() {
 		GridPane pane = new GridPane();
 		ComboBox<ActivationFunctions> combo = new ComboBox<ActivationFunctions>();
@@ -265,7 +263,8 @@ public class GUI implements View {
 		combo.setValue(ActivationFunctions.SIGMOID);
 		combo.valueProperty().addListener(new ChangeListener<ActivationFunctions>() {
 			@Override
-			public void changed(ObservableValue<? extends ActivationFunctions> observable, ActivationFunctions oldValue, ActivationFunctions newValue) {
+			public void changed(ObservableValue<? extends ActivationFunctions> observable, ActivationFunctions oldValue,
+					ActivationFunctions newValue) {
 				aiConfig.setActivationFunc(newValue);
 				notifyObserver((ViewData) gameConfig.copy());
 			}
@@ -444,8 +443,8 @@ public class GUI implements View {
 				}
 			}
 		});
-		canvas.addEventHandler(MouseEvent.MOUSE_MOVED, new EventHandler<MouseEvent>(){
-			private Pos2D prev=new Pos2D(-1,-1);
+		canvas.addEventHandler(MouseEvent.MOUSE_MOVED, new EventHandler<MouseEvent>() {
+			private Pos2D prev = new Pos2D(-1, -1);
 
 			@Override
 			public void handle(MouseEvent event) {
@@ -457,8 +456,8 @@ public class GUI implements View {
 					e.printStackTrace();
 					return;
 				}
-				double dx = (int)Math.floor(pt.getX());
-				double dy = (int)Math.floor(pt.getY());
+				double dx = (int) Math.floor(pt.getX());
+				double dy = (int) Math.floor(pt.getY());
 				Pos2D modelCoordinate = new Pos2D(dx, dy);
 				if (!modelCoordinate.equals(prev) && Util.isValidPos2D(modelCoordinate, Rules.WORLD_X, Rules.WORLD_Y)) {
 					prev = modelCoordinate;
@@ -570,7 +569,8 @@ public class GUI implements View {
 			@Override
 			public void changed(ObservableValue<? extends RenderMode> observable, RenderMode oldValue,
 					RenderMode newValue) {
-				renderer.changeMode(newValue);
+				currentRenderMode = newValue;
+				renderer.changeMode(currentRenderMode);
 				redraw(gc);
 			}
 		});
@@ -623,7 +623,7 @@ public class GUI implements View {
 			@Override
 			public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
 				gameConfig.setSpeed(newValue.doubleValue());
-				notifyObserver((ViewData)gameConfig.copy());
+				notifyObserver((ViewData) gameConfig.copy());
 				String toDisplay = Double.toString(newValue.doubleValue());
 				if (toDisplay.length() > 5) {
 					toDisplay = toDisplay.substring(0, 5);
@@ -801,7 +801,7 @@ public class GUI implements View {
 
 	private void redraw(GraphicsContext gc) {
 		gc.setFill(Color.DARKGRAY);
-		gc.fillRect(-1, -1, gc.getCanvas().getWidth()+1, gc.getCanvas().getHeight()+1);
+		gc.fillRect(-1, -1, gc.getCanvas().getWidth() + 1, gc.getCanvas().getHeight() + 1);
 		userAct.setMove(false);
 		notifyObserver((ViewData) userAct.copy());
 	}
@@ -860,12 +860,12 @@ public class GUI implements View {
 	@Override
 	public void updateCityData(ModelData data, int turn) {
 		Map<CityProperty, Double> map = data.getDataMap();
-		for(CityProperty prop: map.keySet()){
-			this.chartData.get(prop).getData().add(new Data<Number,Number>(turn, map.get(prop)));
+		for (CityProperty prop : map.keySet()) {
+			this.chartData.get(prop).getData().add(new Data<Number, Number>(turn, map.get(prop)));
 			Util.pruneChartData(this.chartData.get(prop));
-			
+
 		}
-		
+
 	}
 
 }

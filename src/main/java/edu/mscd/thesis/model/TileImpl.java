@@ -17,8 +17,8 @@ public class TileImpl implements Tile {
 	private TileType type;
 	private Zone zoning;
 	private ZoneFactory factory;
-	private double landValue;
-	private double pollution;
+	private volatile double landValue;
+	private volatile double pollution;
 
 
 	public TileImpl(Pos2D pos, TileType type, ZoneFactory factory) {
@@ -37,9 +37,7 @@ public class TileImpl implements Tile {
 			zoning.update();
 		}
 		this.pollution = pollutionDecay(this.pollution);
-		this.landValue = landValueDecay(this.landValue);
-		
-		
+		this.landValue = landValueDecay(this.landValue);	
 	}
 	
 	private double pollutionDecay(double pollution){
@@ -140,7 +138,6 @@ public class TileImpl implements Tile {
 	public synchronized void pollute(double pollution) {
 		this.pollution+=pollution;
 		Util.boundValue(pollution, 0, Rules.MAX);
-		
 	}
 
 	@Override
@@ -152,7 +149,6 @@ public class TileImpl implements Tile {
 	public synchronized void modifyLandValue(double factor) {
 		this.landValue+=factor;
 		Util.boundValue(landValue, this.baseLandValue(), Rules.MAX);
-		
 	}
 
 	@Override

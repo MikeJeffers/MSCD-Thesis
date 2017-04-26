@@ -1,6 +1,8 @@
 package edu.mscd.thesis.model;
 
 
+import java.util.concurrent.locks.Lock;
+
 import edu.mscd.thesis.controller.Action;
 import edu.mscd.thesis.controller.ModelData;
 import edu.mscd.thesis.controller.Observable;
@@ -20,5 +22,7 @@ public interface Model extends Observer<Action>, Observable<ModelData>, Overlay,
 	 * Halt run loop, Call before Join!
 	 */
 	public void halt();
+	
+	public Lock getLock();
 
 }

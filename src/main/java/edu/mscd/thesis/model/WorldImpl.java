@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Random;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import edu.mscd.thesis.controller.Action;
 import edu.mscd.thesis.controller.ModelData;
@@ -33,8 +35,10 @@ public class WorldImpl implements World {
 	private BlockingQueue<Action> queue = new LinkedBlockingQueue<Action>();
 	private boolean updateCalled;
 	private volatile boolean isRunning = true;
+	private Lock lock;
 
 	public WorldImpl(int sizeX, int sizeY) {
+		this.lock = new ReentrantLock();
 		this.observers = new ArrayList<Observer<ModelData>>();
 		int size = sizeX * sizeY;
 		tiles = new Tile[size];
@@ -131,11 +135,21 @@ public class WorldImpl implements World {
 		while (isRunning) {
 			Action msg;
 			while ((msg = queue.poll()) != null) {
-				processAction(msg);
+				this.lock.lock();
+				try{
+					processAction(msg);
+				}finally{
+					lock.unlock();
+				}
 			}
 			if(updateCalled){
+				this.lock.lock();
+				try{
+					updateTasks();
+				}finally{
+					lock.unlock();
+				}
 				updateCalled=false;
-				updateTasks();
 			}
 		}
 
@@ -177,7 +191,6 @@ public class WorldImpl implements World {
 				}
 			}
 		}
-
 		tileUpdater.runUpdates();
 		city.update();
 		Platform.runLater(new Runnable() {
@@ -185,7 +198,6 @@ public class WorldImpl implements World {
             	notifyObserver(city.getData());
             }
         });
-		
 	}
 	
 	@Override
@@ -269,7 +281,6 @@ public class WorldImpl implements World {
 				reZone.setZone(zt);
 			}
 			reZone.setSelection(new Selection(true, zt));
-
 		}
 		return true;
 	}
@@ -379,5 +390,12 @@ public class WorldImpl implements World {
 		this.isRunning = false;
 		
 	}
+
+	@Override
+	public Lock getLock() {
+		return this.lock;
+	}
+
+
 
 }

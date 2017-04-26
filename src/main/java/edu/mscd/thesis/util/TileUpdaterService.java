@@ -18,7 +18,6 @@ public class TileUpdaterService {
 		Tile[] tiles = w.getTiles();
 		pool.invoke(new RecursiveTileEffector(w, 0, tiles.length));
 		tiles = pool.invoke(new RecursiveTileUpdater(tiles, 0, tiles.length));
-		
 	}
 
 }

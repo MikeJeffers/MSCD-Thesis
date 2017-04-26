@@ -176,15 +176,14 @@ public class CityImpl implements City {
 					}
 				}
 			}
+			for (Person p : toRemove) {
+				this.removePerson(p);
+			}
+			for (int i = 0; i < toAddCounter; i++) {
+				addPerson();
+			}
+			populationControl();
 		}
-		for (Person p : toRemove) {
-			this.removePerson(p);
-		}
-		for (int i = 0; i < toAddCounter; i++) {
-			addPerson();
-		}
-		populationControl();
-
 		countZones();
 	}
 

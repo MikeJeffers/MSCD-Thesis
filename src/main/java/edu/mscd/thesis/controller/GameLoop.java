@@ -71,7 +71,13 @@ public class GameLoop extends AnimationTimer implements Controller {
 	private void turn(){
 		turn++;
 		ai.update(model, mostRecentlyAppliedAction, view.getWeightVector());
-		model.update();
+		model.getLock().lock();
+		try{
+			model.update();
+		}finally{
+			model.getLock().unlock();
+		}
+		
 		render();
 		if (takeScreen) {
 			takeScreen = false;
@@ -89,7 +95,13 @@ public class GameLoop extends AnimationTimer implements Controller {
 	}
 
 	private void render() {
-		view.renderView(ModelStripper.reducedCopy(this.model));
+		model.getLock().lock();
+		try{
+			view.renderView(ModelStripper.reducedCopy(this.model));
+		}finally{
+			model.getLock().unlock();
+		}
+		
 	}
 
 	@Override

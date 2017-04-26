@@ -28,10 +28,8 @@ public class TileRenderer implements Renderer<Tile> {
 		if (renderMode == RenderMode.NORMAL) {
 			g.setFill(tile.getType().getColor());
 		} else if (renderMode == RenderMode.POLLUTION) {
-			double pollution = 0;
-			synchronized (tile) {
-				pollution = tile.getPollution();
-			}
+			double pollution = tile.getPollution();
+
 			double red = pollution / Rules.MAX;
 			double blue = (Rules.MAX - pollution) / Rules.MAX;
 			double green = ((Rules.MAX + pollution) / 2) / Rules.MAX;
@@ -40,20 +38,18 @@ public class TileRenderer implements Renderer<Tile> {
 					Util.boundValue(blue, 0, 1), Util.boundValue(intensity, 0, 1));
 			g.setFill(pollutionColor);
 		} else if (renderMode == RenderMode.LANDVALUE) {
-			double landValue = 0;
-			synchronized (tile) {
-				landValue = tile.getCurrentLandValue();
-			}
+			double landValue = tile.getCurrentLandValue();
+
 			double green = landValue / Rules.MAX;
 			Color landValueColor = new Color(0, Util.boundValue(green, 0, 1), 0, 1);
 			g.setFill(landValueColor);
 		} else if (renderMode == RenderMode.DENSITY) {
 			double level = 0;
-			synchronized (tile) {
-				if (tile.getZone().getBuilding() != null) {
-					level = tile.getZone().getBuilding().getDensity().getDensityLevel();
-				}
+
+			if (tile.getZone().getBuilding() != null) {
+				level = tile.getZone().getBuilding().getDensity().getDensityLevel();
 			}
+
 			double max = Density.VERYHIGH.getDensityLevel();
 			double red = level / max;
 			double blue = (level / (max * 2));
@@ -63,10 +59,8 @@ public class TileRenderer implements Renderer<Tile> {
 
 			g.setFill(densityColor);
 		} else if (renderMode == RenderMode.POLICY) {
-			double value = 0;
-			synchronized (tile) {
-				value = tile.getOverlayValue();
-			}
+			double value = tile.getOverlayValue();
+
 			Color col = Color.MAGENTA;
 			if (value == 1.0) {
 				col = Color.CYAN;
@@ -74,18 +68,13 @@ public class TileRenderer implements Renderer<Tile> {
 			col = col.deriveColor(1, value, value, value);
 			g.setFill(col.brighter());
 		}
+
 		g.fillRect(tilePos.getX(), tilePos.getY(), 1, 1);
-		Zone z = null;
-		synchronized (tile) {
-			z = tile.getZone();
-		}
+		Zone z = tile.getZone();
 		if (z != null) {
 			zoneRenderer.draw(z, g);
 		}
-		Selection s =null;
-		synchronized (tile) {
-			s = tile.getSelection();
-		}
+		Selection s = tile.getSelection();
 		if (s.isSelected()) {
 			g.setLineWidth(0.095);
 			g.setLineCap(StrokeLineCap.ROUND);

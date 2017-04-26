@@ -1,6 +1,8 @@
 package edu.mscd.thesis.model;
 
 
+import java.util.concurrent.locks.Lock;
+
 import edu.mscd.thesis.controller.Action;
 import edu.mscd.thesis.controller.ModelData;
 import edu.mscd.thesis.controller.Observer;
@@ -133,6 +135,12 @@ public class WorldReduced implements World {
 	public void halt() {
 		// TODO SHOULD BE NOT CALLED
 		
+	}
+
+	@Override
+	public Lock getLock() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 

@@ -20,7 +20,4 @@ public class ModelRenderer implements Renderer<Model>{
 		this.worldRenderer.changeMode(mode);
 	}
 
-
-
-
 }
