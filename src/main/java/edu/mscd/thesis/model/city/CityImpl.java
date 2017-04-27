@@ -174,6 +174,8 @@ public class CityImpl implements City {
 					if (rand < Rules.BIRTH_RATE) {
 						toAddCounter++;
 					}
+				}else if(p.getHappiness()<0 || p.getMoney()<0){
+					toRemove.add(p);
 				}
 			}
 			for (Person p : toRemove) {

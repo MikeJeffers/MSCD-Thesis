@@ -19,8 +19,8 @@ import edu.mscd.thesis.model.zones.ZoneType;
  *
  */
 public class Rules {
-	public static final int WORLD_X = 25;
-	public static final int WORLD_Y = 25;
+	public static final int WORLD_X = 40;
+	public static final int WORLD_Y = 30;
 	public static final int TILE_COUNT = WORLD_X * WORLD_Y;
 	// Game Constants and factors
 	public static final int MAX = 255;
@@ -44,11 +44,11 @@ public class Rules {
 	public static double getValueForZoneTypeWithEffects(Tile t, ZoneType z) {
 		double value = getValueForZoneOnTile(t.getType(), z);
 		if (z == ZoneType.COMMERICAL) {
-			value += (t.getCurrentLandValue() - t.getPollution() / 4.0);
+			value += (t.getCurrentLandValue() - (t.getPollution()*0.1));
 		} else if (z == ZoneType.INDUSTRIAL) {
-			value += (t.getCurrentLandValue() + t.getPollution());
+			value += (t.getCurrentLandValue() + t.getPollution())/2.0;
 		} else if (z == ZoneType.RESIDENTIAL) {
-			value += (t.getCurrentLandValue() - t.getPollution() * 2);
+			value += (t.getCurrentLandValue() - t.getPollution());
 		}
 		return Util.boundValue(value, 0, Rules.MAX);
 	}
@@ -74,10 +74,10 @@ public class Rules {
 			double value = (t.getBaseLandValue() * 3 + t.getMaterialValue()) / 4;
 			return Math.min(MAX, value);
 		} else if (z == ZoneType.INDUSTRIAL) {
-			double value = (t.getBaseLandValue() * 1 + t.getMaterialValue() * 3) / 4;
+			double value = (t.getBaseLandValue() * 0.1 + t.getMaterialValue() * 3.9) / 4;
 			return Math.min(MAX, value);
 		} else if (z == ZoneType.RESIDENTIAL) {
-			double value = (t.getBaseLandValue() * 5 + t.getMaterialValue()) / 6;
+			double value = (t.getBaseLandValue() * 1 + t.getMaterialValue()*0) /1;
 			return Math.min(MAX, value);
 		}
 		return 0;

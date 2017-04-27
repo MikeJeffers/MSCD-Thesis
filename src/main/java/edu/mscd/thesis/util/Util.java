@@ -41,8 +41,8 @@ public class Util {
 	 */
 	public static final int MAX_SEQUENTIAL = (Rules.WORLD_X * Rules.WORLD_Y) / 8;
 	// GUI constants
-	public static final int WINDOW_WIDTH = 800;
-	public static final int WINDOW_HEIGHT = 800;
+	public static final int WINDOW_WIDTH = 1200;
+	public static final int WINDOW_HEIGHT = 900;
 	public static final int CHART_WIDTH = 450;
 	public static final int CHART_HEIGHT = 300;
 	public static final long MAX_FRAME_DURATION = 2000000000L;

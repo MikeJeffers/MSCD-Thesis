@@ -97,7 +97,7 @@ public class GameLoop extends AnimationTimer implements Controller {
 	private void render() {
 		model.getLock().lock();
 		try{
-			view.renderView(ModelStripper.reducedCopy(this.model));
+			view.renderView(model);
 		}finally{
 			model.getLock().unlock();
 		}

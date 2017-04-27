@@ -8,7 +8,6 @@ import edu.mscd.thesis.model.bldgs.Building;
 import edu.mscd.thesis.util.Rules;
 import edu.mscd.thesis.util.Util;
 
-
 public class Citizen implements Person {
 	private Building home;
 	private Building work;
@@ -20,9 +19,9 @@ public class Citizen implements Person {
 
 	public Citizen(int _id) {
 		this.id = _id;
-		this.money = Util.getRandomBetween(1, 55);
-		this.happiness = Util.getRandomBetween(1, 55);
-		this.age = Util.getRandomBetween(1, 80);
+		this.money = Util.getRandomBetween(1, Rules.MAX / 2);
+		this.happiness = Util.getRandomBetween(1, Rules.MAX / 2);
+		this.age = Util.getRandomBetween(1, Rules.LIFE_SPAN);
 	}
 
 	@Override
@@ -42,12 +41,12 @@ public class Citizen implements Person {
 
 	@Override
 	public void employAt(Building b) {
-		work=b;
+		work = b;
 	}
 
 	@Override
 	public void liveAt(Building b) {
-		home=b;
+		home = b;
 	}
 
 	@Override
@@ -79,51 +78,49 @@ public class Citizen implements Person {
 	public void evict() {
 		this.home = null;
 	}
-	
+
 	@Override
 	public int getID() {
 		return this.id;
 	}
 
-	
 	@Override
-	public boolean equals(Object other){
-		if(other instanceof Person){
+	public boolean equals(Object other) {
+		if (other instanceof Person) {
 			Person o = (Person) other;
-			return this.id==o.getID();
+			return this.id == o.getID();
 		}
 		return false;
 	}
-	
+
 	@Override
-	public int hashCode(){
+	public int hashCode() {
 		return Objects.hash(id);
 	}
 
 	@Override
 	public void update() {
 		age++;
-		if(this.employed()){
+		if (this.employed()) {
+			this.happiness++;
 			this.money++;
-		}else{
+		} else {
 			money--;
 		}
-		if(!this.homeless()){
+		if (!this.homeless()) {
 			this.happiness++;
-		}else{
+		} else {
 			happiness--;
 		}
-		if(this.homeless() && !this.employed()){
+		if (this.homeless() && !this.employed()) {
 			this.happiness--;
 		}
-		happiness = Math.min(Rules.MAX, happiness);
-		money = Math.min(Rules.MAX, money);
-		happiness = Math.max(-Rules.MAX, happiness);
-		money = Math.max(-Rules.MAX, money);
+		happiness = (int) Util.boundValue(happiness, -Rules.MAX, Rules.MAX);
+		money = (int) Util.boundValue(money, -Rules.MAX, Rules.MAX);
 	}
-	
+
 	@Override
-	public String toString(){
+	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("Person:{");
 		sb.append("ID=");
@@ -138,14 +135,12 @@ public class Citizen implements Person {
 		sb.append(this.getMoney());
 		sb.append("}");
 		return sb.toString();
-		
+
 	}
 
 	@Override
 	public int getAge() {
 		return this.age;
 	}
-
-
 
 }
