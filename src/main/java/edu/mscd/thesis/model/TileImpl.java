@@ -9,7 +9,6 @@ import edu.mscd.thesis.util.Rules;
 import edu.mscd.thesis.util.Util;
 import edu.mscd.thesis.view.Selection;
 
-
 public class TileImpl implements Tile {
 	private Selection select;
 	private double overlay;
@@ -20,7 +19,6 @@ public class TileImpl implements Tile {
 	private volatile double landValue;
 	private volatile double pollution;
 
-
 	public TileImpl(Pos2D pos, TileType type, ZoneFactory factory) {
 		this.pos = pos;
 		this.type = type;
@@ -30,27 +28,27 @@ public class TileImpl implements Tile {
 		this.pollution = 0;
 		this.select = new Selection(false, ZoneType.EMPTY);
 	}
-	
+
 	@Override
-	public synchronized void update(){
-		if(zoning!=null){
+	public synchronized void update() {
+		if (zoning != null) {
 			zoning.update();
 		}
 		this.pollution = pollutionDecay(this.pollution);
-		this.landValue = landValueDecay(this.landValue);	
+		this.landValue = landValueDecay(this.landValue);
 	}
-	
-	private double pollutionDecay(double pollution){
-		double value = pollution-(pollution/(2*Rules.POLLUTION_HALFLIFE));
+
+	private double pollutionDecay(double pollution) {
+		double value = pollution - (pollution / (Rules.POLLUTION_HALFLIFE));
 		return Util.boundValue(value, 0, Rules.MAX);
-		
+
 	}
-	
-	private double landValueDecay(double currentValue){
-		double value = currentValue - (currentValue/(Rules.LANDVALUE_DECAY));
+
+	private double landValueDecay(double currentValue) {
+		double value = currentValue - (currentValue / (Rules.LANDVALUE_DECAY));
 		return Util.boundValue(value, this.baseLandValue(), Rules.MAX);
 	}
-	
+
 	@Override
 	public TileType getType() {
 		return this.type;
@@ -121,10 +119,10 @@ public class TileImpl implements Tile {
 	}
 
 	@Override
-	public boolean equals(Object other){
-		if(other instanceof Tile){
+	public boolean equals(Object other) {
+		if (other instanceof Tile) {
 			Tile o = (Tile) other;
-			return o.getPos().equals(this.getPos())&&this.getType()==o.getType();
+			return o.getPos().equals(this.getPos()) && this.getType() == o.getType();
 		}
 		return false;
 	}
@@ -136,8 +134,8 @@ public class TileImpl implements Tile {
 
 	@Override
 	public synchronized void pollute(double pollution) {
-		this.pollution+=pollution;
-		Util.boundValue(pollution, 0, Rules.MAX);
+		this.pollution += pollution;
+		this.pollution = Util.boundValue(this.pollution, 0, Rules.MAX);
 	}
 
 	@Override
@@ -147,8 +145,8 @@ public class TileImpl implements Tile {
 
 	@Override
 	public synchronized void modifyLandValue(double factor) {
-		this.landValue+=factor;
-		Util.boundValue(landValue, this.baseLandValue(), Rules.MAX);
+		this.landValue += factor;
+		this.landValue = Util.boundValue(this.landValue, this.baseLandValue(), Rules.MAX);
 	}
 
 	@Override
@@ -159,7 +157,7 @@ public class TileImpl implements Tile {
 	@Override
 	public Density getZoneDensity() {
 		Building b = this.getZone().getBuilding();
-		if(b==null){
+		if (b == null) {
 			return Density.NONE;
 		}
 		return b.getDensity();
@@ -178,7 +176,7 @@ public class TileImpl implements Tile {
 	@Override
 	public void setOverlayValue(double value) {
 		this.overlay = value;
-		
+
 	}
 
 	@Override
@@ -190,7 +188,5 @@ public class TileImpl implements Tile {
 	public void setSelection(Selection select) {
 		this.select = select;
 	}
-
-
 
 }

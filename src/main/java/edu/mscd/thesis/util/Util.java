@@ -49,7 +49,7 @@ public class Util {
 	public static final int MAX_CHART_DATAPTS = 256;
 	public static final double SCALE_FACTOR = Util.getScaleFactor(Rules.WORLD_X, Rules.WORLD_Y, WINDOW_WIDTH,
 			WINDOW_HEIGHT);
-	public static final boolean SCREENSHOT = false;
+	public static final boolean SCREENSHOT = true;
 	public static final int ZONETYPES = ZoneType.values().length;
 	public static final int TILE_ATTRIBUTES = 5;
 
@@ -277,7 +277,7 @@ public class Util {
 	 *            - Time/Turn-series data; where X-axis is assumed independent
 	 */
 	public static void pruneChartData(Series<Number, Number> series) {
-		int numParts = (int) Math.sqrt(MAX_CHART_DATAPTS);
+		int numParts = (int) Math.sqrt(MAX_CHART_DATAPTS*8);
 		ObservableList<Data<Number, Number>> data = series.getData();
 		if (data.size() > MAX_CHART_DATAPTS) {
 			List<List<Data<Number, Number>>> partitions = new ArrayList<List<Data<Number, Number>>>();
