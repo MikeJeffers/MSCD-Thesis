@@ -27,6 +27,15 @@ public class Factory extends PlaceOfWork{
 		super.setMaxOccupancy(level+1);
 		super.changeDensity(density);
 	}
+	
+	@Override
+	public String getLabelText(){
+		StringBuilder sb = new StringBuilder();
+		sb.append("\nFactory");
+		sb.append(super.getLabelText());
+		return sb.toString();
+		
+	}
 
 
 

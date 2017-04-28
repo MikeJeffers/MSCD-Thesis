@@ -179,6 +179,18 @@ public abstract class AbstractBuilding implements Building {
 		sb.append("}");
 		return sb.toString();
 	}
+	
+	@Override
+	public String getLabelText(){
+		StringBuilder sb = new StringBuilder("");
+		sb.append("\nDensity: ");
+		sb.append(this.getDensity());
+		sb.append("\nmaxOccupants: ");
+		sb.append(this.getMaxOccupants());
+		sb.append("\ncurrentCount: ");
+		sb.append(this.currentOccupancy());
+		return sb.toString();
+	}
 
 	public TileType getTileType() {
 		return tileType;

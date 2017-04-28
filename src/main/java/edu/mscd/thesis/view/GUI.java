@@ -100,8 +100,8 @@ public class GUI implements View {
 		Group root = new Group();
 
 		Canvas canvas = new Canvas(Util.WINDOW_WIDTH, Util.WINDOW_HEIGHT);
-		addClickListenerTo(canvas);
-		Tooltip.install(canvas, canvasToolTip);
+		addMouseEventListenerTo(canvas);
+
 		gc = canvas.getGraphicsContext2D();
 		Affine transformMatrix = gc.getTransform();
 		transformMatrix.appendScale(Util.SCALE_FACTOR, Util.SCALE_FACTOR);
@@ -465,7 +465,7 @@ public class GUI implements View {
 		return pane;
 	}
 
-	private void addClickListenerTo(Canvas canvas) {
+	private void addMouseEventListenerTo(Canvas canvas) {
 		canvas.addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
 			@Override
 			public void handle(MouseEvent event) {
@@ -498,8 +498,16 @@ public class GUI implements View {
 				Affine xForm = gc.getTransform();
 				Point2D pt = new Point2D(event.getSceneX(), event.getSceneY());
 				//Translate Tile-info tooltipPane
-				canvasTipPane.setLayoutX(pt.getX()+15);
-				canvasTipPane.setLayoutY(pt.getY()-10);
+				if(pt.getX()<Util.WINDOW_WIDTH/2.0){
+					canvasTipPane.setLayoutX(pt.getX()+15);
+				}else{
+					canvasTipPane.setLayoutX(pt.getX()-15-canvasTipPane.getWidth());
+				}
+				if(pt.getY()<Util.WINDOW_HEIGHT/2.0){
+					canvasTipPane.setLayoutY(pt.getY()+10);
+				}else{
+					canvasTipPane.setLayoutY(pt.getY()-10-canvasTipPane.getHeight());
+				}
 				//End tooltip layout translation
 				try {
 					pt = xForm.inverseTransform(pt);
@@ -515,6 +523,20 @@ public class GUI implements View {
 					userAct.setTarget(modelCoordinate);
 					userAct.setMove(false);
 					notifyObserver((ViewData) userAct.copy());
+				}
+			}
+		});
+		canvas.addEventHandler(MouseEvent.MOUSE_EXITED, new EventHandler<MouseEvent>() {
+			@Override
+			public void handle(MouseEvent event) {
+				canvasTipPane.setVisible(false);
+			}
+		});
+		canvas.addEventHandler(MouseEvent.MOUSE_ENTERED, new EventHandler<MouseEvent>() {
+			@Override
+			public void handle(MouseEvent event) {
+				if(isTileTipEnabled){
+					canvasTipPane.setVisible(true);
 				}
 			}
 		});

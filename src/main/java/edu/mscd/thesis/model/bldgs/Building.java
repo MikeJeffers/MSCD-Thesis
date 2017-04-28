@@ -31,4 +31,6 @@ public interface Building extends Sprite {
 
 	void clear();
 
+	String getLabelText();
+
 }

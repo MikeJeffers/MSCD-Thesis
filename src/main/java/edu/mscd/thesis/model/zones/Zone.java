@@ -21,4 +21,6 @@ public interface Zone{
 	void update();
 
 	void clear();
+
+	String getLabelText();
 }

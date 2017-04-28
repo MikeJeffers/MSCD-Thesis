@@ -25,5 +25,14 @@ public class House extends Home {
 		super.setMaxOccupancy(level + 1);
 		super.changeDensity(density);
 	}
+	
+	@Override
+	public String getLabelText(){
+		StringBuilder sb = new StringBuilder();
+		sb.append("\nHouse");
+		sb.append(super.getLabelText());
+		return sb.toString();
+		
+	}
 
 }

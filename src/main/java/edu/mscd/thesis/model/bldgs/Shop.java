@@ -25,5 +25,14 @@ public class Shop extends PlaceOfWork {
 		super.setMaxOccupancy(level + 1);
 		super.changeDensity(density);
 	}
+	
+	@Override
+	public String getLabelText(){
+		StringBuilder sb = new StringBuilder();
+		sb.append("\nShop");
+		sb.append(super.getLabelText());
+		return sb.toString();
+		
+	}
 
 }

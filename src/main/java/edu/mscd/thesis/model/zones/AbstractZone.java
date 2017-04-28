@@ -84,5 +84,18 @@ public abstract class AbstractZone implements Zone {
 	public Tile getTile() {
 		return tile;
 	}
+	
+	@Override
+	public String getLabelText(){
+		StringBuilder sb = new StringBuilder();
+		sb.append(this.getZoneType());
+		sb.append("\nGrowthValue: ");
+		sb.append(Util.truncateValueToDisplay(this.getValue(), 6));
+		if(this.getBuilding()!=null){
+			sb.append("\n--------");
+			sb.append(this.getBuilding().getLabelText());
+		}
+		return sb.toString();
+	}
 
 }

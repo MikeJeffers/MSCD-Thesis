@@ -352,6 +352,15 @@ public class Util {
 			}
 		}
 	}
+	
+	
+	public static String truncateValueToDisplay(double value, int numDigits){
+		String toDisplay = Double.toString((value));
+		if (toDisplay.length() > numDigits) {
+			toDisplay = toDisplay.substring(0, 7);
+		}
+		return toDisplay;
+	}
 
 	public static void takeScreenshot(Stage stage) {
 		WritableImage img = stage.getScene().snapshot(null);

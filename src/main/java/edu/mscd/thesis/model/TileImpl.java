@@ -125,16 +125,17 @@ public class TileImpl implements Tile {
 		sb.append(this.getPos().getX());
 		sb.append(",");
 		sb.append(this.getPos().getY());
-		sb.append("]");
+		sb.append("] ");
 		sb.append(this.type.toString());
-		sb.append("\nZone:");
-		sb.append(this.getZone().getZoneType());
-		sb.append("\nMaterial:");
-		sb.append(this.materialValue());
-		sb.append("\nLandValue:");
-		sb.append(this.getCurrentLandValue());
-		sb.append("\nPollution:");
-		sb.append(this.pollution);
+		sb.append("\nMaterial: ");
+		sb.append(Util.truncateValueToDisplay(this.materialValue(), 6));
+		sb.append("\nLandValue: ");
+		sb.append(Util.truncateValueToDisplay(this.getCurrentLandValue(), 6));
+		sb.append("\nPollution: ");
+		sb.append(Util.truncateValueToDisplay(this.getPollution(), 6));
+		sb.append("\n--------");
+		sb.append("\nZone: ");
+		sb.append(this.zoning.getLabelText());
 
 		return sb.toString();
 	}
