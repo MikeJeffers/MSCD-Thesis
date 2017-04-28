@@ -9,13 +9,13 @@ public enum TileType {
 	SLOPE("Slope", true, true, Rules.MAX*0.9, Rules.MAX*0.1, Density.VERYLOW, new Color(0.9, 0.9, 0.8, 0.2)), 
 	HIGHLAND("HighLands", true, true, Rules.MAX*0.3, Rules.MAX*0.2, Density.LOW, new Color(0.5, 0.9, 0.5, 0.2)), 
 	FOOTHILL("FootHills", true, true, Rules.MAX*0.3, Rules.MAX*0.2, Density.MED, new Color(0.5, 0.9, 0.2, 0.2)), 
-	HILL("Hill", true, true, Rules.MAX*0.4, Rules.MAX*0.4, Density.HIGH, new Color(0.25, 0.6, 0.25, 0.2)), 
+	HILL("Hill", true, true, Rules.MAX*0.4, Rules.MAX*0.45, Density.HIGH, new Color(0.25, 0.6, 0.25, 0.2)), 
 	BARREN("Barren", true, true, Rules.MAX*0.0, Rules.MAX*0.05, Density.VERYHIGH, new Color(0.4, 0.2, 0.2, 0.2)), 
-	FERTILE("Fertile", true, true, Rules.MAX*0.8, Rules.MAX*0.3,Density.VERYHIGH, new Color(0.1, 0.76, 0.2, 0.2)), 
-	FOREST("Forest", true, true, Rules.MAX*0.7, Rules.MAX*0.3, Density.HIGH, new Color(0.22, 0.86, 0.25, 0.2)), 
+	FERTILE("Fertile", true, true, Rules.MAX*0.8, Rules.MAX*0.4,Density.VERYHIGH, new Color(0.1, 0.76, 0.2, 0.2)), 
+	FOREST("Forest", true, true, Rules.MAX*0.7, Rules.MAX*0.6, Density.HIGH, new Color(0.22, 0.86, 0.25, 0.2)), 
 	LAKE("Lake", true, true, Rules.MAX*0.25, Rules.MAX*0.7, Density.VERYLOW, new Color(0, 0.1, 0.7, 0.2)), 
 	RIVER("River", true, true, Rules.MAX*0.55, Rules.MAX*0.4, Density.MED, new Color(0, 0.25, 1.0, 0.2)),
-	DELTA("Delta", true, true, Rules.MAX*0.75, Rules.MAX*0.2, Density.LOW, new Color(0.25, 0, 1.0, 0.2)),
+	DELTA("Delta", true, true, Rules.MAX*0.75, Rules.MAX*0.3, Density.LOW, new Color(0.25, 0, 1.0, 0.2)),
 	BEACH("Beach", true, true, Rules.MAX*0.1, Rules.MAX*0.9, Density.HIGH, new Color(0.8, 0.8, 0.1, 0.2)),
 	OCEAN("Sea", false, false, Rules.MAX, Rules.MAX, Density.NONE, new Color(0, 0.005, 1.0, 0.5));
 	
