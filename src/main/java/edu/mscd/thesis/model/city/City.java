@@ -31,6 +31,8 @@ public interface City {
 	double industrialDemand();
 	
 	int getZoneCount(ZoneType zt);
+	
+	double densityRating();
 
 	void update();
 

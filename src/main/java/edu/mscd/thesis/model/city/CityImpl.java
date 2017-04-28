@@ -8,6 +8,7 @@ import edu.mscd.thesis.model.Person;
 import edu.mscd.thesis.model.Tile;
 import edu.mscd.thesis.model.World;
 import edu.mscd.thesis.model.bldgs.Building;
+import edu.mscd.thesis.model.zones.Density;
 import edu.mscd.thesis.model.zones.ZoneType;
 import edu.mscd.thesis.util.Rules;
 import edu.mscd.thesis.util.Util;
@@ -18,10 +19,12 @@ public class CityImpl implements City {
 	private static int ID_COUNTER = 0;
 	private World world;
 	private int[] zoneCounts = new int[ZoneType.values().length];
+	private double densityRating;
 
 	public CityImpl(World w) {
 		this.world = w;
 		countZones();
+		densityRating = computeDensity();
 
 		this.population = new HashSet<Person>();
 		for (int i = 0; i < Rules.STARTING_POPULATION; i++) {
@@ -174,7 +177,7 @@ public class CityImpl implements City {
 					if (rand < Rules.BIRTH_RATE) {
 						toAddCounter++;
 					}
-				}else if(p.getHappiness()<0 || p.getMoney()<0){
+				} else if (p.getHappiness() < 0 || p.getMoney() < 0) {
 					toRemove.add(p);
 				}
 			}
@@ -187,6 +190,7 @@ public class CityImpl implements City {
 			populationControl();
 		}
 		countZones();
+		densityRating = computeDensity();
 	}
 
 	private void populationControl() {
@@ -226,6 +230,23 @@ public class CityImpl implements City {
 		}
 	}
 
+	private double computeDensity(){
+		Tile[] tiles = this.world.getTiles();
+		double sum = 0;
+		for (Tile t : tiles) {
+			if(t.maxDensity()==Density.NONE){
+				continue;
+			}
+			sum += ((double) t.getZoneDensity().getDensityLevel()) / ((double) t.maxDensity().getDensityLevel());
+		}
+		return sum/((double)tiles.length);
+	}
+	
+	@Override
+	public double densityRating() {
+		return this.densityRating;
+	}
+
 	@Override
 	public double residentialDemand() {
 		return Rules.getDemandForZoneType(ZoneType.RESIDENTIAL, this.world);
@@ -252,6 +273,7 @@ public class CityImpl implements City {
 		data.setProperty(CityProperty.R_DEMAND, this.residentialDemand());
 		data.setProperty(CityProperty.C_DEMAND, this.commercialDemand());
 		data.setProperty(CityProperty.I_DEMAND, this.industrialDemand());
+		data.setProperty(CityProperty.DENSITY, this.densityRating());
 		data.setProperty(CityProperty.WEALTH, this.averageWealth());
 		data.setProperty(CityProperty.HAPPY, this.averageHappiness());
 		data.setProperty(CityProperty.UNEMPLOY, this.percentageUnemployed());

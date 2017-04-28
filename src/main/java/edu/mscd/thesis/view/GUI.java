@@ -130,10 +130,11 @@ public class GUI implements View {
 		controlPane.add(renderModeControls, 0, 7);
 		controlPane.add(metricsPane, 0, 8);
 		controlPane.add(scorePane, 0, 9);
-		controlPane.add(weightSliders, 0, 10);
-		controlPane.add(moveReporter, 0, 11);
+		
+		controlPane.add(moveReporter, 0, 10, 2, 1);
 		controlPane.add(aiSettingsPane, 1, 5, 1, 2);
 		controlPane.add(tileInfoPane, 1, 7);
+		controlPane.add(weightSliders, 1, 8);
 
 		//Util.setGridVisible(controlPane);
 
@@ -162,7 +163,7 @@ public class GUI implements View {
 
 	private Pane makeTileInfoTogglePane(){
 		Pane pane = new GridPane();
-		Label label = new Label("Tile Info Display:");
+		Label label = new Label("Tile Info Display: ");
 		Button tileInfoToggle = new Button("Show");
 		tileInfoToggle.setTooltip(new Tooltip("Turn on/off Tile-data tooltips"));
 		tileInfoToggle.setOnAction(new EventHandler<ActionEvent>(){
@@ -732,8 +733,8 @@ public class GUI implements View {
 					}
 				}
 			});
-			GridPane.setColumnIndex(button, col);
-			GridPane.setRowIndex(button, 0);
+			GridPane.setColumnIndex(button, col%2);
+			GridPane.setRowIndex(button, col/2);
 			zonePane.getChildren().add(button);
 			col++;
 		}
