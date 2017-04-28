@@ -247,7 +247,7 @@ public class ZoneDecider implements Actor, Learner, Configurable {
 		}
 
 		int strength = (int) Math.round(Util.mapValue(maxScore, new double[] { 0, 1 }, new double[] { 0, 3 }));
-
+		
 		ZoneType AIselection = ZoneType.values()[maxIndex];
 
 		AiAction fake = new AiAction();

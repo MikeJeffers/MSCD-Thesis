@@ -91,7 +91,6 @@ public class Rules {
 	 * @return double score that is some value based on success metrics
 	 */
 	public static double score(Model m) {
-		;
 		Map<CityProperty, Double> data = m.getWorld().getCity().getData().getDataMap();
 		double cityScore = 0;
 		for (CityProperty prop : CityProperty.values()) {

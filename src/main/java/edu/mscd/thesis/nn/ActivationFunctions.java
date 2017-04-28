@@ -12,13 +12,17 @@ public enum ActivationFunctions {
     GAUSSIAN(new ActivationGaussian()), 
     LINEAR(new ActivationLinear()), 
     LOG(new ActivationLOG()), 
+    LOGISTIC(new ActivationLogistic()),
     RAMP(new ActivationRamp(1, 0, 1, 0)), 
     SIGMOID(new ActivationSigmoid()), 
     SIN(new ActivationSIN()), 
     SOFTMAX(new ActivationSoftMax()), 
+    SOFTPLUS(new ActivationSoftPlus()),
+    SOFTSIGN(new ActivationSoftSign()),
     SIGMOID_STEEP(new ActivationSteepenedSigmoid()), 
     STEP(new ActivationStep(0,0.5,1.0)), 
-    TANH(new ActivationTANH());
+    TANH(new ActivationTANH()),
+	ATAN(new ActivationArcTan());
 	
 	private ActivationFunction function;
 	
