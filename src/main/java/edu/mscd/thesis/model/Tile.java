@@ -60,5 +60,7 @@ public interface Tile extends OverlayNode, SelectableNode{
 	void update();
 	
 	TileType getType();
+	
+	public String getLabelText();
 
 }

@@ -117,6 +117,27 @@ public class TileImpl implements Tile {
 		sb.append(" }");
 		return sb.toString();
 	}
+	
+	@Override
+	public String getLabelText() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("[");
+		sb.append(this.getPos().getX());
+		sb.append(",");
+		sb.append(this.getPos().getY());
+		sb.append("]");
+		sb.append(this.type.toString());
+		sb.append(" Zone:");
+		sb.append(this.getZone().getZoneType());
+		sb.append(" Material:");
+		sb.append(this.materialValue());
+		sb.append(" LandValue:");
+		sb.append(this.landValue);
+		sb.append(" Pollution:");
+		sb.append(this.pollution);
+
+		return sb.toString();
+	}
 
 	@Override
 	public boolean equals(Object other) {

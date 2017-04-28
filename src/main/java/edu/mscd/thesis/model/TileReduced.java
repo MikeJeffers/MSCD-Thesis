@@ -18,6 +18,7 @@ public class TileReduced implements Tile {
 	private double originalLandValue;
 	private double pollution;
 	private Zone zone;
+	private String labelText;
 
 	public TileReduced(Tile t) {
 		this.zoneValue = t.getZoneValue();
@@ -32,6 +33,7 @@ public class TileReduced implements Tile {
 		this.overlay = t.getOverlayValue();
 		this.select = t.getSelection();
 		this.zone = t.getZone();
+		this.labelText = t.getLabelText();
 	}
 
 	@Override
@@ -147,6 +149,11 @@ public class TileReduced implements Tile {
 			return o.getPos().equals(this.getPos())&&this.getType()==o.getType();
 		}
 		return false;
+	}
+
+	@Override
+	public String getLabelText() {
+		return this.labelText;
 	}
 
 

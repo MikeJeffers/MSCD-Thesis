@@ -142,6 +142,9 @@ public class GameLoop extends AnimationTimer implements Controller {
 				previousAiMove = next;
 			}else if(!a.isAI()){
 				currentUserMove = a;
+				if(!a.isMove()){
+					view.setTileToolTip(model.getWorld().getTileAt(a.getTarget()).getLabelText());
+				}
 			}
 			if (a.isMove()) {
 				mostRecentlyAppliedAction = a;

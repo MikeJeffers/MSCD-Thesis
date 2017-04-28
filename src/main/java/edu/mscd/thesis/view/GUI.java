@@ -88,6 +88,11 @@ public class GUI implements View {
 
 	private WeightVector<CityProperty> weightVectorForNN = new CityDataWeightVector();
 
+	private Tooltip canvasToolTip = new Tooltip();
+	private Label canvasTileLabel = new Label();
+	private Pane canvasTipPane;
+	private boolean isTileTipEnabled = false;
+
 	@Override
 	public void initView(Stage stage) {
 		renderer.changeMode(currentRenderMode);
@@ -96,6 +101,7 @@ public class GUI implements View {
 
 		Canvas canvas = new Canvas(Util.WINDOW_WIDTH, Util.WINDOW_HEIGHT);
 		addClickListenerTo(canvas);
+		Tooltip.install(canvas, canvasToolTip);
 		gc = canvas.getGraphicsContext2D();
 		Affine transformMatrix = gc.getTransform();
 		transformMatrix.appendScale(Util.SCALE_FACTOR, Util.SCALE_FACTOR);
@@ -111,6 +117,7 @@ public class GUI implements View {
 		Pane weightSliders = makeSliderPane();
 		Pane moveReporter = makeAIMoveReport();
 		Pane aiSettingsPane = makeAiSettingsPane();
+		Pane tileInfoPane = makeTileInfoTogglePane();
 
 		controlPane.setHgap(5);
 		controlPane.setVgap(5);
@@ -126,17 +133,57 @@ public class GUI implements View {
 		controlPane.add(weightSliders, 0, 10);
 		controlPane.add(moveReporter, 0, 11);
 		controlPane.add(aiSettingsPane, 1, 5, 1, 2);
+		controlPane.add(tileInfoPane, 1, 7);
 
-		// setGridVisible(controlPane);
+		//Util.setGridVisible(controlPane);
+
+		canvasTipPane = makeTileLabelPane(canvasTileLabel);
 
 		root.getChildren().add(canvas);
 		root.getChildren().add(controlPane);
+		root.getChildren().add(canvasTipPane);
 
 		Scene mainScene = new Scene(root, Color.WHITE);
 		stage.setScene(mainScene);
 
 		this.stage = stage;
 		stage.show();
+	}
+
+	private Pane makeTileLabelPane(Label label) {
+		Pane pane = new GridPane();
+		Background b = new Background(new BackgroundFill(new Color(1, 1, 1, 0.3), new CornerRadii(5), Insets.EMPTY));
+		pane.setBackground(b);
+		pane.getChildren().add(label);
+		pane.mouseTransparentProperty().set(true);
+		pane.setVisible(isTileTipEnabled);
+		return pane;
+	}
+
+	private Pane makeTileInfoTogglePane(){
+		Pane pane = new GridPane();
+		Label label = new Label("Tile Info Display:");
+		Button tileInfoToggle = new Button("Show");
+		tileInfoToggle.setTooltip(new Tooltip("Turn on/off Tile-data tooltips"));
+		tileInfoToggle.setOnAction(new EventHandler<ActionEvent>(){
+			@Override
+			public void handle(ActionEvent event) {
+				isTileTipEnabled = !isTileTipEnabled;
+				if(isTileTipEnabled){
+					canvasTipPane.setVisible(true);
+					tileInfoToggle.setText("Hide");
+				}else{
+					canvasTipPane.setVisible(false);
+					tileInfoToggle.setText("Show");
+				}
+			}
+		});
+		GridPane.setColumnIndex(label, 0);
+		GridPane.setRowIndex(label, 0);
+		GridPane.setColumnIndex(tileInfoToggle, 1);
+		GridPane.setRowIndex(tileInfoToggle, 0);
+		pane.getChildren().addAll(label, tileInfoToggle);
+		return pane;
 	}
 
 	private Pane makeAiSettingsPane() {
@@ -450,6 +497,8 @@ public class GUI implements View {
 			public void handle(MouseEvent event) {
 				Affine xForm = gc.getTransform();
 				Point2D pt = new Point2D(event.getSceneX(), event.getSceneY());
+				canvasTipPane.setLayoutX(pt.getX());
+				canvasTipPane.setLayoutY(pt.getY());
 				try {
 					pt = xForm.inverseTransform(pt);
 				} catch (NonInvertibleTransformException e) {
@@ -467,6 +516,7 @@ public class GUI implements View {
 				}
 			}
 		});
+
 	}
 
 	private Pane makeStackedChartPane() {
@@ -865,6 +915,13 @@ public class GUI implements View {
 			Util.pruneChartData(this.chartData.get(prop));
 
 		}
+
+	}
+
+	@Override
+	public void setTileToolTip(String text) {
+		canvasTileLabel.setText(text);
+		canvasToolTip.textProperty().set(text);
 
 	}
 

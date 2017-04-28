@@ -16,5 +16,7 @@ public interface DataDisplay {
 	public void updateCityData(ModelData data, int turn);
 	
 	public void updateAIMove(Action action);
+	
+	public void setTileToolTip(String text);
 
 }
