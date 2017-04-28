@@ -27,7 +27,7 @@ public class Rules {
 	public static final int MAX_PERCENTAGE = 100;
 	// Zone growth factors
 	public static final int GROWTH_THRESHOLD = 150;
-	public static final int BASE_GROWTH_COST = 50;
+	public static final int BASE_GROWTH_COST = 55;
 	// City population and Person constants
 	public static final int STARTING_POPULATION = 100;
 	public static final int BASE_POPULATION = 50;
@@ -55,16 +55,23 @@ public class Rules {
 
 	public static double getDemandForZoneType(ZoneType zt, World w) {
 		int r = w.getCity().getZoneCount(ZoneType.RESIDENTIAL);
+		double rRatio = ((double) r) / ((double) TILE_COUNT);
 		int c = w.getCity().getZoneCount(ZoneType.COMMERICAL);
+		double cRatio = ((double) c) / ((double) TILE_COUNT);
 		int i = w.getCity().getZoneCount(ZoneType.INDUSTRIAL);
+		double iRatio = ((double) i) / ((double) TILE_COUNT);
 		if (zt == ZoneType.RESIDENTIAL) {
-			return Math.max(w.getCity().percentageHomeless(), R_DEMAND_BASE);
+			double homelessness = w.getCity().percentageHomeless();
+			double result = (cRatio+iRatio+homelessness)/3.0;
+			return Math.max(result, R_DEMAND_BASE);
 		} else if (zt == ZoneType.COMMERICAL) {
-			double consumerDemand = ((double) r) / ((double) TILE_COUNT);
-			return Math.max((w.getCity().percentageUnemployed() + consumerDemand) / 1.5, 0);
+			double joblessness = w.getCity().percentageUnemployed();
+			double result = (rRatio+iRatio+joblessness)/3.0;
+			return Math.max(result, 0);
 		} else if (zt == ZoneType.INDUSTRIAL) {
-			double commerceDemand = ((double) c) / ((double) TILE_COUNT);
-			return Math.max((w.getCity().percentageUnemployed() + commerceDemand) / 1.5, commerceDemand);
+			double joblessness = w.getCity().percentageUnemployed();
+			double result = (rRatio+cRatio+joblessness)/3.0;
+			return Math.max(result, 0);
 		}
 		return 0;
 	}

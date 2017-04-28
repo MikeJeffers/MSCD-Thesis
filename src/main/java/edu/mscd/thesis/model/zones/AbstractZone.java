@@ -38,8 +38,7 @@ public abstract class AbstractZone implements Zone {
 	}
 
 	public void setValue(double v) {
-		this.value = v;
-		this.value = Util.boundValue(this.value, 0, Rules.MAX);
+		this.value = Util.boundValue(v, 0, Rules.MAX);
 	}
 
 	@Override

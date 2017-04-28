@@ -17,7 +17,7 @@ public class AiConfigImpl extends AbstractConfigData implements AiConfig {
 	public AiConfigImpl(){
 		this.function = ActivationFunctions.SIGMOID;
 		this.networkDepth = 2;
-		this.neuronDensity = 2;
+		this.neuronDensity = 3;
 		this.radius = 1;
 		this.waitTime = 5;
 	}
