@@ -118,18 +118,15 @@ public class Util {
 	 *         or radius is <0
 	 */
 	public static List<Tile> getNeighborsCircularDist(Tile origin, Tile[] tiles, int radius) {
-		int index = Util.getIndexOf(origin, tiles);
-		List<Tile> neighbors = new ArrayList<Tile>();
-		if (index == -1) {
-			return neighbors;
-		}
-		Pos2D originPt = origin.getPos();
-		for (int i = 0; i < tiles.length; i++) {
-			if (tiles[i].getPos().distBetween(originPt) <= radius) {
-				neighbors.add(tiles[i]);
+		List<Tile> manhattanNeighbors = getNeighborsManhattanDist(origin, tiles, radius, Rules.WORLD_X, Rules.WORLD_Y);
+		Iterator<Tile> it = manhattanNeighbors.iterator();
+		while (it.hasNext()) {
+			Tile next = it.next();
+			if (next.getPos().distBetween(origin.getPos()) > radius) {
+				it.remove();
 			}
 		}
-		return neighbors;
+		return manhattanNeighbors;
 	}
 
 	/**
@@ -165,7 +162,7 @@ public class Util {
 	}
 
 	public static int getRandomBetween(int minInclusive, int maxExclusive) {
-		double r = minInclusive+random.nextDouble()*maxExclusive;
+		double r = minInclusive + random.nextDouble() * maxExclusive;
 		return (int) Math.floor(r);
 	}
 
@@ -279,7 +276,7 @@ public class Util {
 	 *            - Time/Turn-series data; where X-axis is assumed independent
 	 */
 	public static void pruneChartData(Series<Number, Number> series) {
-		int numParts = (int) Math.sqrt(MAX_CHART_DATAPTS*8);
+		int numParts = (int) Math.sqrt(MAX_CHART_DATAPTS * 8);
 		ObservableList<Data<Number, Number>> data = series.getData();
 		if (data.size() > MAX_CHART_DATAPTS) {
 			List<List<Data<Number, Number>>> partitions = new ArrayList<List<Data<Number, Number>>>();
@@ -354,9 +351,8 @@ public class Util {
 			}
 		}
 	}
-	
-	
-	public static String truncateValueToDisplay(double value, int numDigits){
+
+	public static String truncateValueToDisplay(double value, int numDigits) {
 		String toDisplay = Double.toString((value));
 		if (toDisplay.length() > numDigits) {
 			toDisplay = toDisplay.substring(0, 7);

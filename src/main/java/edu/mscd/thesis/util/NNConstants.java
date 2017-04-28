@@ -13,7 +13,7 @@ public class NNConstants {
 	
 	
 	public static double getInputLayerSizeFactor(int inputSize, int factor){
-		double modifier = inputSize*Util.mapValue(factor, new double[]{MIN_DENSITY,  MAX_DENSITY}, new double[]{0.5, 2.5});
+		double modifier = inputSize*Util.mapValue(factor, new double[]{MIN_DENSITY,  MAX_DENSITY}, new double[]{0.75, 2.5});
 		return modifier;
 	}
 
