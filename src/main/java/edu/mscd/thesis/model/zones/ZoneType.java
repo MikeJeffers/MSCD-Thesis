@@ -3,16 +3,18 @@ package edu.mscd.thesis.model.zones;
 import javafx.scene.paint.Color;
 
 public enum ZoneType {
-	RESIDENTIAL("R", new Color(0, 1.0, 0, 0.5)),
-	COMMERICAL("C", new Color(0, 0, 1.0, 0.5)),
-	INDUSTRIAL("I", new Color(1.0, 1.0, 0, 0.5)),
-	EMPTY("0", new Color(0.1, 0.1, 0.1, 0.1));
+	RESIDENTIAL("R", "Residential", new Color(0, 1.0, 0, 0.5)),
+	COMMERICAL("C", "Commerical", new Color(0, 0, 1.0, 0.5)),
+	INDUSTRIAL("I", "Industrial", new Color(1.0, 1.0, 0, 0.5)),
+	EMPTY("0", "Empty", new Color(0.1, 0.1, 0.1, 0.1));
 	
 	private Color color;
 	private String shortName;
-	private ZoneType(String id, Color c){
+	private String labelText;
+	private ZoneType(String id, String label, Color c){
 		this.color = c;
 		this.shortName = id;
+		this.labelText = label;
 	}
 	
 	public Color getColor(){
@@ -21,7 +23,7 @@ public enum ZoneType {
 	
 	@Override
 	public String toString(){
-		return this.shortName;
+		return this.labelText;
 	}
 
 	

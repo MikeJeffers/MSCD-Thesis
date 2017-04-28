@@ -497,8 +497,10 @@ public class GUI implements View {
 			public void handle(MouseEvent event) {
 				Affine xForm = gc.getTransform();
 				Point2D pt = new Point2D(event.getSceneX(), event.getSceneY());
-				canvasTipPane.setLayoutX(pt.getX());
-				canvasTipPane.setLayoutY(pt.getY());
+				//Translate Tile-info tooltipPane
+				canvasTipPane.setLayoutX(pt.getX()+15);
+				canvasTipPane.setLayoutY(pt.getY()-10);
+				//End tooltip layout translation
 				try {
 					pt = xForm.inverseTransform(pt);
 				} catch (NonInvertibleTransformException e) {

@@ -71,7 +71,7 @@ public class TileImpl implements Tile {
 
 	@Override
 	public double materialValue() {
-		return this.type.getBaseLandValue();
+		return this.type.getMaterialValue();
 	}
 
 	@Override
@@ -127,13 +127,13 @@ public class TileImpl implements Tile {
 		sb.append(this.getPos().getY());
 		sb.append("]");
 		sb.append(this.type.toString());
-		sb.append(" Zone:");
+		sb.append("\nZone:");
 		sb.append(this.getZone().getZoneType());
-		sb.append(" Material:");
+		sb.append("\nMaterial:");
 		sb.append(this.materialValue());
-		sb.append(" LandValue:");
-		sb.append(this.landValue);
-		sb.append(" Pollution:");
+		sb.append("\nLandValue:");
+		sb.append(this.getCurrentLandValue());
+		sb.append("\nPollution:");
 		sb.append(this.pollution);
 
 		return sb.toString();
