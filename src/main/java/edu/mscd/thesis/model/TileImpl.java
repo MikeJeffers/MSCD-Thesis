@@ -127,6 +127,8 @@ public class TileImpl implements Tile {
 		sb.append(this.getPos().getY());
 		sb.append("] ");
 		sb.append(this.type.toString());
+		sb.append("\nMaxDensity: ");
+		sb.append(this.getType().getMaxDensity());
 		sb.append("\nMaterial: ");
 		sb.append(Util.truncateValueToDisplay(this.materialValue(), 6));
 		sb.append("\nLandValue: ");

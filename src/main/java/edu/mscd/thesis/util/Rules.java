@@ -26,8 +26,8 @@ public class Rules {
 	public static final int MAX = 255;
 	public static final int MAX_PERCENTAGE = 100;
 	// Zone growth factors
-	public static final int GROWTH_THRESHOLD = 125;
-	public static final int BASE_GROWTH_COST = 25;
+	public static final int GROWTH_THRESHOLD = 150;
+	public static final int BASE_GROWTH_COST = 50;
 	// City population and Person constants
 	public static final int STARTING_POPULATION = 100;
 	public static final int BASE_POPULATION = 50;
