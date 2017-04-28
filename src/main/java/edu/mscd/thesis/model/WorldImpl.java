@@ -44,7 +44,7 @@ public class WorldImpl implements World {
 		tiles = new Tile[size];
 		this.rows = sizeY;
 		this.cols = sizeX;
-		this.smoothWorldInit();
+		this.smoothWorldInit(3);
 		this.city = new CityImpl(this);
 		tileUpdater = new TileUpdaterService(this);
 	}
@@ -67,7 +67,7 @@ public class WorldImpl implements World {
 	/**
 	 * World created with smooth transitions between random mountain peaks and water bodies
 	 */
-	private void smoothWorldInit(){
+	private void smoothWorldInit(int noise){
 		Random r = new Random();
 		TileType[] types = TileType.values();
 		ZoneFactory zFact = new ZoneFactoryImpl();
@@ -106,7 +106,9 @@ public class WorldImpl implements World {
 			double distToOcean = distanceTo(tiles[i].getPos(), TileType.OCEAN);
 			double ratio = distToOcean/(distToOcean+distToMtn+0.001);
 			int typeSelection = (int) Math.floor(ratio*(types.length));
-			typeSelection = typeSelection%types.length;
+			typeSelection+=(int)Util.getRandomBetween(-noise, noise+1);
+			typeSelection = (int) Util.boundValue(typeSelection, 0, types.length);
+			typeSelection = (typeSelection)%types.length;
 			Tile t = new TileImpl(tiles[i].getPos(), types[typeSelection], zFact);
 			smoothed.add(t);
 		}

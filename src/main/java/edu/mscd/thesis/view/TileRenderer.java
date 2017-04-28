@@ -43,6 +43,13 @@ public class TileRenderer implements Renderer<Tile> {
 			double green = landValue / Rules.MAX;
 			Color landValueColor = new Color(0, Util.boundValue(green, 0, 1), 0, 1);
 			g.setFill(landValueColor);
+		} else if (renderMode == RenderMode.RESOURCE) {
+			double materialValue = tile.materialValue();
+
+			double red = materialValue / Rules.MAX;
+			red = Util.boundValue(red, 0, 1);
+			Color landValueColor = new Color(red, red/2.0, 0, 1);
+			g.setFill(landValueColor);
 		} else if (renderMode == RenderMode.DENSITY) {
 			double level = 0;
 

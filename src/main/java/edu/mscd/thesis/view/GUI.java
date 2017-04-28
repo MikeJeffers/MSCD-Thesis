@@ -798,7 +798,7 @@ public class GUI implements View {
 
 	private Pane radiusSelect() {
 		GridPane radiusSelectPane = new GridPane();
-		Spinner<Integer> radiusSelector = new Spinner<Integer>(0, 10, 1);
+		Spinner<Integer> radiusSelector = new Spinner<Integer>(0, Util.MAX_RADIUS-1, 1);
 		radiusSelector.setTooltip(new Tooltip("Sets size of Brush"));
 		radiusSelector.setMaxSize(100, 25);
 		radiusSelector.valueProperty().addListener(new ChangeListener<Integer>() {

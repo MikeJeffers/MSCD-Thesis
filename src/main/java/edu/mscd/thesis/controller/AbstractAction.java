@@ -2,6 +2,7 @@ package edu.mscd.thesis.controller;
 
 import edu.mscd.thesis.model.Pos2D;
 import edu.mscd.thesis.model.zones.ZoneType;
+import edu.mscd.thesis.util.Util;
 
 public abstract class AbstractAction implements Action {
 	private Pos2D location;
@@ -59,13 +60,11 @@ public abstract class AbstractAction implements Action {
 
 	public void setZoneType(ZoneType zone) {
 		this.zone = zone;
-
 	}
 
 
 	public void setRadius(int radius) {
-		this.radius = radius;
-
+		this.radius = (int) Math.floor(Util.boundValue(radius, 0, Util.MAX_RADIUS));
 	}
 
 

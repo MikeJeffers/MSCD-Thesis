@@ -2,8 +2,7 @@ package edu.mscd.thesis.util;
 
 public class NNConstants {
 	
-	public static final double INPUT_LAYER_INFLATION = 1.5;
-	public static final int MAX_DENSITY = 4;
+	public static final int MAX_DENSITY = 5;
 	public static final int MIN_DENSITY = 1;
 	public static final int MAX_DEPTH = 4;
 	public static final int MIN_DEPTH= 1;
@@ -14,7 +13,7 @@ public class NNConstants {
 	
 	
 	public static double getInputLayerSizeFactor(int inputSize, int factor){
-		double modifier = inputSize*Util.mapValue(factor, new double[]{MIN_DENSITY,  MAX_DENSITY}, new double[]{0.5, 3.0});
+		double modifier = inputSize*Util.mapValue(factor, new double[]{MIN_DENSITY,  MAX_DENSITY}, new double[]{0.5, 2.5});
 		return modifier;
 	}
 

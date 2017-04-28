@@ -52,6 +52,7 @@ public class Util {
 	public static final boolean SCREENSHOT = true;
 	public static final int ZONETYPES = ZoneType.values().length;
 	public static final int TILE_ATTRIBUTES = 5;
+	public static final int MAX_RADIUS = 6;
 
 	private static Random random = new Random();
 	private static DateFormat df = new SimpleDateFormat("yyMMdd_HHmmss_SSS");
@@ -164,7 +165,8 @@ public class Util {
 	}
 
 	public static int getRandomBetween(int minInclusive, int maxExclusive) {
-		return minInclusive + Util.random.nextInt(maxExclusive);
+		double r = minInclusive+random.nextDouble()*maxExclusive;
+		return (int) Math.floor(r);
 	}
 
 	public static double boundValue(double value, double min, double max) {

@@ -4,6 +4,7 @@ public enum RenderMode {
 	NORMAL("Normal"),
 	POLLUTION("Pollution"),
 	LANDVALUE("Landvalues"),
+	RESOURCE("Resources"),
 	DENSITY("Density"),
 	POLICY("AI-Policy Map");
 	
