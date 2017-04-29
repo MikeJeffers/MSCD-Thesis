@@ -1,24 +1,15 @@
 package edu.mscd.thesis.nn;
 
-import org.encog.Encog;
 import org.encog.ml.data.MLData;
-import org.encog.ml.data.MLDataSet;
 import org.encog.ml.data.basic.BasicMLData;
-import org.encog.ml.data.basic.BasicMLDataSet;
-import org.encog.neural.networks.BasicNetwork;
-import org.encog.neural.networks.layers.BasicLayer;
-import org.encog.neural.networks.training.propagation.resilient.ResilientPropagation;
 
 import edu.mscd.thesis.controller.Action;
 import edu.mscd.thesis.controller.AiAction;
-import edu.mscd.thesis.controller.AiConfig;
-import edu.mscd.thesis.controller.AiConfigImpl;
 import edu.mscd.thesis.model.Model;
 import edu.mscd.thesis.model.city.CityData;
 import edu.mscd.thesis.model.city.CityProperty;
 import edu.mscd.thesis.model.zones.ZoneType;
 import edu.mscd.thesis.util.ModelToVec;
-import edu.mscd.thesis.util.NNConstants;
 import edu.mscd.thesis.util.Rules;
 import edu.mscd.thesis.util.Util;
 import edu.mscd.thesis.util.WeightVector;
@@ -31,23 +22,20 @@ import edu.mscd.thesis.util.WeightVector;
  * 
  * @author Mike
  */
-public class ZoneDecider implements Actor, Learner, Configurable {
+public class ZoneDecider extends AbstractNetwork implements Actor, Learner {
 	private Model state;
-	private AiConfig conf = new AiConfigImpl();
-
-	private BasicNetwork network = new BasicNetwork();
-	private MLDataSet DATASET = new BasicMLDataSet();
-	private int inputLayerSize = CityProperty.values().length + ZoneType.values().length;
-	private static final int OUTPUT_LAYER_SIZE = 1;
 
 	public ZoneDecider(Model initialState) {
+		inputLayerSize = CityProperty.values().length + ZoneType.values().length;
 		this.state = initialState;
 		initNetwork();
 		initTraining();
-		trainResilient();
+		train();
 	}
 
-	private void initTraining() {
+	@Override
+	protected void initTraining() {
+		super.initTraining();
 		double[][] input = new double[28][inputLayerSize];
 		double[][] output = new double[28][OUTPUT_LAYER_SIZE];
 		int i = 0;
@@ -198,35 +186,6 @@ public class ZoneDecider implements Actor, Learner, Configurable {
 
 	}
 
-	private void trainResilient() {
-		ResilientPropagation train = new ResilientPropagation(network, DATASET);
-		int epoch = 1;
-
-		do {
-			train.iteration();
-			epoch++;
-		} while (train.getError() > 0.01 && epoch < 50);
-		train.finishTraining();
-
-		Encog.getInstance().shutdown();
-	}
-
-	private void initNetwork() {
-		int firstLayerSize =(int) Math.round(NNConstants.getInputLayerSizeFactor(inputLayerSize, conf.getNeuronDensity()));
-		int stepSize = (firstLayerSize-OUTPUT_LAYER_SIZE-1)/conf.getNetworkDepth();
-		network.addLayer(new BasicLayer(null, true, inputLayerSize));
-		for(int i=0; i<this.conf.getNetworkDepth(); i++){
-			network.addLayer(new BasicLayer(conf.getActivationFunc(), true, firstLayerSize-(stepSize*i)));
-		}
-		network.addLayer(new BasicLayer(conf.getActivationFunc(), false, OUTPUT_LAYER_SIZE));
-		network.getStructure().finalizeStructure();
-		network.reset();
-		System.out.println(network.toString());
-		for(int i=0; i<network.getLayerCount(); i++){
-			System.out.println(network.getLayerNeuronCount(i));
-		}
-	}
-
 	@Override
 	public Action takeNextAction() {
 		CityData cityData = state.getWorld().getCity().getData();
@@ -247,7 +206,7 @@ public class ZoneDecider implements Actor, Learner, Configurable {
 		}
 
 		int strength = (int) Math.round(Util.mapValue(maxScore, new double[] { 0, 1 }, new double[] { 0, 3 }));
-		
+
 		ZoneType AIselection = ZoneType.values()[maxIndex];
 
 		AiAction fake = new AiAction();
@@ -270,7 +229,7 @@ public class ZoneDecider implements Actor, Learner, Configurable {
 		MLData trainingIn = new BasicMLData(input);
 		MLData idealOut = new BasicMLData(output);
 		DATASET.add(trainingIn, idealOut);
-		this.trainResilient();
+		train();
 	}
 
 	@Override
@@ -278,14 +237,5 @@ public class ZoneDecider implements Actor, Learner, Configurable {
 		this.state = state;
 
 	}
-
-	@Override
-	public void configure(AiConfig configuration) {
-		this.conf = configuration;
-		this.initNetwork();
-		this.initTraining();
-		this.trainResilient();
-	}
-
 
 }

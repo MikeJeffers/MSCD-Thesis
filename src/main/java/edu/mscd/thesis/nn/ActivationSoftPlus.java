@@ -21,7 +21,11 @@ public class ActivationSoftPlus implements ActivationFunction {
 	public final void activationFunction(final double[] x, final int start,
 			final int size) {
 		for (int i = start; i < start + size; i++) {
+			double data = x[i];
 			x[i] = Math.log(1.0+Math.pow(Math.E, x[i]));
+			if(Double.isNaN(x[i])){
+				System.out.println("x["+i+"]="+x[i]+"  from = "+data);
+			}
 		}
 	}
 
@@ -38,6 +42,13 @@ public class ActivationSoftPlus implements ActivationFunction {
 	 */
 	@Override
 	public final double derivativeFunction(final double b, final double a) {
+		double data = 1.0/(1.0+Math.pow(Math.E, -a));
+		if(Double.isNaN(data)){
+			System.out.println(a);
+			System.out.println(Math.pow(Math.E, -a));
+			System.out.println((1.0+Math.pow(Math.E, -a)));
+			System.out.println(data);
+		}
 		return 1.0/(1.0+Math.pow(Math.E, -a));
 	}
 
