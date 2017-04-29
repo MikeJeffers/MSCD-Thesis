@@ -125,7 +125,7 @@ public class ZoneMapper implements Learner, Mapper, Configurable {
 		do {
 			train.iteration();
 			epoch++;
-		} while (train.getError() > 0.01 && epoch < 45);
+		} while (train.getError() > 0.01 && epoch < 50);
 		train.finishTraining();
 		Encog.getInstance().shutdown();
 	}
