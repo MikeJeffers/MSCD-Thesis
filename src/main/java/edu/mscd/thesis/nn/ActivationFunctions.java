@@ -20,6 +20,7 @@ public enum ActivationFunctions {
     SOFTPLUS(new ActivationSoftPlus()),
     SOFTSIGN(new ActivationSoftSign()),
     SIGMOID_STEEP(new ActivationSteepenedSigmoid()), 
+    RELU(new ActivationReLu()),
     //STEP(new ActivationStep(0,0.5,1.0)), 
     TANH(new ActivationTANH()),
 	ATAN(new ActivationArcTan());

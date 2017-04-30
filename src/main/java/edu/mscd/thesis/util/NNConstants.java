@@ -10,6 +10,8 @@ public class NNConstants {
 	public static final int MAX_RADIUS = 4;
 	public static final int MIN_WAIT = 1;
 	public static final int MAX_WAIT = 10;
+	public static final int MIN_EPOCHS = 50;
+	public static final int MAX_EPOCHS = 1000;
 	
 	
 	public static double getInputLayerSizeFactor(int inputSize, int factor){

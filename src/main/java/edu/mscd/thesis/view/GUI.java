@@ -19,6 +19,7 @@ import edu.mscd.thesis.model.Pos2D;
 import edu.mscd.thesis.model.city.CityProperty;
 import edu.mscd.thesis.model.zones.ZoneType;
 import edu.mscd.thesis.nn.ActivationFunctions;
+import edu.mscd.thesis.nn.NN;
 import edu.mscd.thesis.util.CityDataWeightVector;
 import edu.mscd.thesis.util.NNConstants;
 import edu.mscd.thesis.util.Rules;
@@ -50,6 +51,8 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.Slider;
 import javafx.scene.control.Spinner;
+import javafx.scene.control.SpinnerValueFactory;
+import javafx.scene.control.SpinnerValueFactory.IntegerSpinnerValueFactory;
 import javafx.scene.control.Tooltip;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
@@ -195,6 +198,7 @@ public class GUI implements View {
 		Pane neuronDensity = neuronDensitySelector();
 		Pane learnRadius = learnRadiusSelector();
 		Pane waitTime = makeWaitTimeSelector();
+		Pane epochs = makeEpochSelector();
 		Pane submitButton = makeSubmitButton();
 
 		Label modeLabel = new Label("Ai Mode: ");
@@ -203,6 +207,7 @@ public class GUI implements View {
 		Label densityLabel = new Label("Neurons: ");
 		Label radiusLabel = new Label("Radius: ");
 		Label waitLabel = new Label("Observe cycle: ");
+		Label epochLabel = new Label("Training Epochs: ");
 		Label submitLabel = new Label("Commit Changes: ");
 
 		GridPane.setConstraints(modeLabel, 0, 0, 1, 1, HPos.LEFT, VPos.BASELINE);
@@ -217,11 +222,13 @@ public class GUI implements View {
 		GridPane.setConstraints(learnRadius, 1, 4, 1, 1, HPos.LEFT, VPos.BASELINE);
 		GridPane.setConstraints(waitLabel, 0, 5, 1, 1, HPos.LEFT, VPos.BASELINE);
 		GridPane.setConstraints(waitTime, 1, 5, 1, 1, HPos.LEFT, VPos.BASELINE);
-		GridPane.setConstraints(submitLabel, 0, 6, 1, 1, HPos.LEFT, VPos.BASELINE);
-		GridPane.setConstraints(submitButton, 1, 6, 1, 1, HPos.LEFT, VPos.BASELINE);
+		GridPane.setConstraints(epochLabel, 0, 6, 1, 1, HPos.LEFT, VPos.BASELINE);
+		GridPane.setConstraints(epochs, 1, 6, 1, 1, HPos.LEFT, VPos.BASELINE);
+		GridPane.setConstraints(submitLabel, 0, 7, 1, 1, HPos.LEFT, VPos.BASELINE);
+		GridPane.setConstraints(submitButton, 1, 7, 1, 1, HPos.LEFT, VPos.BASELINE);
 
 		pane.getChildren().addAll(aiModeCombo, activationFuncCombo, depthSelector, neuronDensity, learnRadius, waitTime,
-				submitButton, modeLabel, funcLabel, depthLabel, densityLabel, radiusLabel, waitLabel, submitLabel);
+				submitButton, modeLabel, funcLabel, depthLabel, densityLabel, radiusLabel, waitLabel, submitLabel, epochs, epochLabel);
 		return pane;
 	}
 
@@ -236,6 +243,22 @@ public class GUI implements View {
 			}
 		});
 		pane.add(button, 0, 0);
+		return pane;
+	}
+	
+	private Pane makeEpochSelector() {
+		GridPane pane = new GridPane();
+		Spinner<Integer> selector = new Spinner<Integer>(NNConstants.MIN_EPOCHS, NNConstants.MAX_EPOCHS,
+				aiConfig.getMaxTrainingEpochs(), NNConstants.MIN_EPOCHS);
+		selector.setTooltip(new Tooltip("Sets max number of training iterations to achieve Min-Error"));
+		selector.setMaxSize(100, 25);
+		selector.valueProperty().addListener(new ChangeListener<Integer>() {
+			@Override
+			public void changed(ObservableValue<? extends Integer> observable, Integer oldValue, Integer newValue) {
+				aiConfig.setMaxTrainingEpochs(newValue);
+			}
+		});
+		pane.add(selector, 0, 0);
 		return pane;
 	}
 

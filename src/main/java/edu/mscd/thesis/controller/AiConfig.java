@@ -9,6 +9,7 @@ public interface AiConfig {
 	public int getNeuronDensity();
 	public int getObservationRadius();
 	public int getObservationWaitTime();
+	public int getMaxTrainingEpochs();
 	
 	
 	public AiConfig copy();

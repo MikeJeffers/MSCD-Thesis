@@ -2,17 +2,16 @@ package edu.mscd.thesis.nn;
 
 import org.encog.engine.network.activation.ActivationFunction;
 import org.encog.mathutil.BoundMath;
-import org.encog.mathutil.BoundNumbers;
 
 /**
- * ArcTan activation function implementation for Encog's ActivationFunction interface
+ * SoftPlus activation function implementation for Encog's ActivationFunction interface
  * @author Mike
  */
-public class ActivationArcTan implements ActivationFunction {
+public class ActivationReLu implements ActivationFunction {
 	private static final long serialVersionUID = 1L;
 	private final double[] params;
 
-	public ActivationArcTan() {
+	public ActivationReLu() {
 		this.params = new double[0];
 	}
 
@@ -23,7 +22,7 @@ public class ActivationArcTan implements ActivationFunction {
 	public final void activationFunction(final double[] x, final int start,
 			final int size) {
 		for (int i = start; i < start + size; i++) {
-			x[i] = Math.atan(BoundNumbers.bound(x[i]));
+			x[i] = Math.max(0, x[i]);
 		}
 	}
 
@@ -32,7 +31,7 @@ public class ActivationArcTan implements ActivationFunction {
 	 */
 	@Override
 	public final ActivationFunction clone() {
-		return new ActivationArcTan();
+		return new ActivationReLu();
 	}
 
 	/**
@@ -40,7 +39,11 @@ public class ActivationArcTan implements ActivationFunction {
 	 */
 	@Override
 	public final double derivativeFunction(final double b, final double a) {
-		return 1.0/(1.0+BoundMath.pow(a, 2));
+		if(a>=0){
+			return 1.0;
+		}else{
+			return 0.0;
+		}
 	}
 
 	/**
@@ -85,6 +88,6 @@ public class ActivationArcTan implements ActivationFunction {
 	}
 
 	public String getLabel() {
-		return "ArcTan";
+		return "SoftPlus";
 	}
 }

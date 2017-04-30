@@ -36,9 +36,14 @@ public abstract class AbstractNetwork implements Configurable {
 		train.addStrategy(reg);
 		int epoch = 1;
 		do {
+			//System.out.println(train.getLastGradient()[0]);
 			train.iteration();
+			if(Double.isNaN(train.getError())){
+				System.out.println(train.getLastGradient()[0]);
+				System.out.println(train.getUpdateValues()[0]);
+			}
 			epoch++;
-		} while (train.getError() > 0.01 && epoch < 255);
+		} while (train.getError() > 0.01 && epoch < conf.getMaxTrainingEpochs());
 		train.finishTraining();
 		System.out.println("Epochs Required:" + epoch + " to achieve Error:" + train.getError());
 		/*
