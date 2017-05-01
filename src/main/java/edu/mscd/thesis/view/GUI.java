@@ -1,5 +1,7 @@
 package edu.mscd.thesis.view;
 
+import java.text.DecimalFormat;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -19,7 +21,6 @@ import edu.mscd.thesis.model.Pos2D;
 import edu.mscd.thesis.model.city.CityProperty;
 import edu.mscd.thesis.model.zones.ZoneType;
 import edu.mscd.thesis.nn.ActivationFunctions;
-import edu.mscd.thesis.nn.NN;
 import edu.mscd.thesis.util.CityDataWeightVector;
 import edu.mscd.thesis.util.NNConstants;
 import edu.mscd.thesis.util.Rules;
@@ -52,7 +53,6 @@ import javafx.scene.control.Label;
 import javafx.scene.control.Slider;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
-import javafx.scene.control.SpinnerValueFactory.IntegerSpinnerValueFactory;
 import javafx.scene.control.Tooltip;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
@@ -66,6 +66,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.transform.Affine;
 import javafx.scene.transform.NonInvertibleTransformException;
 import javafx.stage.Stage;
+import javafx.util.StringConverter;
 
 public class GUI implements View {
 	private Collection<Observer<ViewData>> observers = new ArrayList<Observer<ViewData>>();
@@ -133,13 +134,13 @@ public class GUI implements View {
 		controlPane.add(renderModeControls, 0, 7);
 		controlPane.add(metricsPane, 0, 8);
 		controlPane.add(scorePane, 0, 9);
-		
+
 		controlPane.add(moveReporter, 0, 10, 2, 1);
 		controlPane.add(aiSettingsPane, 1, 5, 1, 2);
 		controlPane.add(tileInfoPane, 1, 7);
 		controlPane.add(weightSliders, 1, 8);
 
-		//Util.setGridVisible(controlPane);
+		Util.setGridVisible(controlPane);
 
 		canvasTipPane = makeTileLabelPane(canvasTileLabel);
 
@@ -164,19 +165,19 @@ public class GUI implements View {
 		return pane;
 	}
 
-	private Pane makeTileInfoTogglePane(){
+	private Pane makeTileInfoTogglePane() {
 		Pane pane = new GridPane();
 		Label label = new Label("Tile Info Display: ");
 		Button tileInfoToggle = new Button("Show");
 		tileInfoToggle.setTooltip(new Tooltip("Turn on/off Tile-data tooltips"));
-		tileInfoToggle.setOnAction(new EventHandler<ActionEvent>(){
+		tileInfoToggle.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent event) {
 				isTileTipEnabled = !isTileTipEnabled;
-				if(isTileTipEnabled){
+				if (isTileTipEnabled) {
 					canvasTipPane.setVisible(true);
 					tileInfoToggle.setText("Hide");
-				}else{
+				} else {
 					canvasTipPane.setVisible(false);
 					tileInfoToggle.setText("Show");
 				}
@@ -193,42 +194,112 @@ public class GUI implements View {
 	private Pane makeAiSettingsPane() {
 		GridPane pane = new GridPane();
 		Pane aiModeCombo = makeAiModeComboBox();
-		Pane activationFuncCombo = makeFunctionComboBox();
 		Pane depthSelector = depthSelector();
-		Pane neuronDensity = neuronDensitySelector();
 		Pane learnRadius = learnRadiusSelector();
 		Pane waitTime = makeWaitTimeSelector();
 		Pane epochs = makeEpochSelector();
+		Pane error = makeErrorSelector();
 		Pane submitButton = makeSubmitButton();
 
 		Label modeLabel = new Label("Ai Mode: ");
-		Label funcLabel = new Label("Activation: ");
 		Label depthLabel = new Label("Layers: ");
-		Label densityLabel = new Label("Neurons: ");
 		Label radiusLabel = new Label("Radius: ");
 		Label waitLabel = new Label("Observe cycle: ");
 		Label epochLabel = new Label("Training Epochs: ");
+		Label errorLabel = new Label("Error rate: ");
 		Label submitLabel = new Label("Commit Changes: ");
 
 		GridPane.setConstraints(modeLabel, 0, 0, 1, 1, HPos.LEFT, VPos.BASELINE);
 		GridPane.setConstraints(aiModeCombo, 1, 0, 1, 1, HPos.LEFT, VPos.BASELINE);
-		GridPane.setConstraints(funcLabel, 0, 1, 1, 1, HPos.LEFT, VPos.BASELINE);
-		GridPane.setConstraints(activationFuncCombo, 1, 1, 1, 1, HPos.LEFT, VPos.BASELINE);
-		GridPane.setConstraints(depthLabel, 0, 2, 1, 1, HPos.LEFT, VPos.BASELINE);
-		GridPane.setConstraints(depthSelector, 1, 2, 1, 1, HPos.LEFT, VPos.BASELINE);
-		GridPane.setConstraints(densityLabel, 0, 3, 1, 1, HPos.LEFT, VPos.BASELINE);
-		GridPane.setConstraints(neuronDensity, 1, 3, 1, 1, HPos.LEFT, VPos.BASELINE);
-		GridPane.setConstraints(radiusLabel, 0, 4, 1, 1, HPos.LEFT, VPos.BASELINE);
-		GridPane.setConstraints(learnRadius, 1, 4, 1, 1, HPos.LEFT, VPos.BASELINE);
-		GridPane.setConstraints(waitLabel, 0, 5, 1, 1, HPos.LEFT, VPos.BASELINE);
-		GridPane.setConstraints(waitTime, 1, 5, 1, 1, HPos.LEFT, VPos.BASELINE);
-		GridPane.setConstraints(epochLabel, 0, 6, 1, 1, HPos.LEFT, VPos.BASELINE);
-		GridPane.setConstraints(epochs, 1, 6, 1, 1, HPos.LEFT, VPos.BASELINE);
-		GridPane.setConstraints(submitLabel, 0, 7, 1, 1, HPos.LEFT, VPos.BASELINE);
-		GridPane.setConstraints(submitButton, 1, 7, 1, 1, HPos.LEFT, VPos.BASELINE);
+		GridPane.setConstraints(radiusLabel, 0, 1, 1, 1, HPos.LEFT, VPos.BASELINE);
+		GridPane.setConstraints(learnRadius, 1, 1, 1, 1, HPos.LEFT, VPos.BASELINE);
+		GridPane.setConstraints(waitLabel, 0, 2, 1, 1, HPos.LEFT, VPos.BASELINE);
+		GridPane.setConstraints(waitTime, 1, 2, 1, 1, HPos.LEFT, VPos.BASELINE);
+		GridPane.setConstraints(epochLabel, 0, 3, 1, 1, HPos.LEFT, VPos.BASELINE);
+		GridPane.setConstraints(epochs, 1, 3, 1, 1, HPos.LEFT, VPos.BASELINE);
+		GridPane.setConstraints(errorLabel, 0, 4, 1, 1, HPos.LEFT, VPos.BASELINE);
+		GridPane.setConstraints(error, 1, 4, 1, 1, HPos.LEFT, VPos.BASELINE);
+		GridPane.setConstraints(depthLabel, 0, 5, 1, 1, HPos.LEFT, VPos.BASELINE);
+		GridPane.setConstraints(depthSelector, 1, 5, 1, 1, HPos.LEFT, VPos.BASELINE);
+		GridPane.setConstraints(submitLabel, 0, 6, 1, 1, HPos.LEFT, VPos.BASELINE);
+		GridPane.setConstraints(submitButton, 1, 6, 1, 1, HPos.LEFT, VPos.BASELINE);
 
-		pane.getChildren().addAll(aiModeCombo, activationFuncCombo, depthSelector, neuronDensity, learnRadius, waitTime,
-				submitButton, modeLabel, funcLabel, depthLabel, densityLabel, radiusLabel, waitLabel, submitLabel, epochs, epochLabel);
+		pane.getChildren().addAll(aiModeCombo, depthSelector, learnRadius, waitTime, submitButton, modeLabel,
+				depthLabel, radiusLabel, waitLabel, submitLabel, epochs, epochLabel, error, errorLabel);
+		return pane;
+	}
+
+	private Pane depthSelector() {
+		GridPane pane = new GridPane();
+		Spinner<Integer> selector = new Spinner<Integer>(NNConstants.MIN_LAYERS, NNConstants.MAX_LAYERS,
+				aiConfig.getLayerCount());
+		selector.setTooltip(new Tooltip("Sets number of intermediate layers in the Neural Networks"));
+		selector.setMaxSize(100, 25);
+		selector.valueProperty().addListener(new ChangeListener<Integer>() {
+			@Override
+			public void changed(ObservableValue<? extends Integer> observable, Integer oldValue, Integer newValue) {
+				aiConfig.setNumLayers(newValue.intValue());
+				pane.getChildren().clear();
+				pane.add(selector, 0, 0);
+				for (int i = 0; i < aiConfig.getLayerCount(); i++) {
+					pane.add(layerConfigPane(i), 0, i + 1);
+				}
+			}
+		});
+		pane.add(selector, 0, 0);
+		for (int i = 0; i < aiConfig.getLayerCount(); i++) {
+			pane.add(layerConfigPane(i), 0, i + 1);
+		}
+		return pane;
+	}
+
+	private Pane layerConfigPane(int layerIndex) {
+		GridPane pane = new GridPane();
+		Label layerName = new Label("Layer " + layerIndex + ": ");
+		pane.add(layerName, 0, 0);
+		pane.add(makeFunctionComboBox(layerIndex), 1, 0);
+		pane.add(neuronDensitySelector(layerIndex), 2, 0);
+		return pane;
+
+	}
+
+	private Pane makeFunctionComboBox(int index) {
+		GridPane pane = new GridPane();
+		ComboBox<ActivationFunctions> combo = new ComboBox<ActivationFunctions>();
+		combo.getItems().setAll(ActivationFunctions.values());
+		combo.setTooltip(new Tooltip("Sets the activation function of the neurons"));
+		combo.setValue(ActivationFunctions.SIGMOID);
+		combo.valueProperty().addListener(new ChangeListener<ActivationFunctions>() {
+			@Override
+			public void changed(ObservableValue<? extends ActivationFunctions> observable, ActivationFunctions oldValue,
+					ActivationFunctions newValue) {
+				aiConfig.setActivationFunc(index, newValue);
+			}
+		});
+		pane.add(combo, 0, 0);
+		aiConfig.setActivationFunc(index, combo.getValue());
+		return pane;
+	}
+
+	private Pane neuronDensitySelector(int index) {
+		GridPane pane = new GridPane();
+		Spinner<Integer> selector = new Spinner<Integer>(NNConstants.MIN_DENSITY, NNConstants.MAX_DENSITY,
+				NNConstants.MIN_DENSITY);
+		selector.setTooltip(new Tooltip("Sets a factor of how many neurons should be in intermediate layers"));
+		selector.setMaxSize(100, 25);
+		selector.valueProperty().addListener(new ChangeListener<Integer>() {
+			@Override
+			public void changed(ObservableValue<? extends Integer> observable, Integer oldValue, Integer newValue) {
+				aiConfig.setNeuralDensity(index, newValue);
+			}
+		});
+		if (index + 1 == aiConfig.getLayerCount()) {
+			selector.setDisable(true);
+		}else{
+			selector.setDisable(false);
+		}
+		pane.add(selector, 0, 0);
+		aiConfig.setNeuralDensity(index, selector.getValue());
 		return pane;
 	}
 
@@ -246,6 +317,50 @@ public class GUI implements View {
 		return pane;
 	}
 	
+	private Pane makeErrorSelector() {
+		GridPane pane = new GridPane();
+		SpinnerValueFactory.DoubleSpinnerValueFactory fac = new SpinnerValueFactory.DoubleSpinnerValueFactory(NNConstants.MIN_ERROR_RATE, NNConstants.MAX_ERROR_RATE,
+				aiConfig.getMaxError(), NNConstants.MIN_ERROR_RATE);
+		fac.setConverter(new StringConverter<Double>() {
+		     private final DecimalFormat df = new DecimalFormat("#.###");
+		     
+		     @Override 
+		     public String toString(Double value) {
+		         if (value == null) {
+		             return "";
+		         }
+		         return df.format(value);
+		     }
+
+		     @Override 
+		     public Double fromString(String value) {
+		         try {
+		             if (value == null) {
+		                 return null;
+		             }
+		             value = value.trim();
+		             if (value.length() < 1) {
+		                 return null;
+		             }
+		             return df.parse(value).doubleValue();
+		         } catch (ParseException ex) {
+		             throw new RuntimeException(ex);
+		         }
+		     }
+		 });
+		Spinner<Double> selector = new Spinner<Double>(fac);
+		selector.setTooltip(new Tooltip("Sets target error-rate to train to"));
+		selector.setMaxSize(100, 25);
+		selector.valueProperty().addListener(new ChangeListener<Double>() {
+			@Override
+			public void changed(ObservableValue<? extends Double> observable, Double oldValue, Double newValue) {
+				aiConfig.setMaxError(newValue);
+			}
+		});
+		pane.add(selector, 0, 0);
+		return pane;
+	}
+
 	private Pane makeEpochSelector() {
 		GridPane pane = new GridPane();
 		Spinner<Integer> selector = new Spinner<Integer>(NNConstants.MIN_EPOCHS, NNConstants.MAX_EPOCHS,
@@ -291,56 +406,6 @@ public class GUI implements View {
 			}
 		});
 		pane.add(selector, 0, 0);
-		return pane;
-	}
-
-	private Pane neuronDensitySelector() {
-		GridPane pane = new GridPane();
-		Spinner<Integer> selector = new Spinner<Integer>(NNConstants.MIN_DENSITY, NNConstants.MAX_DENSITY,
-				aiConfig.getNeuronDensity());
-		selector.setTooltip(new Tooltip("Sets a factor of how many neurons should be in intermediate layers"));
-		selector.setMaxSize(100, 25);
-		selector.valueProperty().addListener(new ChangeListener<Integer>() {
-			@Override
-			public void changed(ObservableValue<? extends Integer> observable, Integer oldValue, Integer newValue) {
-				aiConfig.setNeuronDensity(newValue.intValue());
-			}
-		});
-		pane.add(selector, 0, 0);
-		return pane;
-	}
-
-	private Pane depthSelector() {
-		GridPane pane = new GridPane();
-		Spinner<Integer> selector = new Spinner<Integer>(NNConstants.MIN_DEPTH, NNConstants.MAX_DEPTH,
-				aiConfig.getNetworkDepth());
-		selector.setTooltip(new Tooltip("Sets number of intermediate layers in the Neural Networks"));
-		selector.setMaxSize(100, 25);
-		selector.valueProperty().addListener(new ChangeListener<Integer>() {
-			@Override
-			public void changed(ObservableValue<? extends Integer> observable, Integer oldValue, Integer newValue) {
-				aiConfig.setNetworkDepth(newValue.intValue());
-			}
-		});
-		pane.add(selector, 0, 0);
-		return pane;
-	}
-
-	private Pane makeFunctionComboBox() {
-		GridPane pane = new GridPane();
-		ComboBox<ActivationFunctions> combo = new ComboBox<ActivationFunctions>();
-		combo.getItems().setAll(ActivationFunctions.values());
-		combo.setTooltip(new Tooltip("Sets the activation function of the neurons"));
-		combo.setValue(ActivationFunctions.SIGMOID);
-		combo.valueProperty().addListener(new ChangeListener<ActivationFunctions>() {
-			@Override
-			public void changed(ObservableValue<? extends ActivationFunctions> observable, ActivationFunctions oldValue,
-					ActivationFunctions newValue) {
-				aiConfig.setActivationFunc(newValue);
-				notifyObserver((ViewData) gameConfig.copy());
-			}
-		});
-		pane.add(combo, 0, 0);
 		return pane;
 	}
 
@@ -521,18 +586,18 @@ public class GUI implements View {
 			public void handle(MouseEvent event) {
 				Affine xForm = gc.getTransform();
 				Point2D pt = new Point2D(event.getSceneX(), event.getSceneY());
-				//Translate Tile-info tooltipPane
-				if(pt.getX()<Util.WINDOW_WIDTH/2.0){
-					canvasTipPane.setLayoutX(pt.getX()+15);
-				}else{
-					canvasTipPane.setLayoutX(pt.getX()-15-canvasTipPane.getWidth());
+				// Translate Tile-info tooltipPane
+				if (pt.getX() < Util.WINDOW_WIDTH / 2.0) {
+					canvasTipPane.setLayoutX(pt.getX() + 15);
+				} else {
+					canvasTipPane.setLayoutX(pt.getX() - 15 - canvasTipPane.getWidth());
 				}
-				if(pt.getY()<Util.WINDOW_HEIGHT/2.0){
-					canvasTipPane.setLayoutY(pt.getY()+10);
-				}else{
-					canvasTipPane.setLayoutY(pt.getY()-10-canvasTipPane.getHeight());
+				if (pt.getY() < Util.WINDOW_HEIGHT / 2.0) {
+					canvasTipPane.setLayoutY(pt.getY() + 10);
+				} else {
+					canvasTipPane.setLayoutY(pt.getY() - 10 - canvasTipPane.getHeight());
 				}
-				//End tooltip layout translation
+				// End tooltip layout translation
 				try {
 					pt = xForm.inverseTransform(pt);
 				} catch (NonInvertibleTransformException e) {
@@ -559,7 +624,7 @@ public class GUI implements View {
 		canvas.addEventHandler(MouseEvent.MOUSE_ENTERED, new EventHandler<MouseEvent>() {
 			@Override
 			public void handle(MouseEvent event) {
-				if(isTileTipEnabled){
+				if (isTileTipEnabled) {
 					canvasTipPane.setVisible(true);
 				}
 			}
@@ -756,8 +821,8 @@ public class GUI implements View {
 					}
 				}
 			});
-			GridPane.setColumnIndex(button, col%2);
-			GridPane.setRowIndex(button, col/2);
+			GridPane.setColumnIndex(button, col % 2);
+			GridPane.setRowIndex(button, col / 2);
 			zonePane.getChildren().add(button);
 			col++;
 		}
@@ -822,7 +887,7 @@ public class GUI implements View {
 
 	private Pane radiusSelect() {
 		GridPane radiusSelectPane = new GridPane();
-		Spinner<Integer> radiusSelector = new Spinner<Integer>(0, Util.MAX_RADIUS-1, 1);
+		Spinner<Integer> radiusSelector = new Spinner<Integer>(0, Util.MAX_RADIUS - 1, 1);
 		radiusSelector.setTooltip(new Tooltip("Sets size of Brush"));
 		radiusSelector.setMaxSize(100, 25);
 		radiusSelector.valueProperty().addListener(new ChangeListener<Integer>() {

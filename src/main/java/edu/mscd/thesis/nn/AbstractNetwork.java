@@ -1,11 +1,7 @@
 package edu.mscd.thesis.nn;
 
-import java.util.Arrays;
 
 import org.encog.Encog;
-import org.encog.engine.network.activation.ActivationSigmoid;
-import org.encog.ml.data.MLData;
-import org.encog.ml.data.MLDataPair;
 import org.encog.ml.data.MLDataSet;
 import org.encog.ml.data.basic.BasicMLDataSet;
 import org.encog.ml.train.strategy.Strategy;
@@ -43,7 +39,7 @@ public abstract class AbstractNetwork implements Configurable {
 				System.out.println(train.getUpdateValues()[0]);
 			}
 			epoch++;
-		} while (train.getError() > 0.01 && epoch < conf.getMaxTrainingEpochs());
+		} while (train.getError() > conf.getMaxError() && epoch < conf.getMaxTrainingEpochs());
 		train.finishTraining();
 		System.out.println("Epochs Required:" + epoch + " to achieve Error:" + train.getError());
 		/*
@@ -59,14 +55,12 @@ public abstract class AbstractNetwork implements Configurable {
 	}
 
 	protected void initNetwork() {
-		int firstLayerSize = (int) Math
-				.round(NNConstants.getInputLayerSizeFactor(inputLayerSize, conf.getNeuronDensity()));
-		int stepSize = (firstLayerSize - OUTPUT_LAYER_SIZE - 1) / conf.getNetworkDepth();
 		network.addLayer(new BasicLayer(null, true, inputLayerSize));
-		for (int i = 0; i < this.conf.getNetworkDepth(); i++) {
-			network.addLayer(new BasicLayer(conf.getActivationFunc(), true, firstLayerSize - (stepSize * i)));
+		for (int i = 0; i < this.conf.getLayerCount()-1; i++) {
+			int neuronCount = NNConstants.getNeuronCountByFactor(inputLayerSize, conf.getNeuralDensities().get(i));
+			network.addLayer(new BasicLayer(conf.getActivationFunctions().get(i).getFunction(), true, neuronCount));
 		}
-		network.addLayer(new BasicLayer(new ActivationSigmoid(), false, OUTPUT_LAYER_SIZE));
+		network.addLayer(new BasicLayer(conf.getActivationFunctions().get(conf.getLayerCount()-1).getFunction(), false, OUTPUT_LAYER_SIZE));
 		network.getStructure().finalizeStructure();
 		network.reset();
 		System.out.println(network.toString());

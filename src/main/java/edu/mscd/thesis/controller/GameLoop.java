@@ -127,6 +127,7 @@ public class GameLoop extends AnimationTimer implements Controller {
 
 	@Override
 	public void notifyViewEvent(ViewData data) {
+		System.out.println(data);
 		if (data.isAction()) {
 			Action a = data.getAction().copy();
 			if(gameConfig.getAiMode()!=AiMode.OFF && a.isAI()){

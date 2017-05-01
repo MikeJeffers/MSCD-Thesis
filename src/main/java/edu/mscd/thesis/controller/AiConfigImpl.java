@@ -1,6 +1,7 @@
 package edu.mscd.thesis.controller;
 
-import org.encog.engine.network.activation.ActivationFunction;
+import java.util.HashMap;
+import java.util.Map;
 
 import edu.mscd.thesis.nn.ActivationFunctions;
 import edu.mscd.thesis.util.NNConstants;
@@ -8,36 +9,36 @@ import edu.mscd.thesis.util.Util;
 
 public class AiConfigImpl extends AbstractConfigData implements AiConfig {
 
-	private ActivationFunctions function;
-	private int networkDepth;
-	private int neuronDensity;
+	private Map<Integer, ActivationFunctions> actFunctions;
+	private Map<Integer, Integer> neuralDensities;
+	private int layerCount;
 	private int radius;
 	private int waitTime;
 	private int maxEpochs;
+	private double maxError;
 
-	
-	public AiConfigImpl(){
-		this.function = ActivationFunctions.SIGMOID;
-		this.networkDepth = 2;
-		this.neuronDensity = 3;
+	public AiConfigImpl() {
+		this.actFunctions = new HashMap<Integer, ActivationFunctions>();
+		this.neuralDensities = new HashMap<Integer, Integer>();
+
+		this.maxError = 0.01;
+		this.layerCount = 3;
 		this.radius = 1;
 		this.waitTime = 5;
 		this.maxEpochs = 100;
+		for (int i = 0; i < this.layerCount; i++) {
+			this.actFunctions.put(i, ActivationFunctions.SIGMOID);
+			if (i + 1 == this.layerCount) {
+				this.neuralDensities.put(i, 1);
+			} else {
+				this.neuralDensities.put(i, this.layerCount - i);
+			}
+		}
 	}
 
 	@Override
-	public ActivationFunction getActivationFunc() {
-		return this.function.getFunction();
-	}
-
-	@Override
-	public int getNetworkDepth() {
-		return this.networkDepth;
-	}
-
-	@Override
-	public int getNeuronDensity() {
-		return this.neuronDensity;
+	public int getLayerCount() {
+		return this.layerCount;
 	}
 
 	@Override
@@ -49,29 +50,56 @@ public class AiConfigImpl extends AbstractConfigData implements AiConfig {
 	public int getObservationWaitTime() {
 		return this.waitTime;
 	}
-	
+
 	@Override
 	public int getMaxTrainingEpochs() {
 		return this.maxEpochs;
 	}
-	
-	public void setMaxTrainingEpochs(int epochs){
-		this.maxEpochs = (int) Util.boundValue(epochs, NNConstants.MIN_EPOCHS, NNConstants.MAX_EPOCHS);
+
+	@Override
+	public double getMaxError() {
+		return this.maxError;
 	}
 
-	public void setActivationFunc(ActivationFunctions f) {
-		this.function = f;
+	@Override
+	public Map<Integer, ActivationFunctions> getActivationFunctions() {
+		return this.actFunctions;
 	}
 
-	public void setNetworkDepth(int depth) {
-		if (depth >= NNConstants.MIN_DEPTH && depth <= NNConstants.MAX_DEPTH) {
-			this.networkDepth = depth;
+	@Override
+	public Map<Integer, Integer> getNeuralDensities() {
+		return this.neuralDensities;
+	}
+
+	public void setActivationFunctions(Map<Integer, ActivationFunctions> funcs) {
+		this.actFunctions = funcs;
+	}
+
+	public void setNeuralDensities(Map<Integer, Integer> densities) {
+		this.neuralDensities = densities;
+	}
+
+	public void setNeuralDensity(int index, int density) {
+		if (density >= NNConstants.MIN_DENSITY && density <= NNConstants.MAX_DENSITY) {
+			this.neuralDensities.put(index, density);
 		}
 	}
 
-	public void setNeuronDensity(int density) {
-		if (density >=NNConstants.MIN_DENSITY && density <= NNConstants.MAX_DENSITY) {
-			this.neuronDensity = density;
+	public void setActivationFunc(int index, ActivationFunctions func) {
+		this.actFunctions.put(index, func);
+	}
+
+	public void setMaxError(double error) {
+		this.maxError = Util.boundValue(error, NNConstants.MIN_ERROR_RATE, NNConstants.MAX_ERROR_RATE);
+	}
+
+	public void setMaxTrainingEpochs(int epochs) {
+		this.maxEpochs = (int) Util.boundValue(epochs, NNConstants.MIN_EPOCHS, NNConstants.MAX_EPOCHS);
+	}
+
+	public void setNumLayers(int depth) {
+		if (depth >= NNConstants.MIN_LAYERS && depth <= NNConstants.MAX_LAYERS) {
+			this.layerCount = depth;
 		}
 	}
 
@@ -89,13 +117,16 @@ public class AiConfigImpl extends AbstractConfigData implements AiConfig {
 
 	@Override
 	public AiConfig copy() {
+		System.out.println(this);
 		AiConfigImpl a = new AiConfigImpl();
-		a.setActivationFunc(this.function);
-		a.setNetworkDepth(this.getNetworkDepth());
-		a.setNeuronDensity(this.getNeuronDensity());
+		a.setNumLayers(this.getLayerCount());
+		a.setActivationFunctions(this.getActivationFunctions());
+		a.setNeuralDensities(this.getNeuralDensities());
 		a.setObservationRadius(this.getObservationRadius());
 		a.setObservationWaitTime(this.getObservationWaitTime());
 		a.setMaxTrainingEpochs(this.getMaxTrainingEpochs());
+		a.setMaxError(this.getMaxError());
+		System.out.println(a);
 		return a;
 	}
 
@@ -119,28 +150,31 @@ public class AiConfigImpl extends AbstractConfigData implements AiConfig {
 	public AiConfig getAiConfig() {
 		return this;
 	}
-	
+
 	@Override
-	public String toString(){
+	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append(this.getClass().getName());
 		sb.append("{");
-		sb.append("ActivationFunc:");
-		sb.append(this.getActivationFunc().getClass().getName());
 		sb.append(" Layers:");
-		sb.append(this.getNetworkDepth());
-		sb.append(" NeuronCount:");
-		sb.append(this.getNeuronDensity());
+		sb.append(this.getLayerCount());
+		for(int i=0; i<this.getLayerCount(); i++){
+			sb.append("Layer"+i);
+			sb.append(" NeuronDensity:");
+			sb.append(this.getNeuralDensities().get(i));
+			sb.append(" Activiation:");
+			sb.append(this.getActivationFunctions().get(i).name());
+		}
 		sb.append(" ObserveRadius:");
 		sb.append(this.getObservationRadius());
 		sb.append(" ObserveTime:");
 		sb.append(this.getObservationWaitTime());
 		sb.append(" TrainingEpochs:");
 		sb.append(this.getMaxTrainingEpochs());
+		sb.append(" MaxError:");
+		sb.append(this.getMaxError());
 		sb.append("}");
 		return sb.toString();
 	}
-
-	
 
 }
