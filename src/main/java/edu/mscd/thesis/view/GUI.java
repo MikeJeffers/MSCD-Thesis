@@ -286,7 +286,7 @@ public class GUI implements View {
 		Spinner<Integer> selector = new Spinner<Integer>(NNConstants.MIN_DENSITY, NNConstants.MAX_DENSITY,
 				NNConstants.MIN_DENSITY);
 		selector.setTooltip(new Tooltip("Sets a factor of how many neurons should be in intermediate layers"));
-		selector.setMaxSize(100, 25);
+		selector.setMaxSize(65, 25);
 		selector.valueProperty().addListener(new ChangeListener<Integer>() {
 			@Override
 			public void changed(ObservableValue<? extends Integer> observable, Integer oldValue, Integer newValue) {

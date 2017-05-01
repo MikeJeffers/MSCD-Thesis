@@ -19,8 +19,8 @@ import edu.mscd.thesis.model.zones.ZoneType;
  *
  */
 public class Rules {
-	public static final int WORLD_X = 40;
-	public static final int WORLD_Y = 30;
+	public static final int WORLD_X = 20;
+	public static final int WORLD_Y = 15;
 	public static final int TILE_COUNT = WORLD_X * WORLD_Y;
 	// Game Constants and factors
 	public static final int MAX = 255;
@@ -32,7 +32,7 @@ public class Rules {
 	public static final int STARTING_POPULATION = 100;
 	public static final int BASE_POPULATION = 50;
 	public static final int MAX_POPULATION = TILE_COUNT * Density.VERYHIGH.getDensityLevel();
-	public static final int BIRTH_RATE = 3;
+	public static final int BIRTH_RATE = 5;
 	public static final int LIFE_SPAN = 100;
 	public static final double R_DEMAND_BASE = 0.05;
 	// Tile effect factors
@@ -44,33 +44,37 @@ public class Rules {
 	public static double getValueForZoneTypeWithEffects(Tile t, ZoneType z) {
 		double value = getValueForZoneOnTile(t.getType(), z);
 		if (z == ZoneType.COMMERICAL) {
-			value += (t.getCurrentLandValue() - (t.getPollution()*0.1));
+			value += (t.getCurrentLandValue()*1.0 - t.getPollution()*0.1);
 		} else if (z == ZoneType.INDUSTRIAL) {
-			value += (t.getCurrentLandValue() + t.getPollution())/2.0;
+			value += (t.getCurrentLandValue()*0.1 + t.getPollution()*1.0);
 		} else if (z == ZoneType.RESIDENTIAL) {
-			value += (t.getCurrentLandValue() - t.getPollution());
+			value += (t.getCurrentLandValue()*1.0 - t.getPollution()*0.75);
 		}
 		return Util.boundValue(value, 0, Rules.MAX);
 	}
 
 	public static double getDemandForZoneType(ZoneType zt, World w) {
 		int r = w.getCity().getZoneCount(ZoneType.RESIDENTIAL);
-		double rRatio = ((double) r) / ((double) TILE_COUNT);
+		double rRatio = ((double) r+1) / ((double) TILE_COUNT);
 		int c = w.getCity().getZoneCount(ZoneType.COMMERICAL);
-		double cRatio = ((double) c) / ((double) TILE_COUNT);
+		double cRatio = ((double) c+1) / ((double) TILE_COUNT);
 		int i = w.getCity().getZoneCount(ZoneType.INDUSTRIAL);
-		double iRatio = ((double) i) / ((double) TILE_COUNT);
+		double iRatio = ((double) i+1) / ((double) TILE_COUNT);
 		if (zt == ZoneType.RESIDENTIAL) {
 			double homelessness = w.getCity().percentageHomeless();
-			double result = (cRatio+iRatio+homelessness)/3.0;
+			double ciZones = (iRatio+cRatio)*0.5;
+			double ratio = (((ciZones-rRatio)/ciZones)*0.5)+0.5;
+			double result = (ratio+homelessness)/2.0;
 			return Math.max(result, R_DEMAND_BASE);
 		} else if (zt == ZoneType.COMMERICAL) {
 			double joblessness = w.getCity().percentageUnemployed();
-			double result = (rRatio+iRatio+joblessness)/3.0;
+			double ratio = (((iRatio-cRatio)/iRatio)*0.5)+0.5;
+			double result = (ratio+joblessness)/2.0;
 			return Math.max(result, 0);
 		} else if (zt == ZoneType.INDUSTRIAL) {
 			double joblessness = w.getCity().percentageUnemployed();
-			double result = (rRatio+cRatio+joblessness)/3.0;
+			double ratio = (((cRatio-iRatio)/cRatio)*0.5)+0.5;
+			double result = (ratio+joblessness)/2.0;
 			return Math.max(result, 0);
 		}
 		return 0;
