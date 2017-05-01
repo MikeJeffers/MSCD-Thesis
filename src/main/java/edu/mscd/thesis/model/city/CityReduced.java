@@ -3,7 +3,6 @@ package edu.mscd.thesis.model.city;
 import java.util.Collection;
 
 import edu.mscd.thesis.model.Person;
-import edu.mscd.thesis.model.Tile;
 import edu.mscd.thesis.model.zones.ZoneType;
 
 public class CityReduced implements City{

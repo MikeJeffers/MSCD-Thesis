@@ -1,7 +1,6 @@
 package edu.mscd.thesis.nn;
 
 import org.encog.engine.network.activation.ActivationFunction;
-import org.encog.mathutil.BoundMath;
 
 /**
  * SoftPlus activation function implementation for Encog's ActivationFunction interface

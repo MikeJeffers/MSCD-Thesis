@@ -117,7 +117,6 @@ public class AiConfigImpl extends AbstractConfigData implements AiConfig {
 
 	@Override
 	public AiConfig copy() {
-		System.out.println(this);
 		AiConfigImpl a = new AiConfigImpl();
 		a.setNumLayers(this.getLayerCount());
 		a.setActivationFunctions(this.getActivationFunctions());
@@ -126,7 +125,6 @@ public class AiConfigImpl extends AbstractConfigData implements AiConfig {
 		a.setObservationWaitTime(this.getObservationWaitTime());
 		a.setMaxTrainingEpochs(this.getMaxTrainingEpochs());
 		a.setMaxError(this.getMaxError());
-		System.out.println(a);
 		return a;
 	}
 
