@@ -1,6 +1,7 @@
 package edu.mscd.thesis.nn;
 
 import org.encog.engine.network.activation.ActivationFunction;
+import org.encog.mathutil.BoundMath;
 
 /**
  * Logistic(SoftStep) activation function implementation for Encog's ActivationFunction interface
@@ -26,7 +27,8 @@ public class ActivationLogistic implements ActivationFunction {
 	}
 	
 	private double func(double x){
-		return 1.0/(1.0+Math.pow(Math.E, -x));
+		
+		return 1.0/(1.0+BoundMath.exp(-x));
 	}
 
 	/**

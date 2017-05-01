@@ -1,17 +1,11 @@
 package edu.mscd.thesis.nn;
 
-import org.encog.Encog;
 import org.encog.ml.data.MLData;
-import org.encog.ml.data.MLDataSet;
 import org.encog.ml.data.basic.BasicMLData;
 import org.encog.ml.data.basic.BasicMLDataSet;
-import org.encog.neural.networks.BasicNetwork;
-import org.encog.neural.networks.layers.BasicLayer;
-import org.encog.neural.networks.training.propagation.resilient.ResilientPropagation;
 
 import edu.mscd.thesis.controller.Action;
 import edu.mscd.thesis.controller.AiConfig;
-import edu.mscd.thesis.controller.AiConfigImpl;
 import edu.mscd.thesis.model.Model;
 import edu.mscd.thesis.model.Pos2D;
 import edu.mscd.thesis.model.Tile;
@@ -21,7 +15,6 @@ import edu.mscd.thesis.model.zones.ZoneType;
 import edu.mscd.thesis.util.ComputeNeuralMapService;
 import edu.mscd.thesis.util.MapExecutorService;
 import edu.mscd.thesis.util.ModelToVec;
-import edu.mscd.thesis.util.NNConstants;
 import edu.mscd.thesis.util.Rules;
 import edu.mscd.thesis.util.Util;
 import edu.mscd.thesis.util.WeightVector;
@@ -34,44 +27,27 @@ import edu.mscd.thesis.util.WeightVector;
  * @author Mike
  *
  */
-public class ZoneMapper implements Learner, Mapper, Configurable {
+public class ZoneMapper extends AbstractNetwork implements Learner, Mapper {
 
-	private AiConfig conf = new AiConfigImpl();
-	private int neighborhoodSize = (int)Math.pow(conf.getObservationRadius()*2+1, 2);
 	private static final int ZONETYPES = ZoneType.values().length;
-	private int inputLayerSize = ZONETYPES+ZONETYPES*neighborhoodSize;
-	private static final int OUTPUT_LAYER_SIZE = 1;
-	private BasicNetwork network = new BasicNetwork();
-	private MLDataSet dataSet = new BasicMLDataSet();
+	private int neighborhoodSize = (int)Math.pow(conf.getObservationRadius()*2+1, 2);
 	private MapExecutorService pool;
 
 
 	public ZoneMapper(Model state) {
+		
+		inputLayerSize = ZONETYPES+ZONETYPES*neighborhoodSize;
 		initNetwork();
 		initTraining();
-		trainResilient();
-		this.pool = new ComputeNeuralMapService(this.network, this.conf, ModelToVec::getTileAsZoneVector, Util.ZONETYPES);
+		train();
+		this.pool = new ComputeNeuralMapService(network, conf, ModelToVec::getTileAsZoneVector, Util.ZONETYPES);
 	}
 
-	private void initNetwork() {
-		int firstLayerSize =(int) Math.round(NNConstants.getInputLayerSizeFactor(inputLayerSize, conf.getNeuronDensity()));
-		int stepSize = (firstLayerSize-OUTPUT_LAYER_SIZE-1)/conf.getNetworkDepth();
-		network.addLayer(new BasicLayer(null, true, inputLayerSize));
-		for(int i=0; i<this.conf.getNetworkDepth(); i++){
-			network.addLayer(new BasicLayer(conf.getActivationFunc(), true, firstLayerSize-(stepSize*i)));
-		}
-		network.addLayer(new BasicLayer(conf.getActivationFunc(), false, OUTPUT_LAYER_SIZE));
-		network.getStructure().finalizeStructure();
-		network.reset();
-		System.out.println(network.toString());
-		for(int i=0; i<network.getLayerCount(); i++){
-			System.out.println(network.getLayerNeuronCount(i));
-		}
-	}
 
-	private void initTraining() {
-		dataSet.close();
-		dataSet = new BasicMLDataSet();
+	@Override
+	protected void initTraining() {
+		DATASET.close();
+		DATASET = new BasicMLDataSet();
 		double[][] input = new double[9][inputLayerSize];
 		double[][] output = new double[9][OUTPUT_LAYER_SIZE];
 		double[] r = ModelToVec.getZoneAsVector(ZoneType.RESIDENTIAL);
@@ -101,7 +77,7 @@ public class ZoneMapper implements Learner, Mapper, Configurable {
 		for (int i = 0; i < input.length; i++) {
 			MLData trainingIn = new BasicMLData(input[i]);
 			MLData idealOut = new BasicMLData(output[i]);
-			dataSet.add(trainingIn, idealOut);
+			DATASET.add(trainingIn, idealOut);
 		}
 
 	}
@@ -119,16 +95,6 @@ public class ZoneMapper implements Learner, Mapper, Configurable {
 		return inputSet;
 	}
 
-	private void trainResilient() {
-		ResilientPropagation train = new ResilientPropagation(network, dataSet);
-		int epoch = 1;
-		do {
-			train.iteration();
-			epoch++;
-		} while (train.getError() > 0.01 && epoch < 50);
-		train.finishTraining();
-		Encog.getInstance().shutdown();
-	}
 
 	@Override
 	public double[] getMapOfValues(Model state, Action action) {
@@ -152,8 +118,8 @@ public class ZoneMapper implements Learner, Mapper, Configurable {
 	private void learn(double[] input, double[] output) {
 		MLData trainingIn = new BasicMLData(input);
 		MLData idealOut = new BasicMLData(output);
-		dataSet.add(trainingIn, idealOut);
-		trainResilient();
+		DATASET.add(trainingIn, idealOut);
+		train();
 	}
 
 	private double[] getInputAroundTile(World w, Pos2D p) {
@@ -187,12 +153,9 @@ public class ZoneMapper implements Learner, Mapper, Configurable {
 
 	@Override
 	public void configure(AiConfig configuration) {
-		this.conf = configuration;
-		this.neighborhoodSize = (int)Math.pow(conf.getObservationRadius()*2+1, 2);
-		this.inputLayerSize = ZONETYPES+ZONETYPES*neighborhoodSize;
-		this.initNetwork();
-		this.initTraining();
-		this.trainResilient();
+		this.neighborhoodSize = (int)Math.pow(configuration.getObservationRadius()*2+1, 2);
+		inputLayerSize = ZONETYPES+ZONETYPES*neighborhoodSize;
+		super.configure(configuration);
 		this.pool = new ComputeNeuralMapService(this.network, this.conf, ModelToVec::getTileAsZoneVector, Util.ZONETYPES);
 	}
 

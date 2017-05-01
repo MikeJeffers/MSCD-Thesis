@@ -1,17 +1,10 @@
 package edu.mscd.thesis.nn;
 
-import org.encog.Encog;
 import org.encog.ml.data.MLData;
-import org.encog.ml.data.MLDataSet;
 import org.encog.ml.data.basic.BasicMLData;
-import org.encog.ml.data.basic.BasicMLDataSet;
-import org.encog.neural.networks.BasicNetwork;
-import org.encog.neural.networks.layers.BasicLayer;
-import org.encog.neural.networks.training.propagation.resilient.ResilientPropagation;
 
 import edu.mscd.thesis.controller.Action;
 import edu.mscd.thesis.controller.AiConfig;
-import edu.mscd.thesis.controller.AiConfigImpl;
 import edu.mscd.thesis.model.Model;
 import edu.mscd.thesis.model.Pos2D;
 import edu.mscd.thesis.model.Tile;
@@ -22,58 +15,38 @@ import edu.mscd.thesis.model.zones.ZoneType;
 import edu.mscd.thesis.util.ComputeNeuralMapService;
 import edu.mscd.thesis.util.MapExecutorService;
 import edu.mscd.thesis.util.ModelToVec;
-import edu.mscd.thesis.util.NNConstants;
 import edu.mscd.thesis.util.Rules;
 import edu.mscd.thesis.util.Util;
 import edu.mscd.thesis.util.WeightVector;
 
 /**
  * MLP Q-learner that outputs Q value for Tile neighborhood(state) and ZoneType
- * (action) Input Layer - NeighborhoodRadiusxTileAttributeVectors + 1xZoneTypeVector Implements
- * Mapper to produce Q-values for entire World-space
+ * (action) Input Layer - NeighborhoodRadiusxTileAttributeVectors +
+ * 1xZoneTypeVector Implements Mapper to produce Q-values for entire World-space
  * 
  * @author Mike
  */
-public class TileMapper implements Learner, Mapper, Configurable {
+public class TileMapper extends AbstractNetwork implements Learner, Mapper {
 
-	private AiConfig conf = new AiConfigImpl();
-	private int neighborhoodSize = (int)Math.pow(conf.getObservationRadius()*2+1, 2);
+	private int neighborhoodSize = (int) Math.pow(conf.getObservationRadius() * 2 + 1, 2);
 	private static final int ZONETYPES = ZoneType.values().length;
 	private static final int TILE_ATTRIBUTES = ModelToVec.getTileAttributesAsVector(null).length;
-	private static final int OUTPUT_LAYER_SIZE = 1;
-	private int inputLayerSize = ZONETYPES + TILE_ATTRIBUTES * neighborhoodSize;
-	
-	private BasicNetwork network = new BasicNetwork();
-	private MLDataSet dataSet = new BasicMLDataSet();
-	
+
 	private MapExecutorService pool;
 
 	public TileMapper(Model state) {
+		this.neighborhoodSize = (int) Math.pow(conf.getObservationRadius() * 2 + 1, 2);
+		super.inputLayerSize = ZONETYPES + TILE_ATTRIBUTES * neighborhoodSize;
 		initNetwork();
 		initTraining();
-		trainResilient();
-		this.pool = new ComputeNeuralMapService(this.network, this.conf, ModelToVec::getTileAttributesAsVector, TILE_ATTRIBUTES);
+		train();
+		this.pool = new ComputeNeuralMapService(this.network, this.conf, ModelToVec::getTileAttributesAsVector,
+				TILE_ATTRIBUTES);
 	}
 
-	private void initNetwork() {
-		int firstLayerSize =(int) Math.round(NNConstants.getInputLayerSizeFactor(inputLayerSize, conf.getNeuronDensity()));
-		int stepSize = (firstLayerSize-OUTPUT_LAYER_SIZE-1)/conf.getNetworkDepth();
-		network.addLayer(new BasicLayer(null, true, inputLayerSize));
-		for(int i=0; i<this.conf.getNetworkDepth(); i++){
-			network.addLayer(new BasicLayer(conf.getActivationFunc(), true, firstLayerSize-(stepSize*i)));
-		}
-		network.addLayer(new BasicLayer(conf.getActivationFunc(), false, OUTPUT_LAYER_SIZE));
-		network.getStructure().finalizeStructure();
-		network.reset();
-		System.out.println(network.toString());
-		for(int i=0; i<network.getLayerCount(); i++){
-			System.out.println(network.getLayerNeuronCount(i));
-		}
-	}
-
-	private void initTraining() {
-		dataSet.close();
-		dataSet = new BasicMLDataSet();
+	@Override
+	protected void initTraining() {
+		super.initTraining();
 		int total = TileType.values().length * ZoneType.values().length;
 		double[][] input = new double[total][inputLayerSize];
 		double[][] output = new double[total][OUTPUT_LAYER_SIZE];
@@ -94,7 +67,7 @@ public class TileMapper implements Learner, Mapper, Configurable {
 		for (int i = 0; i < input.length; i++) {
 			MLData trainingIn = new BasicMLData(input[i]);
 			MLData idealOut = new BasicMLData(output[i]);
-			dataSet.add(trainingIn, idealOut);
+			DATASET.add(trainingIn, idealOut);
 		}
 
 	}
@@ -107,18 +80,6 @@ public class TileMapper implements Learner, Mapper, Configurable {
 		inputVec = Util.appendVectors(inputVec, action);
 		return inputVec;
 	}
-
-	private void trainResilient() {
-		ResilientPropagation train = new ResilientPropagation(network, dataSet);
-		int epoch = 1;
-		do {
-			train.iteration();
-			epoch++;
-		} while (train.getError() > 0.01 && epoch < 50);
-		train.finishTraining();
-		Encog.getInstance().shutdown();
-	}
-
 
 	@Override
 	public double[] getMapOfValues(Model state, Action action) {
@@ -143,8 +104,8 @@ public class TileMapper implements Learner, Mapper, Configurable {
 	private void learn(double[] input, double[] output) {
 		MLData trainingIn = new BasicMLData(input);
 		MLData idealOut = new BasicMLData(output);
-		dataSet.add(trainingIn, idealOut);
-		trainResilient();
+		DATASET.add(trainingIn, idealOut);
+		train();
 	}
 
 	private double[] getInputAroundTile(World w, Pos2D p) {
@@ -164,8 +125,8 @@ public class TileMapper implements Learner, Mapper, Configurable {
 		Tile[] tiles = new Tile[this.neighborhoodSize];
 		int r = conf.getObservationRadius();
 		int index = 0;
-		for (int i = -r; i<=r; i++) {
-			for (int j = -r; j<=r; j++) {
+		for (int i = -r; i <= r; i++) {
+			for (int j = -r; j <= r; j++) {
 				Pos2D nLoc = new Pos2D(p.getX() + i, p.getY() + j);
 				tiles[index] = w.getTileAt(nLoc);
 				index++;
@@ -177,15 +138,12 @@ public class TileMapper implements Learner, Mapper, Configurable {
 	@Override
 	public void configure(AiConfig configuration) {
 		this.conf = configuration;
-		this.neighborhoodSize = (int)Math.pow(conf.getObservationRadius()*2+1, 2);
-		this.inputLayerSize = ZONETYPES + TILE_ATTRIBUTES * neighborhoodSize;
-		this.initNetwork();
-		this.initTraining();
-		this.trainResilient();
-		this.pool = new ComputeNeuralMapService(this.network, this.conf, ModelToVec::getTileAttributesAsVector, TILE_ATTRIBUTES);
+		this.neighborhoodSize = (int) Math.pow(conf.getObservationRadius() * 2 + 1, 2);
+		super.inputLayerSize = ZONETYPES + TILE_ATTRIBUTES * neighborhoodSize;
+		super.configure(configuration);
+		this.pool = new ComputeNeuralMapService(this.network, this.conf, ModelToVec::getTileAttributesAsVector,
+				TILE_ATTRIBUTES);
 
 	}
-
-
 
 }

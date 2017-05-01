@@ -1,6 +1,7 @@
 package edu.mscd.thesis.nn;
 
 import org.encog.engine.network.activation.ActivationFunction;
+import org.encog.mathutil.BoundMath;
 
 /**
  * SoftPlus activation function implementation for Encog's ActivationFunction interface
@@ -21,7 +22,7 @@ public class ActivationSoftPlus implements ActivationFunction {
 	public final void activationFunction(final double[] x, final int start,
 			final int size) {
 		for (int i = start; i < start + size; i++) {
-			x[i] = Math.log(1.0+Math.pow(Math.E, x[i]));
+			x[i] = BoundMath.log(1.0+BoundMath.exp(x[i]));
 		}
 	}
 
@@ -38,7 +39,7 @@ public class ActivationSoftPlus implements ActivationFunction {
 	 */
 	@Override
 	public final double derivativeFunction(final double b, final double a) {
-		return 1.0/(1.0+Math.pow(Math.E, -a));
+		return 1.0/(1.0+BoundMath.exp(-a));
 	}
 
 	/**

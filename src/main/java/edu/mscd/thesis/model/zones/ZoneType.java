@@ -21,6 +21,10 @@ public enum ZoneType {
 		return this.color;
 	}
 	
+	public String shortName(){
+		return this.shortName;
+	}
+	
 	@Override
 	public String toString(){
 		return this.labelText;

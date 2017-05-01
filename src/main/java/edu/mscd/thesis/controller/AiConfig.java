@@ -1,14 +1,18 @@
 package edu.mscd.thesis.controller;
 
-import org.encog.engine.network.activation.ActivationFunction;
+import java.util.Map;
+
+import edu.mscd.thesis.nn.ActivationFunctions;
 
 public interface AiConfig {
 	
-	public ActivationFunction getActivationFunc();
-	public int getNetworkDepth();
-	public int getNeuronDensity();
+	public Map<Integer, ActivationFunctions> getActivationFunctions();
+	public Map<Integer, Integer> getNeuralDensities();
+	public int getLayerCount();
 	public int getObservationRadius();
 	public int getObservationWaitTime();
+	public int getMaxTrainingEpochs();
+	public double getMaxError();
 	
 	
 	public AiConfig copy();

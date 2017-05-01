@@ -8,8 +8,6 @@ import edu.mscd.thesis.util.Rules;
 import edu.mscd.thesis.util.Util;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
-import javafx.scene.paint.Paint;
-import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.StrokeLineCap;
 
 public class TileRenderer implements Renderer<Tile> {

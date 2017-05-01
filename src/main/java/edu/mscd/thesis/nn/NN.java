@@ -6,19 +6,12 @@ import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import org.encog.Encog;
 import org.encog.ml.data.MLData;
-import org.encog.ml.data.MLDataSet;
 import org.encog.ml.data.basic.BasicMLData;
-import org.encog.ml.data.basic.BasicMLDataSet;
-import org.encog.neural.networks.BasicNetwork;
-import org.encog.neural.networks.layers.BasicLayer;
-import org.encog.neural.networks.training.propagation.resilient.ResilientPropagation;
 
 import edu.mscd.thesis.controller.Action;
 import edu.mscd.thesis.controller.AiAction;
 import edu.mscd.thesis.controller.AiConfig;
-import edu.mscd.thesis.controller.AiConfigImpl;
 import edu.mscd.thesis.controller.Observer;
 import edu.mscd.thesis.controller.ViewData;
 import edu.mscd.thesis.model.Model;
@@ -27,7 +20,6 @@ import edu.mscd.thesis.model.city.CityProperty;
 import edu.mscd.thesis.model.zones.ZoneType;
 import edu.mscd.thesis.util.ModelStripper;
 import edu.mscd.thesis.util.ModelToVec;
-import edu.mscd.thesis.util.NNConstants;
 import edu.mscd.thesis.util.Rules;
 import edu.mscd.thesis.util.Util;
 import edu.mscd.thesis.util.WeightVector;
@@ -39,7 +31,7 @@ import javafx.application.Platform;
  * 
  * @author Mike
  */
-public class NN implements AI {
+public class NN extends AbstractNetwork implements AI {
 	private volatile boolean isRunning = true;
 	private int counter;
 	private BlockingQueue<AiConfig> queue = new LinkedBlockingQueue<AiConfig>();
@@ -48,20 +40,15 @@ public class NN implements AI {
 	private Model prev;
 	private Action act;
 	private WeightVector<CityProperty> weights;
-	
+
 	private TileMapper tileMap;
 	private ZoneDecider zoneDecider;
 	private ZoneMapper zoneMap;
 
-	private AiConfig conf = new AiConfigImpl();
 	private Collection<Observer<ViewData>> observers = new ArrayList<Observer<ViewData>>();
 
-	private BasicNetwork network = new BasicNetwork();
-	private MLDataSet DATASET = new BasicMLDataSet();
-	private int inputLayerSize = 2 + ZoneType.values().length;
-	private static final int OUTPUT_LAYER_SIZE = 1;
-
 	public NN(Model state) {
+		inputLayerSize = 2 + ZoneType.values().length;
 		this.state = ModelStripper.reducedCopy(state);
 		this.prev = ModelStripper.reducedCopy(state);
 
@@ -69,12 +56,13 @@ public class NN implements AI {
 		this.tileMap = new TileMapper(this.state);
 		this.zoneDecider = new ZoneDecider(this.state);
 
-		this.initNetwork();
-		this.initTraining();
-		this.trainResilient();
+		initNetwork();
+		initTraining();
+		train();
 	}
 
-	private void initTraining() {
+	@Override
+	protected void initTraining() {
 		double[][] input = new double[4][inputLayerSize];
 		double[][] output = new double[4][OUTPUT_LAYER_SIZE];
 		int i = 0;
@@ -90,36 +78,6 @@ public class NN implements AI {
 			MLData idealOut = new BasicMLData(output[j]);
 			DATASET.add(trainingIn, idealOut);
 		}
-	}
-
-	private void initNetwork() {
-		int firstLayerSize = (int) Math
-				.round(NNConstants.getInputLayerSizeFactor(inputLayerSize, conf.getNeuronDensity()));
-		int stepSize = (firstLayerSize - OUTPUT_LAYER_SIZE - 1) / conf.getNetworkDepth();
-		network.addLayer(new BasicLayer(null, true, inputLayerSize));
-		for (int i = 0; i < this.conf.getNetworkDepth(); i++) {
-			network.addLayer(new BasicLayer(conf.getActivationFunc(), true, firstLayerSize - (stepSize * i)));
-		}
-		network.addLayer(new BasicLayer(conf.getActivationFunc(), false, OUTPUT_LAYER_SIZE));
-		network.getStructure().finalizeStructure();
-		network.reset();
-		System.out.println(network.toString());
-		for (int i = 0; i < network.getLayerCount(); i++) {
-			System.out.println(network.getLayerNeuronCount(i));
-		}
-	}
-
-	private void trainResilient() {
-		ResilientPropagation train = new ResilientPropagation(network, DATASET);
-		int epoch = 1;
-
-		do {
-			train.iteration();
-			epoch++;
-		} while (train.getError() > 0.01 && epoch < 50);
-		train.finishTraining();
-
-		Encog.getInstance().shutdown();
 	}
 
 	@Override
@@ -198,7 +156,7 @@ public class NN implements AI {
 
 		int index = Util.getIndexOf(prev.getWorld().getTileAt(action.getTarget()), prev.getWorld().getTiles());
 
-		if(index<0){
+		if (index < 0) {
 			return;
 		}
 		double prevScore = Rules.score(prev, weights);
@@ -211,8 +169,7 @@ public class NN implements AI {
 		MLData trainingIn = new BasicMLData(input);
 		MLData idealOut = new BasicMLData(output);
 		DATASET.add(trainingIn, idealOut);
-		this.trainResilient();
-
+		train();
 	}
 
 	@Override
@@ -249,16 +206,13 @@ public class NN implements AI {
 		}
 
 	}
-	
-	private void processNewConfig(AiConfig configuration){
+
+	private void processNewConfig(AiConfig configuration) {
 		System.out.println("CONFIGURING AI SYSTEM....");
-		this.conf = configuration;
 		this.zoneDecider.configure(configuration);
 		this.tileMap.configure(configuration);
 		this.zoneMap.configure(configuration);
-		this.initNetwork();
-		this.initTraining();
-		this.trainResilient();
+		super.configure(configuration);
 		System.out.println("...CONFIGURATION COMPLETE");
 	}
 
@@ -294,10 +248,11 @@ public class NN implements AI {
 				counter = 0;
 				Action act = this.takeNextAction();
 				Platform.runLater(new Runnable() {
-		            @Override public void run() {
-		            	notifyObserver(act);
-		            }
-		        });
+					@Override
+					public void run() {
+						notifyObserver(act);
+					}
+				});
 				this.prev = this.state;
 			}
 		}
@@ -305,9 +260,9 @@ public class NN implements AI {
 	}
 
 	@Override
-	public synchronized void update(Model state, Action action, WeightVector<CityProperty> weights){
-		if(counter==0){
-			this.prev=ModelStripper.reducedCopy(state);
+	public synchronized void update(Model state, Action action, WeightVector<CityProperty> weights) {
+		if (counter == 0) {
+			this.prev = ModelStripper.reducedCopy(state);
 			this.act = action.copy();
 			this.weights = weights;
 		}
@@ -317,7 +272,7 @@ public class NN implements AI {
 
 	@Override
 	public void halt() {
-		this.isRunning =false;
+		this.isRunning = false;
 	}
 
 }
