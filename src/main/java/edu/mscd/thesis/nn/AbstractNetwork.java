@@ -1,5 +1,6 @@
 package edu.mscd.thesis.nn;
 
+
 import org.encog.Encog;
 import org.encog.ml.data.MLDataPair;
 import org.encog.ml.data.MLDataSet;
@@ -34,17 +35,10 @@ public abstract class AbstractNetwork implements Configurable {
 		train.addStrategy(reg);
 		int epoch = 1;
 		do {
-			// System.out.println(train.getLastGradient()[0]);
 			train.iteration();
-			if (Double.isNaN(train.getError())) {
-				System.out.println(train.getLastGradient()[0]);
-				System.out.println(train.getUpdateValues()[0]);
-			}
 			epoch++;
 		} while (train.getError() > conf.getMaxError() && epoch < conf.getMaxTrainingEpochs());
-		//train.finishTraining();
 		System.out.println("Epochs Required:" + epoch + " to achieve Error:" + train.getError());
-		//Encog.getInstance().shutdown();
 		lastIteration = train.getIteration();
 	}
 
@@ -75,13 +69,17 @@ public abstract class AbstractNetwork implements Configurable {
 
 	protected void learn(MLDataPair pair) {
 		int epoch=0;
+		DATASET.add(pair);
 		while (train.getError() > conf.getMaxError() && epoch<conf.getMaxTrainingEpochs() || epoch<1) {
-			DATASET.add(pair);
 			epoch++;
 			train.iteration();
 		}
 		System.out.println("Epochs Required:" + epoch + " to achieve Error:" + train.getError());
-
+	}
+	
+	protected void shutdown(){
+		this.train.finishTraining();
+		Encog.getInstance().shutdown();
 	}
 
 }
