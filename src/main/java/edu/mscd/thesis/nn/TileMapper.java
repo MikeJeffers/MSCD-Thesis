@@ -2,6 +2,7 @@ package edu.mscd.thesis.nn;
 
 import org.encog.ml.data.MLData;
 import org.encog.ml.data.basic.BasicMLData;
+import org.encog.ml.data.basic.BasicMLDataPair;
 
 import edu.mscd.thesis.controller.Action;
 import edu.mscd.thesis.controller.AiConfig;
@@ -97,16 +98,13 @@ public class TileMapper extends AbstractNetwork implements Learner, Mapper {
 		double normalizedScoreDiff = Util.getNormalizedDifference(currentScore, prevScore);
 		double[] input = Util.appendVectors(getInputAroundTile(prev.getWorld(), pos),
 				ModelToVec.getZoneAsVector(zoneAct));
-		learn(input, new double[] { normalizedScoreDiff });
+		MLData in = new BasicMLData(input);
+		MLData out = new BasicMLData(new double[] { normalizedScoreDiff });
+		super.learn(new BasicMLDataPair(in, out));
 
 	}
 
-	private void learn(double[] input, double[] output) {
-		MLData trainingIn = new BasicMLData(input);
-		MLData idealOut = new BasicMLData(output);
-		DATASET.add(trainingIn, idealOut);
-		train();
-	}
+
 
 	private double[] getInputAroundTile(World w, Pos2D p) {
 		Tile[] tiles = getNeighbors(w, p);

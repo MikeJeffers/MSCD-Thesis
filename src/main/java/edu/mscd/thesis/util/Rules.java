@@ -19,9 +19,10 @@ import edu.mscd.thesis.model.zones.ZoneType;
  *
  */
 public class Rules {
-	public static final int WORLD_X = 20;
-	public static final int WORLD_Y = 15;
+	public static final int WORLD_X = 32;
+	public static final int WORLD_Y = 24;
 	public static final int TILE_COUNT = WORLD_X * WORLD_Y;
+	public static final int WORLD_TILE_NOISE = 2;
 	// Game Constants and factors
 	public static final int MAX = 255;
 	public static final int MAX_PERCENTAGE = 100;

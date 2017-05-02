@@ -1,6 +1,7 @@
 package edu.mscd.thesis.nn;
 
 import org.encog.engine.network.activation.ActivationFunction;
+import org.encog.mathutil.BoundMath;
 
 /**
  * SoftSign activation function implementation for Encog's ActivationFunction interface
@@ -38,7 +39,7 @@ public class ActivationSoftSign implements ActivationFunction {
 	 */
 	@Override
 	public final double derivativeFunction(final double b, final double a) {
-		return 1.0/Math.pow(1.0+Math.abs(a), 2);
+		return 1.0/BoundMath.pow(1.0+Math.abs(a), 2);
 	}
 
 	/**

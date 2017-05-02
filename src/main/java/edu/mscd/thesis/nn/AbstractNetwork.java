@@ -1,7 +1,7 @@
 package edu.mscd.thesis.nn;
 
-
 import org.encog.Encog;
+import org.encog.ml.data.MLDataPair;
 import org.encog.ml.data.MLDataSet;
 import org.encog.ml.data.basic.BasicMLDataSet;
 import org.encog.ml.train.strategy.Strategy;
@@ -18,6 +18,8 @@ public abstract class AbstractNetwork implements Configurable {
 	protected AiConfig conf = new AiConfigImpl();
 	protected BasicNetwork network = new BasicNetwork();
 	protected MLDataSet DATASET = new BasicMLDataSet();
+	protected ResilientPropagation train;
+	protected int lastIteration;
 	protected int inputLayerSize;
 	protected final int OUTPUT_LAYER_SIZE = 1;
 
@@ -27,40 +29,33 @@ public abstract class AbstractNetwork implements Configurable {
 	}
 
 	protected void train() {
-		ResilientPropagation train = new ResilientPropagation(network, DATASET);
+		this.train = new ResilientPropagation(network, DATASET);
 		Strategy reg = new RegularizationStrategy(0.00000001);
 		train.addStrategy(reg);
 		int epoch = 1;
 		do {
-			//System.out.println(train.getLastGradient()[0]);
+			// System.out.println(train.getLastGradient()[0]);
 			train.iteration();
-			if(Double.isNaN(train.getError())){
+			if (Double.isNaN(train.getError())) {
 				System.out.println(train.getLastGradient()[0]);
 				System.out.println(train.getUpdateValues()[0]);
 			}
 			epoch++;
 		} while (train.getError() > conf.getMaxError() && epoch < conf.getMaxTrainingEpochs());
-		train.finishTraining();
+		//train.finishTraining();
 		System.out.println("Epochs Required:" + epoch + " to achieve Error:" + train.getError());
-		/*
-		System.out.println("Neural Network Results:");
-		for (MLDataPair pair : DATASET) {
-			final MLData output = network.compute(pair.getInput());
-			System.out
-					.println(Arrays.toString(output.getData()) + ",ideal=" + Arrays.toString(pair.getIdeal().getData())
-							+ "; From:" + Arrays.toString(pair.getInput().getData()));
-		}
-		*/
-		Encog.getInstance().shutdown();
+		//Encog.getInstance().shutdown();
+		lastIteration = train.getIteration();
 	}
 
 	protected void initNetwork() {
 		network.addLayer(new BasicLayer(null, true, inputLayerSize));
-		for (int i = 0; i < this.conf.getLayerCount()-1; i++) {
+		for (int i = 0; i < this.conf.getLayerCount() - 1; i++) {
 			int neuronCount = NNConstants.getNeuronCountByFactor(inputLayerSize, conf.getNeuralDensities().get(i));
 			network.addLayer(new BasicLayer(conf.getActivationFunctions().get(i).getFunction(), true, neuronCount));
 		}
-		network.addLayer(new BasicLayer(conf.getActivationFunctions().get(conf.getLayerCount()-1).getFunction(), false, OUTPUT_LAYER_SIZE));
+		network.addLayer(new BasicLayer(conf.getActivationFunctions().get(conf.getLayerCount() - 1).getFunction(),
+				false, OUTPUT_LAYER_SIZE));
 		network.getStructure().finalizeStructure();
 		network.reset();
 		System.out.println(network.toString());
@@ -75,6 +70,18 @@ public abstract class AbstractNetwork implements Configurable {
 		this.initNetwork();
 		this.initTraining();
 		this.train();
+	}
+
+
+	protected void learn(MLDataPair pair) {
+		int epoch=0;
+		while (train.getError() > conf.getMaxError() && epoch<conf.getMaxTrainingEpochs() || epoch<1) {
+			DATASET.add(pair);
+			epoch++;
+			train.iteration();
+		}
+		System.out.println("Epochs Required:" + epoch + " to achieve Error:" + train.getError());
+
 	}
 
 }

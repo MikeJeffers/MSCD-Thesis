@@ -19,6 +19,7 @@ import edu.mscd.thesis.model.zones.Zone;
 import edu.mscd.thesis.model.zones.ZoneFactory;
 import edu.mscd.thesis.model.zones.ZoneFactoryImpl;
 import edu.mscd.thesis.model.zones.ZoneType;
+import edu.mscd.thesis.util.Rules;
 import edu.mscd.thesis.util.TileUpdaterService;
 import edu.mscd.thesis.util.Util;
 import edu.mscd.thesis.view.Selection;
@@ -44,24 +45,9 @@ public class WorldImpl implements World {
 		tiles = new Tile[size];
 		this.rows = sizeY;
 		this.cols = sizeX;
-		this.smoothWorldInit(3);
+		this.smoothWorldInit(Rules.WORLD_TILE_NOISE);
 		this.city = new CityImpl(this);
 		tileUpdater = new TileUpdaterService(this);
-	}
-
-	/**
-	 * old random-tile world initialization
-	 */
-	private void worldInit() {
-		Random r = new Random();
-		TileType[] types = TileType.values();
-		ZoneFactory zFact = new ZoneFactoryImpl();
-		for (int i = 0; i < tiles.length; i++) {
-			Pos2D p = new Pos2D((i % cols), (i / cols));
-			int typeSelection = r.nextInt(types.length);
-			Tile t = new TileImpl(p, types[typeSelection], zFact);
-			tiles[i] = t;
-		}
 	}
 	
 	/**

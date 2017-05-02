@@ -2,6 +2,7 @@ package edu.mscd.thesis.nn;
 
 import org.encog.ml.data.MLData;
 import org.encog.ml.data.basic.BasicMLData;
+import org.encog.ml.data.basic.BasicMLDataPair;
 
 import edu.mscd.thesis.controller.Action;
 import edu.mscd.thesis.controller.AiAction;
@@ -219,7 +220,7 @@ public class ZoneDecider extends AbstractNetwork implements Actor, Learner {
 	@Override
 	public void addCase(Model prev, Model current, Action action, WeightVector<CityProperty> weights) {
 		double prevScore = Rules.score(prev, weights);
-		double currentScore = Rules.score(state, weights);
+		double currentScore = Rules.score(current, weights);
 		double normalizedScoreDiff = Util.getNormalizedDifference(currentScore, prevScore);
 		CityData cityData = prev.getWorld().getCity().getData();
 		double[] modelVector = ModelToVec.getCityDataVector(cityData);
@@ -228,8 +229,9 @@ public class ZoneDecider extends AbstractNetwork implements Actor, Learner {
 		double[] output = new double[] { normalizedScoreDiff };
 		MLData trainingIn = new BasicMLData(input);
 		MLData idealOut = new BasicMLData(output);
-		DATASET.add(trainingIn, idealOut);
-		train();
+		//DATASET.add(trainingIn, idealOut);
+		//train();
+		super.learn(new BasicMLDataPair(trainingIn, idealOut));
 	}
 
 	@Override
