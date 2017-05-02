@@ -22,13 +22,13 @@ public class Rules {
 	public static final int WORLD_X = 32;
 	public static final int WORLD_Y = 24;
 	public static final int TILE_COUNT = WORLD_X * WORLD_Y;
-	public static final int WORLD_TILE_NOISE = 2;
+	public static final int WORLD_TILE_NOISE = 1;
 	// Game Constants and factors
 	public static final int MAX = 255;
 	public static final int MAX_PERCENTAGE = 100;
 	// Zone growth factors
-	public static final int GROWTH_THRESHOLD = 150;
-	public static final int BASE_GROWTH_COST = 55;
+	public static final int GROWTH_THRESHOLD = 125;
+	public static final int BASE_GROWTH_COST = 50;
 	// City population and Person constants
 	public static final int STARTING_POPULATION = 100;
 	public static final int BASE_POPULATION = 50;
@@ -83,7 +83,7 @@ public class Rules {
 
 	public static double getValueForZoneOnTile(TileType t, ZoneType z) {
 		if (z == ZoneType.COMMERICAL) {
-			double value = (t.getBaseLandValue() * 3 + t.getMaterialValue()) / 4;
+			double value = (t.getBaseLandValue() * 3.5 + t.getMaterialValue()) / 4;
 			return Math.min(MAX, value);
 		} else if (z == ZoneType.INDUSTRIAL) {
 			double value = (t.getBaseLandValue() * 0.1 + t.getMaterialValue() * 3.9) / 4;

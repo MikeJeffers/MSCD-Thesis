@@ -31,8 +31,6 @@ public abstract class AbstractNetwork implements Configurable {
 
 	protected void train() {
 		this.train = new ResilientPropagation(network, DATASET);
-		Strategy reg = new RegularizationStrategy(0.00000001);
-		train.addStrategy(reg);
 		int epoch = 1;
 		do {
 			train.iteration();

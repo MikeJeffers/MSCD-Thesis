@@ -63,17 +63,11 @@ public class NN extends AbstractNetwork implements AI {
 
 	@Override
 	protected void initTraining() {
-		double[][] input = new double[16][inputLayerSize];
-		double[][] output = new double[16][OUTPUT_LAYER_SIZE];
-		int i = 0;
-		for(int j=0; j<4; j++){
-			for (ZoneType zone : ZoneType.values()) {
-				double[] modelVec = new double[] { 1.0, 0.0 };
-				input[i] = Util.appendVectors(modelVec, ModelToVec.getZoneAsVector(zone));
-				output[i] = new double[] { 1.0 };
-				i++;
-			}
-		}
+		double[][] input = new double[1][inputLayerSize];
+		double[][] output = new double[1][OUTPUT_LAYER_SIZE];
+		double[] modelVec = new double[] { 0.0, 0.0 };
+		input[0] = Util.appendVectors(modelVec, ModelToVec.getZoneAsVector(ZoneType.EMPTY));
+		output[0] = new double[]{0};
 		for (int j = 0; j < input.length; j++) {
 			MLData trainingIn = new BasicMLData(input[j]);
 			MLData idealOut = new BasicMLData(output[j]);
