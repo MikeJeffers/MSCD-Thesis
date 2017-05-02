@@ -101,7 +101,6 @@ public class TileMapper extends AbstractNetwork implements Learner, Mapper {
 		MLData in = new BasicMLData(input);
 		MLData out = new BasicMLData(new double[] { normalizedScoreDiff });
 		super.learn(new BasicMLDataPair(in, out));
-
 	}
 
 

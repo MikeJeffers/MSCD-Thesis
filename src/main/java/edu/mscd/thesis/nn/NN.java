@@ -8,6 +8,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 import org.encog.ml.data.MLData;
 import org.encog.ml.data.basic.BasicMLData;
+import org.encog.ml.data.basic.BasicMLDataPair;
 
 import edu.mscd.thesis.controller.Action;
 import edu.mscd.thesis.controller.AiAction;
@@ -157,14 +158,12 @@ public class NN extends AbstractNetwork implements AI {
 		double prevScore = Rules.score(prev, weights);
 		double currentScore = Rules.score(state, weights);
 		double normalizedScoreDiff = Util.getNormalizedDifference(currentScore, prevScore);
-		double[] output = new double[] { normalizedScoreDiff };
 		double[] modelVec = new double[] { tileValues[index], zoneValues[index] };
 		double[] actionVec = ModelToVec.getZoneAsVector(action.getZoneType());
 		double[] input = Util.appendVectors(modelVec, actionVec);
-		MLData trainingIn = new BasicMLData(input);
-		MLData idealOut = new BasicMLData(output);
-		DATASET.add(trainingIn, idealOut);
-		train();
+		MLData in = new BasicMLData(input);
+		MLData out = new BasicMLData(new double[] { normalizedScoreDiff });
+		super.learn(new BasicMLDataPair(in, out));
 	}
 
 	@Override

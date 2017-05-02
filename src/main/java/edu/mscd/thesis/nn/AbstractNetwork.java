@@ -5,11 +5,10 @@ import org.encog.Encog;
 import org.encog.ml.data.MLDataPair;
 import org.encog.ml.data.MLDataSet;
 import org.encog.ml.data.basic.BasicMLDataSet;
-import org.encog.ml.train.strategy.Strategy;
 import org.encog.neural.networks.BasicNetwork;
 import org.encog.neural.networks.layers.BasicLayer;
+import org.encog.neural.networks.training.propagation.TrainingContinuation;
 import org.encog.neural.networks.training.propagation.resilient.ResilientPropagation;
-import org.encog.neural.networks.training.strategy.RegularizationStrategy;
 
 import edu.mscd.thesis.controller.AiConfig;
 import edu.mscd.thesis.controller.AiConfigImpl;
@@ -20,6 +19,7 @@ public abstract class AbstractNetwork implements Configurable {
 	protected BasicNetwork network = new BasicNetwork();
 	protected MLDataSet DATASET = new BasicMLDataSet();
 	protected ResilientPropagation train;
+	TrainingContinuation pauseState;
 	protected int lastIteration;
 	protected int inputLayerSize;
 	protected final int OUTPUT_LAYER_SIZE = 1;
@@ -31,13 +31,16 @@ public abstract class AbstractNetwork implements Configurable {
 
 	protected void train() {
 		this.train = new ResilientPropagation(network, DATASET);
+		//this.train.setBatchSize(100);
 		int epoch = 1;
 		do {
 			train.iteration();
 			epoch++;
 		} while (train.getError() > conf.getMaxError() && epoch < conf.getMaxTrainingEpochs());
 		System.out.println("Epochs Required:" + epoch + " to achieve Error:" + train.getError());
+		System.out.println(train.isTrainingDone());
 		lastIteration = train.getIteration();
+		pauseState = train.pause();
 	}
 
 	protected void initNetwork() {
@@ -68,11 +71,14 @@ public abstract class AbstractNetwork implements Configurable {
 	protected void learn(MLDataPair pair) {
 		int epoch=0;
 		DATASET.add(pair);
+		train.setTraining(DATASET);
+		train.resume(pauseState);
 		while (train.getError() > conf.getMaxError() && epoch<conf.getMaxTrainingEpochs() || epoch<1) {
 			epoch++;
 			train.iteration();
 		}
 		System.out.println("Epochs Required:" + epoch + " to achieve Error:" + train.getError());
+		pauseState = train.pause();
 	}
 	
 	protected void shutdown(){
