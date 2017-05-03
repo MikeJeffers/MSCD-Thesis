@@ -51,7 +51,6 @@ public class TileMapper extends AbstractNetwork implements Learner, Mapper {
 		int total = TileType.values().length * ZoneType.values().length;
 		double[][] input = new double[total][inputLayerSize];
 		double[][] output = new double[total][OUTPUT_LAYER_SIZE];
-
 		double[] src = new double[] { 0, Rules.MAX };
 		double[] target = new double[] { 0.0, 1.0 };
 		int j = 0;
@@ -64,13 +63,11 @@ public class TileMapper extends AbstractNetwork implements Learner, Mapper {
 				j++;
 			}
 		}
-
 		for (int i = 0; i < input.length; i++) {
 			MLData trainingIn = new BasicMLData(input[i]);
 			MLData idealOut = new BasicMLData(output[i]);
 			DATASET.add(trainingIn, idealOut);
 		}
-
 	}
 
 	private double[] constructSampleInput(double[] tileVector, double[] action) {

@@ -178,13 +178,11 @@ public class ZoneDecider extends AbstractNetwork implements Actor, Learner {
 			}
 			i++;
 		}
-
 		for (int j = 0; j < input.length; j++) {
 			MLData trainingIn = new BasicMLData(input[j]);
 			MLData idealOut = new BasicMLData(output[j]);
 			DATASET.add(trainingIn, idealOut);
 		}
-
 	}
 
 	@Override

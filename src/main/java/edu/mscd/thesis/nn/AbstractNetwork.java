@@ -5,10 +5,18 @@ import org.encog.Encog;
 import org.encog.ml.data.MLDataPair;
 import org.encog.ml.data.MLDataSet;
 import org.encog.ml.data.basic.BasicMLDataSet;
+import org.encog.ml.train.strategy.HybridStrategy;
 import org.encog.neural.networks.BasicNetwork;
 import org.encog.neural.networks.layers.BasicLayer;
+import org.encog.neural.networks.training.lma.LevenbergMarquardtTraining;
+import org.encog.neural.networks.training.propagation.Propagation;
 import org.encog.neural.networks.training.propagation.TrainingContinuation;
+import org.encog.neural.networks.training.propagation.manhattan.ManhattanPropagation;
+import org.encog.neural.networks.training.propagation.quick.QuickPropagation;
 import org.encog.neural.networks.training.propagation.resilient.ResilientPropagation;
+import org.encog.neural.networks.training.propagation.scg.ScaledConjugateGradient;
+import org.encog.neural.networks.training.strategy.SmartLearningRate;
+import org.encog.neural.networks.training.strategy.SmartMomentum;
 
 import edu.mscd.thesis.controller.AiConfig;
 import edu.mscd.thesis.controller.AiConfigImpl;
@@ -18,7 +26,7 @@ public abstract class AbstractNetwork implements Configurable {
 	protected AiConfig conf = new AiConfigImpl();
 	protected BasicNetwork network = new BasicNetwork();
 	protected MLDataSet DATASET = new BasicMLDataSet();
-	protected ResilientPropagation train;
+	protected Propagation train;
 	TrainingContinuation pauseState;
 	protected int lastIteration;
 	protected int inputLayerSize;
@@ -31,14 +39,15 @@ public abstract class AbstractNetwork implements Configurable {
 
 	protected void train() {
 		this.train = new ResilientPropagation(network, DATASET);
-		//this.train.setBatchSize(100);
-		int epoch = 1;
-		do {
+		ScaledConjugateGradient scg = new ScaledConjugateGradient(network, DATASET);
+		this.train.addStrategy(new HybridStrategy(scg));
+		int epoch = 0;
+		do{
 			train.iteration();
 			epoch++;
-		} while (train.getError() > conf.getMaxError() && epoch < conf.getMaxTrainingEpochs());
+		}while(train.getError() > conf.getMaxError() && epoch < conf.getMaxTrainingEpochs() && DATASET.size()>0);
+
 		System.out.println("Epochs Required:" + epoch + " to achieve Error:" + train.getError());
-		System.out.println(train.isTrainingDone());
 		lastIteration = train.getIteration();
 		pauseState = train.pause();
 	}

@@ -47,8 +47,7 @@ public class ZoneMapper extends AbstractNetwork implements Learner, Mapper {
 
 	@Override
 	protected void initTraining() {
-		DATASET.close();
-		DATASET = new BasicMLDataSet();
+		super.initTraining();
 		double[][] input = new double[9][inputLayerSize];
 		double[][] output = new double[9][OUTPUT_LAYER_SIZE];
 		double[] r = ModelToVec.getZoneAsVector(ZoneType.RESIDENTIAL);
@@ -74,13 +73,11 @@ public class ZoneMapper extends AbstractNetwork implements Learner, Mapper {
 		input[8] =  constructSampleInput(empty, indy);
 		output[8] = new double[] { 1 };
 
-
 		for (int i = 0; i < input.length; i++) {
 			MLData trainingIn = new BasicMLData(input[i]);
 			MLData idealOut = new BasicMLData(output[i]);
 			DATASET.add(trainingIn, idealOut);
 		}
-
 	}
 
 	private double[] constructSampleInput(double[] zoneVector, double[] action) {

@@ -64,6 +64,7 @@ public class NN extends AbstractNetwork implements AI {
 
 	@Override
 	protected void initTraining() {
+		super.initTraining();
 		double[][] input = new double[1][inputLayerSize];
 		double[][] output = new double[1][OUTPUT_LAYER_SIZE];
 		double[] modelVec = new double[] { 0.0, 0.0 };
