@@ -8,15 +8,10 @@ import org.encog.ml.data.basic.BasicMLDataSet;
 import org.encog.ml.train.strategy.HybridStrategy;
 import org.encog.neural.networks.BasicNetwork;
 import org.encog.neural.networks.layers.BasicLayer;
-import org.encog.neural.networks.training.lma.LevenbergMarquardtTraining;
 import org.encog.neural.networks.training.propagation.Propagation;
 import org.encog.neural.networks.training.propagation.TrainingContinuation;
-import org.encog.neural.networks.training.propagation.manhattan.ManhattanPropagation;
-import org.encog.neural.networks.training.propagation.quick.QuickPropagation;
 import org.encog.neural.networks.training.propagation.resilient.ResilientPropagation;
 import org.encog.neural.networks.training.propagation.scg.ScaledConjugateGradient;
-import org.encog.neural.networks.training.strategy.SmartLearningRate;
-import org.encog.neural.networks.training.strategy.SmartMomentum;
 
 import edu.mscd.thesis.controller.AiConfig;
 import edu.mscd.thesis.controller.AiConfigImpl;
@@ -38,8 +33,8 @@ public abstract class AbstractNetwork implements Configurable {
 	}
 
 	protected void train() {
-		this.train = new ResilientPropagation(network, DATASET);
 		ScaledConjugateGradient scg = new ScaledConjugateGradient(network, DATASET);
+		this.train = new ResilientPropagation(network, DATASET);
 		this.train.addStrategy(new HybridStrategy(scg));
 		int epoch = 0;
 		do{

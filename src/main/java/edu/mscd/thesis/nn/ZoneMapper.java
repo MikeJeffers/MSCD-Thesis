@@ -3,7 +3,6 @@ package edu.mscd.thesis.nn;
 import org.encog.ml.data.MLData;
 import org.encog.ml.data.basic.BasicMLData;
 import org.encog.ml.data.basic.BasicMLDataPair;
-import org.encog.ml.data.basic.BasicMLDataSet;
 
 import edu.mscd.thesis.controller.Action;
 import edu.mscd.thesis.controller.AiConfig;
