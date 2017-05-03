@@ -42,12 +42,13 @@ public abstract class AbstractBuilding implements Building {
 		int currentDensityLevel = this.getDensity().getDensityLevel();
 		int currentOccupancy = this.currentOccupancy();
 		int maxOccupancy = this.getMaxOccupants();
-		if(currentOccupancy>=maxOccupancy && (growthValue-Rules.BASE_GROWTH_COST)>Rules.GROWTH_THRESHOLD && tileMaxDensity>currentDensityLevel){
+		int growthCost = Rules.BASE_GROWTH_COST*currentDensityLevel;
+		if(currentOccupancy>=maxOccupancy && (growthValue-growthCost)>Rules.GROWTH_THRESHOLD && tileMaxDensity>currentDensityLevel){
 			this.changeDensity(getDensity().getNextLevel());
-			return growthValue - Rules.BASE_GROWTH_COST;
-		}else if(currentDensityLevel==0 && (growthValue-Rules.BASE_GROWTH_COST)>Rules.GROWTH_THRESHOLD){
+			return growthValue - growthCost;
+		}else if(currentDensityLevel==0 && (growthValue-growthCost)>Rules.GROWTH_THRESHOLD){
 			this.changeDensity(getDensity().getNextLevel());
-			return growthValue - Rules.BASE_GROWTH_COST;
+			return growthValue - growthCost;
 		}else if(growthValue<Rules.GROWTH_THRESHOLD){
 			this.changeDensity(getDensity().getPrevLevel());
 			return growthValue;
