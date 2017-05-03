@@ -27,8 +27,8 @@ public class Rules {
 	public static final int MAX = 255;
 	public static final int MAX_PERCENTAGE = 100;
 	// Zone growth factors
-	public static final int GROWTH_THRESHOLD = 120;
-	public static final int BASE_GROWTH_COST = 10;
+	public static final int GROWTH_THRESHOLD = 125;
+	public static final int BASE_GROWTH_COST = 25;
 	public static final double GROWTH_RATE = 0.1;
 	// City population and Person constants
 	public static final int STARTING_POPULATION = 100;
@@ -111,13 +111,13 @@ public class Rules {
 	 */
 	public static double getValueForZoneOnTile(TileType t, ZoneType z) {
 		if (z == ZoneType.COMMERICAL) {
-			double value = (t.getBaseLandValue() * 3.5 + t.getMaterialValue()) / 4;
+			double value = (t.getBaseLandValue() * 3.0 + t.getMaterialValue()) / 4;
 			return Math.min(MAX, value);
 		} else if (z == ZoneType.INDUSTRIAL) {
-			double value = (t.getBaseLandValue() * 0.1 + t.getMaterialValue() * 3.9) / 4;
+			double value = (t.getBaseLandValue() * 0.0 + t.getMaterialValue() * 1.0) / 1;
 			return Math.min(MAX, value);
 		} else if (z == ZoneType.RESIDENTIAL) {
-			double value = (t.getBaseLandValue() * 1 + t.getMaterialValue() * 0) / 1;
+			double value = (t.getBaseLandValue() * 1.0 + t.getMaterialValue() * 0) / 1;
 			return Math.min(MAX, value);
 		}
 		return 0;
