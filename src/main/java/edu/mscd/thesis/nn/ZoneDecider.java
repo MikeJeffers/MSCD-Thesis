@@ -52,11 +52,11 @@ public class ZoneDecider extends AbstractNetwork implements Actor, Learner {
 			if (ZoneType.EMPTY == zone) {
 				output[i] = new double[] { 0 };
 			} else if (ZoneType.RESIDENTIAL == zone) {
-				output[i] = new double[] { 1 };
+				output[i] = new double[] { 0.5 };
 			} else if (ZoneType.COMMERICAL == zone) {
 				output[i] = new double[] { 0.5 };
 			} else if (ZoneType.INDUSTRIAL == zone) {
-				output[i] = new double[] { 0.4 };
+				output[i] = new double[] { 0.5 };
 			}
 			i++;
 		}
@@ -71,7 +71,7 @@ public class ZoneDecider extends AbstractNetwork implements Actor, Learner {
 			if (ZoneType.EMPTY == zone) {
 				output[i] = new double[] { 0 };
 			} else if (ZoneType.RESIDENTIAL == zone) {
-				output[i] = new double[] { 0.75 };
+				output[i] = new double[] { 1.0 };
 			} else if (ZoneType.COMMERICAL == zone) {
 				output[i] = new double[] { 0.0 };
 			} else if (ZoneType.INDUSTRIAL == zone) {
@@ -92,7 +92,7 @@ public class ZoneDecider extends AbstractNetwork implements Actor, Learner {
 			} else if (ZoneType.RESIDENTIAL == zone) {
 				output[i] = new double[] { 0 };
 			} else if (ZoneType.COMMERICAL == zone) {
-				output[i] = new double[] { 0.75 };
+				output[i] = new double[] { 1.0 };
 			} else if (ZoneType.INDUSTRIAL == zone) {
 				output[i] = new double[] { 0.0 };
 			}
@@ -113,7 +113,7 @@ public class ZoneDecider extends AbstractNetwork implements Actor, Learner {
 			} else if (ZoneType.COMMERICAL == zone) {
 				output[i] = new double[] { 0.0 };
 			} else if (ZoneType.INDUSTRIAL == zone) {
-				output[i] = new double[] { 0.75 };
+				output[i] = new double[] { 1.0 };
 			}
 			i++;
 		}

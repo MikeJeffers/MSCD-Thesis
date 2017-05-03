@@ -47,8 +47,8 @@ public class ZoneMapper extends AbstractNetwork implements Learner, Mapper {
 	@Override
 	protected void initTraining() {
 		super.initTraining();
-		double[][] input = new double[9][inputLayerSize];
-		double[][] output = new double[9][OUTPUT_LAYER_SIZE];
+		double[][] input = new double[10][inputLayerSize];
+		double[][] output = new double[10][OUTPUT_LAYER_SIZE];
 		double[] r = ModelToVec.getZoneAsVector(ZoneType.RESIDENTIAL);
 		double[] c = ModelToVec.getZoneAsVector(ZoneType.COMMERICAL);
 		double[] indy = ModelToVec.getZoneAsVector(ZoneType.INDUSTRIAL);
@@ -59,18 +59,20 @@ public class ZoneMapper extends AbstractNetwork implements Learner, Mapper {
 		output[1] = new double[] { 0 };
 		input[2] =  constructSampleInput(indy, empty);
 		output[2] = new double[] { 1 };
-		input[3] =  constructSampleInput(empty, empty);
-		output[3] = new double[] { 0 };
+		input[3] =  constructSampleInput(c, indy);
+		output[3] = new double[] { 0.1 };
 		input[4] =  constructSampleInput(r, indy);
 		output[4] = new double[] { 0.1 };
 		input[5] =  constructSampleInput(indy, r);
 		output[5] = new double[] { 0.9 };
-		input[6] =  constructSampleInput(empty, r);
-		output[6] = new double[] { 1 };
-		input[7] =  constructSampleInput(empty, c);
+		input[6] =  constructSampleInput(indy, c);
+		output[6] = new double[] { 0.9 };
+		input[7] =  constructSampleInput(empty, r);
 		output[7] = new double[] { 1 };
-		input[8] =  constructSampleInput(empty, indy);
+		input[8] =  constructSampleInput(empty, c);
 		output[8] = new double[] { 1 };
+		input[9] =  constructSampleInput(empty, indy);
+		output[9] = new double[] { 1 };
 
 		for (int i = 0; i < input.length; i++) {
 			MLData trainingIn = new BasicMLData(input[i]);

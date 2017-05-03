@@ -21,11 +21,11 @@ public class AiConfigImpl extends AbstractConfigData implements AiConfig {
 		this.actFunctions = new HashMap<Integer, ActivationFunctions>();
 		this.neuralDensities = new HashMap<Integer, Integer>();
 
-		this.maxError = 0.01;
+		this.maxError = 0.025;
 		this.layerCount = 3;
 		this.radius = 1;
-		this.waitTime = 5;
-		this.maxEpochs = 100;
+		this.waitTime = 10;
+		this.maxEpochs = 150;
 		for (int i = 0; i < this.layerCount; i++) {
 			this.actFunctions.put(i, ActivationFunctions.SIGMOID);
 			if (i + 1 == this.layerCount) {

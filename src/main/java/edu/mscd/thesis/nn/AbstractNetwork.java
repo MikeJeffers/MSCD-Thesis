@@ -5,13 +5,17 @@ import org.encog.Encog;
 import org.encog.ml.data.MLDataPair;
 import org.encog.ml.data.MLDataSet;
 import org.encog.ml.data.basic.BasicMLDataSet;
+import org.encog.ml.train.MLTrain;
 import org.encog.ml.train.strategy.HybridStrategy;
 import org.encog.neural.networks.BasicNetwork;
 import org.encog.neural.networks.layers.BasicLayer;
 import org.encog.neural.networks.training.propagation.Propagation;
 import org.encog.neural.networks.training.propagation.TrainingContinuation;
+import org.encog.neural.networks.training.propagation.manhattan.ManhattanPropagation;
 import org.encog.neural.networks.training.propagation.resilient.ResilientPropagation;
 import org.encog.neural.networks.training.propagation.scg.ScaledConjugateGradient;
+import org.encog.neural.networks.training.pso.NeuralPSO;
+import org.encog.neural.networks.training.strategy.RegularizationStrategy;
 
 import edu.mscd.thesis.controller.AiConfig;
 import edu.mscd.thesis.controller.AiConfigImpl;
@@ -21,7 +25,7 @@ public abstract class AbstractNetwork implements Configurable {
 	protected AiConfig conf = new AiConfigImpl();
 	protected BasicNetwork network = new BasicNetwork();
 	protected MLDataSet DATASET = new BasicMLDataSet();
-	protected Propagation train;
+	protected MLTrain train;
 	TrainingContinuation pauseState;
 	protected int lastIteration;
 	protected int inputLayerSize;
@@ -35,7 +39,9 @@ public abstract class AbstractNetwork implements Configurable {
 	protected void train() {
 		ScaledConjugateGradient scg = new ScaledConjugateGradient(network, DATASET);
 		this.train = new ResilientPropagation(network, DATASET);
+		this.train.addStrategy(new RegularizationStrategy(0.00001));
 		this.train.addStrategy(new HybridStrategy(scg));
+
 		int epoch = 0;
 		do{
 			train.iteration();
@@ -75,7 +81,7 @@ public abstract class AbstractNetwork implements Configurable {
 	protected void learn(MLDataPair pair) {
 		int epoch=0;
 		DATASET.add(pair);
-		train.setTraining(DATASET);
+		//train.setTraining(DATASET);
 		train.resume(pauseState);
 		while (train.getError() > conf.getMaxError() && epoch<conf.getMaxTrainingEpochs() || epoch<1) {
 			epoch++;
