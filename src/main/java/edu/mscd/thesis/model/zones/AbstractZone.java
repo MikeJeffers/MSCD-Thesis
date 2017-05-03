@@ -63,8 +63,8 @@ public abstract class AbstractZone implements Zone {
 
 	@Override
 	public void update() {
-		double newValue = Rules.getValueForZoneTypeWithEffects(this.getTile(), this.getZoneType());
-		this.setValue(newValue);
+		double deltaValue = Rules.getGrowthValue(this.getTile(), this.getZoneType());
+		this.deltaValue(deltaValue);
 		if(this.building!=null){
 			this.setValue(this.building.update(this.getValue()));
 		}

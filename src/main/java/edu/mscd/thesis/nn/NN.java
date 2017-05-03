@@ -3,6 +3,7 @@ package edu.mscd.thesis.nn;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -65,11 +66,23 @@ public class NN extends AbstractNetwork implements AI {
 	@Override
 	protected void initTraining() {
 		super.initTraining();
-		double[][] input = new double[1][inputLayerSize];
-		double[][] output = new double[1][OUTPUT_LAYER_SIZE];
-		double[] modelVec = new double[] { 0.0, 0.0 };
-		input[0] = Util.appendVectors(modelVec, ModelToVec.getZoneAsVector(ZoneType.EMPTY));
-		output[0] = new double[]{0};
+		Random r = new Random();
+		int limit =100;
+		double[][] input = new double[limit][inputLayerSize];
+		double[][] output = new double[limit][OUTPUT_LAYER_SIZE];
+		
+		for(int i=0; i<limit; i++){
+			double tileValue = r.nextDouble();
+			double zoneValue = r.nextDouble();
+			double[] modelVec = new double[] { tileValue, zoneValue };
+			ZoneType zone = ZoneType.values()[r.nextInt(ZoneType.values().length)];
+			input[i] = Util.appendVectors(modelVec, ModelToVec.getZoneAsVector(zone));
+			output[i] = new double[] { (tileValue+zoneValue)/2.0 };
+		}
+		
+		
+
+		
 		for (int j = 0; j < input.length; j++) {
 			MLData trainingIn = new BasicMLData(input[j]);
 			MLData idealOut = new BasicMLData(output[j]);
@@ -117,6 +130,8 @@ public class NN extends AbstractNetwork implements AI {
 
 		System.out.println(
 				"Possible actions based on Mapped Score domain[" + combined[minIndex] + "," + combined[maxIndex] + "]");
+		System.out.println(
+				"Difference:" +(maxScore-minScore));
 		System.out.print("Best move:{");
 		System.out.print(locations[maxIndex]);
 		System.out.println();
