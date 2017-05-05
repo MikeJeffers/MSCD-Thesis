@@ -2,7 +2,7 @@ package edu.mscd.thesis.util;
 
 public class NNConstants {
 	
-	public static final int MAX_DENSITY = 5;
+	public static final int MAX_DENSITY = 12;
 	public static final int MIN_DENSITY = 1;
 	public static final int MAX_LAYERS = 5;
 	public static final int MIN_LAYERS= 2;
@@ -17,7 +17,7 @@ public class NNConstants {
 	
 	
 	public static int getNeuronCountByFactor(int inputSize, int factor){
-		int neuronCount = (int)Math.round(inputSize*Util.mapValue(factor, new double[]{MIN_DENSITY,  MAX_DENSITY}, new double[]{0.75, 2.5}));
+		int neuronCount = (int)Math.round(inputSize*Util.mapValue(factor, new double[]{MIN_DENSITY,  MAX_DENSITY}, new double[]{0.25, 3.25}));
 		return neuronCount;
 	}
 

@@ -81,7 +81,6 @@ public abstract class AbstractNetwork implements Configurable {
 	protected void learn(MLDataPair pair) {
 		int epoch=0;
 		DATASET.add(pair);
-		//train.setTraining(DATASET);
 		train.resume(pauseState);
 		while (train.getError() > conf.getMaxError() && epoch<conf.getMaxTrainingEpochs() || epoch<1) {
 			epoch++;
