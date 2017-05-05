@@ -70,7 +70,12 @@ public class GameLoop extends AnimationTimer implements Controller {
 	
 	private void turn(){
 		turn++;
-		ai.update(model, mostRecentlyAppliedAction, view.getWeightVector());
+		ai.getLock().lock();
+		try{
+			ai.update(model, mostRecentlyAppliedAction, view.getWeightVector());
+		}finally{
+			ai.getLock().unlock();
+		}
 		model.getLock().lock();
 		try{
 			model.update();
@@ -87,7 +92,13 @@ public class GameLoop extends AnimationTimer implements Controller {
 	}
 
 	private void getCurrentQValueMap(Action action) {
-		double[] map = ai.getMapOfValues(model, action);
+		ai.getLock().lock();
+		double[] map = new double[Rules.TILE_COUNT];
+		try{
+			map = ai.getMapOfValues(model, action);
+		}finally{
+			ai.getLock().unlock();
+		}
 		double[] norm = new double[] { 0, 1 };
 		map = Util.mapValues(map, norm);
 		model.setOverlay(map);

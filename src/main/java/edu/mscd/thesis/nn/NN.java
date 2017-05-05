@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Random;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.encog.ml.data.MLData;
 import org.encog.ml.data.basic.BasicMLData;
@@ -48,8 +50,11 @@ public class NN extends AbstractNetwork implements AI {
 	private ZoneMapper zoneMap;
 
 	private Collection<Observer<ViewData>> observers = new ArrayList<Observer<ViewData>>();
+	
+	private Lock lock;
 
 	public NN(Model state) {
+		this.lock = new ReentrantLock();
 		inputLayerSize = 2 + ZoneType.values().length;
 		this.state = ModelStripper.reducedCopy(state);
 		this.prev = ModelStripper.reducedCopy(state);
@@ -251,41 +256,64 @@ public class NN extends AbstractNetwork implements AI {
 		while (isRunning) {
 			AiConfig msg;
 			while ((msg = queue.poll()) != null) {
-				processNewConfig(msg);
+				this.lock.lock();
+				try{
+					processNewConfig(msg);
+				}finally{
+					this.lock.unlock();
+				}
 			}
 			if (this.counter > conf.getObservationWaitTime()) {
-				this.addCase(this.prev, this.state, this.act, this.weights);
-				counter = 0;
-				Action act = this.takeNextAction();
-				Platform.runLater(new Runnable() {
-					@Override
-					public void run() {
-						notifyObserver(act);
-					}
-				});
-				this.prev = this.state;
+				this.lock.lock();
+				try{
+					this.addCase(this.prev, this.state, this.act, this.weights);
+					counter = 0;
+					Action act = this.takeNextAction();
+					Platform.runLater(new Runnable() {
+						@Override
+						public void run() {
+							notifyObserver(act);
+						}
+					});
+					this.prev = this.state;
+				}finally{
+					this.lock.unlock();
+				}
+				
 			}
 		}
-		this.shutdown();
 		this.zoneDecider.shutdown();
 		this.zoneMap.shutdown();
 		this.tileMap.shutdown();
+		this.shutdown();
 	}
 
 	@Override
-	public synchronized void update(Model state, Action action, WeightVector<CityProperty> weights) {
-		if (counter == 0) {
-			this.prev = ModelStripper.reducedCopy(state);
-			this.act = action.copy();
-			this.weights = weights;
+	public void update(Model state, Action action, WeightVector<CityProperty> weights) {
+		this.lock.lock();
+		try{
+			if (counter == 0) {
+				this.prev = ModelStripper.reducedCopy(state);
+				this.act = action.copy();
+				this.weights = weights;
+			}
+			this.setState(state);
+			counter++;
+		}finally{
+			this.lock.unlock();
 		}
-		this.setState(state);
-		counter++;
+		
+		
 	}
 
 	@Override
 	public void halt() {
 		this.isRunning = false;
+	}
+
+	@Override
+	public Lock getLock() {
+		return this.lock;
 	}
 
 }

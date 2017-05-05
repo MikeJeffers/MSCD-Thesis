@@ -1,5 +1,7 @@
 package edu.mscd.thesis.nn;
 
+import java.util.concurrent.locks.Lock;
+
 import edu.mscd.thesis.controller.Action;
 import edu.mscd.thesis.controller.Observable;
 import edu.mscd.thesis.controller.ViewData;
@@ -20,4 +22,6 @@ public interface AI extends Actor, Learner, Mapper, Configurable, Observable<Vie
 	 */
 	public void halt();
 	
+	
+	public Lock getLock();
 }
