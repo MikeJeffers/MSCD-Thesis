@@ -23,7 +23,7 @@ public class ActivationArcTan implements ActivationFunction {
 	public final void activationFunction(final double[] x, final int start,
 			final int size) {
 		for (int i = start; i < start + size; i++) {
-			x[i] = Math.atan(BoundNumbers.bound(x[i]));
+			x[i] = (2.0/Math.PI)*Math.atan(BoundNumbers.bound((Math.PI/2.0)*x[i]));
 		}
 	}
 
