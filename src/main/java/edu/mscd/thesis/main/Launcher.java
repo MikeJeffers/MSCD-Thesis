@@ -6,6 +6,7 @@ import edu.mscd.thesis.model.Model;
 import edu.mscd.thesis.model.WorldImpl;
 import edu.mscd.thesis.nn.AI;
 import edu.mscd.thesis.nn.NN;
+import edu.mscd.thesis.nn.RandomBenchmark;
 import edu.mscd.thesis.util.Rules;
 import edu.mscd.thesis.view.GUI;
 import edu.mscd.thesis.view.View;
@@ -77,7 +78,8 @@ public class Launcher extends Application {
 	}
 
 	private AI initAi(Model initialState) {
-		AI ai = new NN(model);
+		//AI ai = new RandomBenchmark(initialState);
+		AI ai = new NN(initialState);
 		aiThread = new Thread(ai);
 		aiThread.start();
 		return ai;

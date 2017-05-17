@@ -140,7 +140,7 @@ public class GUI implements View {
 		controlPane.add(tileInfoPane, 1, 7);
 		controlPane.add(weightSliders, 1, 8);
 
-		//Util.setGridVisible(controlPane);
+		Util.setGridVisible(controlPane);
 
 		canvasTipPane = makeTileLabelPane(canvasTileLabel);
 
@@ -194,6 +194,7 @@ public class GUI implements View {
 	private Pane makeAiSettingsPane() {
 		GridPane pane = new GridPane();
 		Pane aiModeCombo = makeAiModeComboBox();
+		Pane userMoveScoreSlider = makeUserSelfScoreSlider();
 		Pane depthSelector = depthSelector();
 		Pane learnRadius = learnRadiusSelector();
 		Pane waitTime = makeWaitTimeSelector();
@@ -202,33 +203,67 @@ public class GUI implements View {
 		Pane submitButton = makeSubmitButton();
 
 		Label modeLabel = new Label("Ai Mode: ");
+		Label userScoreLabel = new Label("User-Move Weight: ");
 		Label depthLabel = new Label("Layers: ");
 		Label radiusLabel = new Label("Radius: ");
 		Label waitLabel = new Label("Observe cycle: ");
 		Label epochLabel = new Label("Training Epochs: ");
 		Label errorLabel = new Label("Error rate: ");
 		Label submitLabel = new Label("Commit Changes: ");
-
-		GridPane.setConstraints(modeLabel, 0, 0, 1, 1, HPos.LEFT, VPos.BASELINE);
-		GridPane.setConstraints(aiModeCombo, 1, 0, 1, 1, HPos.LEFT, VPos.BASELINE);
-		GridPane.setConstraints(radiusLabel, 0, 1, 1, 1, HPos.LEFT, VPos.BASELINE);
-		GridPane.setConstraints(learnRadius, 1, 1, 1, 1, HPos.LEFT, VPos.BASELINE);
-		GridPane.setConstraints(waitLabel, 0, 2, 1, 1, HPos.LEFT, VPos.BASELINE);
-		GridPane.setConstraints(waitTime, 1, 2, 1, 1, HPos.LEFT, VPos.BASELINE);
-		GridPane.setConstraints(epochLabel, 0, 3, 1, 1, HPos.LEFT, VPos.BASELINE);
-		GridPane.setConstraints(epochs, 1, 3, 1, 1, HPos.LEFT, VPos.BASELINE);
-		GridPane.setConstraints(errorLabel, 0, 4, 1, 1, HPos.LEFT, VPos.BASELINE);
-		GridPane.setConstraints(error, 1, 4, 1, 1, HPos.LEFT, VPos.BASELINE);
-		GridPane.setConstraints(depthLabel, 0, 5, 1, 1, HPos.LEFT, VPos.BASELINE);
-		GridPane.setConstraints(depthSelector, 1, 5, 1, 1, HPos.LEFT, VPos.BASELINE);
-		GridPane.setConstraints(submitLabel, 0, 6, 1, 1, HPos.LEFT, VPos.BASELINE);
-		GridPane.setConstraints(submitButton, 1, 6, 1, 1, HPos.LEFT, VPos.BASELINE);
+		int i = 0;
+		GridPane.setConstraints(modeLabel, 0, i, 1, 1, HPos.LEFT, VPos.BASELINE);
+		GridPane.setConstraints(aiModeCombo, 1, i, 1, 1, HPos.LEFT, VPos.BASELINE);
+		i++;
+		GridPane.setConstraints(userScoreLabel, 0, i, 1, 1, HPos.LEFT, VPos.BASELINE);
+		GridPane.setConstraints(userMoveScoreSlider, 1, i, 1, 1, HPos.LEFT, VPos.BASELINE);
+		i++;
+		GridPane.setConstraints(radiusLabel, 0, i, 1, 1, HPos.LEFT, VPos.BASELINE);
+		GridPane.setConstraints(learnRadius, 1, i, 1, 1, HPos.LEFT, VPos.BASELINE);
+		i++;
+		GridPane.setConstraints(waitLabel, 0, i, 1, 1, HPos.LEFT, VPos.BASELINE);
+		GridPane.setConstraints(waitTime, 1, i, 1, 1, HPos.LEFT, VPos.BASELINE);
+		i++;
+		GridPane.setConstraints(epochLabel, 0, i, 1, 1, HPos.LEFT, VPos.BASELINE);
+		GridPane.setConstraints(epochs, 1, i, 1, 1, HPos.LEFT, VPos.BASELINE);
+		i++;
+		GridPane.setConstraints(errorLabel, 0, i, 1, 1, HPos.LEFT, VPos.BASELINE);
+		GridPane.setConstraints(error, 1, i, 1, 1, HPos.LEFT, VPos.BASELINE);
+		i++;
+		GridPane.setConstraints(depthLabel, 0, i, 1, 1, HPos.LEFT, VPos.BASELINE);
+		GridPane.setConstraints(depthSelector, 1, i, 1, 1, HPos.LEFT, VPos.BASELINE);
+		i++;
+		GridPane.setConstraints(submitLabel, 0, i, 1, 1, HPos.LEFT, VPos.BASELINE);
+		GridPane.setConstraints(submitButton, 1, i, 1, 1, HPos.LEFT, VPos.BASELINE);
 
 		pane.getChildren().addAll(aiModeCombo, depthSelector, learnRadius, waitTime, submitButton, modeLabel,
-				depthLabel, radiusLabel, waitLabel, submitLabel, epochs, epochLabel, error, errorLabel);
+				depthLabel, radiusLabel, waitLabel, submitLabel, epochs, epochLabel, error, errorLabel, userScoreLabel, userMoveScoreSlider);
+		return pane;
+	}
+	
+	private Pane makeUserSelfScoreSlider() {
+		GridPane pane = new GridPane();
+		Label dataReadout = new Label("0.5");
+		Slider slider = new Slider(0.0, 1.0, 0.5);
+		Tooltip tip = new Tooltip("If using follow-mode, this will weight the amount the AI will train towards your moves.");
+		slider.setTooltip(tip);
+		aiConfig.setUserSelfScore(0.5);
+		slider.valueProperty().addListener(new ChangeListener<Number>() {
+			@Override
+			public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
+				aiConfig.setUserSelfScore(newValue.doubleValue());
+				String toDisplay = Double.toString(newValue.doubleValue());
+				if (toDisplay.length() > 7) {
+					toDisplay = toDisplay.substring(0, 7);
+				}
+				dataReadout.setText(toDisplay);
+			}
+		});
+		pane.add(slider, 0, 0);
+		pane.add(dataReadout, 1, 0);
 		return pane;
 	}
 
+	
 	private Pane depthSelector() {
 		GridPane pane = new GridPane();
 		Spinner<Integer> selector = new Spinner<Integer>(NNConstants.MIN_LAYERS, NNConstants.MAX_LAYERS,
@@ -253,6 +288,7 @@ public class GUI implements View {
 		return pane;
 	}
 
+	
 	private Pane layerConfigPane(int layerIndex) {
 		GridPane pane = new GridPane();
 		Label layerName = new Label("Layer " + layerIndex + ": ");
@@ -414,11 +450,18 @@ public class GUI implements View {
 		Label aiModeLabel = new Label("AI Mode: ");
 		ComboBox<AiMode> combo = new ComboBox<AiMode>();
 		combo.getItems().setAll(AiMode.values());
-		combo.setValue(AiMode.ON);
+		combo.setValue(AiMode.ON_FOLLOW);
+		aiConfig.setFollowUser(true);
 		combo.valueProperty().addListener(new ChangeListener<AiMode>() {
 			@Override
 			public void changed(ObservableValue<? extends AiMode> observable, AiMode oldValue, AiMode newValue) {
 				gameConfig.setAiMode(newValue);
+				if(newValue==AiMode.ASSIST_FOLLOW||newValue==AiMode.ON_FOLLOW){
+					aiConfig.setFollowUser(true);
+				}else{
+					aiConfig.setFollowUser(false);
+				}
+				notifyObserver((ViewData) aiConfig.copy());
 				notifyObserver((ViewData) gameConfig.copy());
 			}
 		});

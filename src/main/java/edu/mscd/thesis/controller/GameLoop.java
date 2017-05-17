@@ -2,15 +2,12 @@ package edu.mscd.thesis.controller;
 
 import edu.mscd.thesis.model.Model;
 import edu.mscd.thesis.nn.AI;
-import edu.mscd.thesis.util.ModelStripper;
 import edu.mscd.thesis.util.Rules;
 import edu.mscd.thesis.util.Util;
 import edu.mscd.thesis.view.View;
 import javafx.animation.AnimationTimer;
 
-
 public class GameLoop extends AnimationTimer implements Controller {
-
 
 	private Model model;
 	private View view;
@@ -18,15 +15,10 @@ public class GameLoop extends AnimationTimer implements Controller {
 	private boolean step = true;
 	private boolean draw = true;
 
-	private Model prevModelState;
 	private long previousTime = System.currentTimeMillis();
-	
+
 	private int turn = 0;
 
-	private Action currentAiMove;
-	private Action previousAiMove;
-
-	private Action currentUserMove = new UserAction();
 	private Action mostRecentlyAppliedAction = new UserAction();
 
 	private AiConfig aiConfig = new AiConfigImpl();
@@ -35,7 +27,6 @@ public class GameLoop extends AnimationTimer implements Controller {
 	private AI ai;
 
 	private boolean takeScreen = false;
-	
 
 	public GameLoop(Model model, View view, AI ai) {
 		this.model = model;
@@ -44,8 +35,6 @@ public class GameLoop extends AnimationTimer implements Controller {
 		model.attachObserver(new ModelListener(this));
 		ai.attachObserver(new ViewListener(this));
 		this.ai = ai;
-		this.prevModelState = ModelStripper.reducedCopy(model);
-
 	}
 
 	@Override
@@ -60,59 +49,59 @@ public class GameLoop extends AnimationTimer implements Controller {
 		if (step) {
 			step = false;
 			turn();
-			
-		} else if (draw) {
-			render();
+		}
+
+		if (draw) {
 			draw = false;
+			render();
+			if (takeScreen) {
+				takeScreen = false;
+				view.screenShot();
+			}
 		}
 
 	}
-	
-	private void turn(){
+
+	private void turn() {
 		turn++;
 		ai.getLock().lock();
-		try{
+		try {
 			ai.update(model, mostRecentlyAppliedAction, view.getWeightVector());
-		}finally{
+		} finally {
 			ai.getLock().unlock();
 		}
 		model.getLock().lock();
-		try{
+		try {
 			model.update();
-		}finally{
+		} finally {
 			model.getLock().unlock();
 		}
-		
-		render();
-		if (takeScreen) {
-			takeScreen = false;
-			view.screenShot();
-		}
-		
+		draw = true;
 	}
 
 	private void getCurrentQValueMap(Action action) {
 		ai.getLock().lock();
 		double[] map = new double[Rules.TILE_COUNT];
-		try{
+		try {
 			map = ai.getMapOfValues(model, action);
-		}finally{
+		} finally {
 			ai.getLock().unlock();
 		}
 		double[] norm = new double[] { 0, 1 };
 		map = Util.mapValues(map, norm);
 		model.setOverlay(map);
 		takeScreen = true;
+		draw = true;
 	}
 
 	private void render() {
 		model.getLock().lock();
-		try{
+		try {
 			view.renderView(model);
-		}finally{
+		} finally {
 			model.getLock().unlock();
 		}
-		
+
 	}
 
 	@Override
@@ -141,29 +130,30 @@ public class GameLoop extends AnimationTimer implements Controller {
 		AiMode mode = gameConfig.getAiMode();
 		if (data.isAction()) {
 			Action a = data.getAction().copy();
-			if(mode!=AiMode.OFF && a.isAI()){
-				getCurrentQValueMap(a);
+			if (mode != AiMode.OFF && a.isAI()) {
+
 				view.updateAIMove(a);
 				Action next = a;
-				if (mode == AiMode.ON|| mode==AiMode.ON_FOLLOW) {
+				if (mode == AiMode.ON || mode == AiMode.ON_FOLLOW) {
 					AiAction act = (AiAction) next;
 					act.setMove(true);
-					next = act;
+					if (mode == AiMode.ON_FOLLOW) {
+						ai.forceUpdate();
+					}
 				}
-				prevModelState = ModelStripper.reducedCopy(model);
-				previousAiMove = next;
-			}else if(!a.isAI()){
-				currentUserMove = a;
-				if(!a.isMove()){
+				getCurrentQValueMap(a);
+			} else if (!a.isAI()) {
+				if (!a.isMove()) {
 					view.setTileToolTip(model.getWorld().getTileAt(a.getTarget()).getLabelText());
-				}else if(mode==AiMode.ASSIST_FOLLOW|| mode==AiMode.ON_FOLLOW){
+				} else if (mode == AiMode.ASSIST_FOLLOW || mode == AiMode.ON_FOLLOW) {
 					ai.forceUpdate();
+					getCurrentQValueMap(a);
 				}
 			}
 			if (a.isMove()) {
 				mostRecentlyAppliedAction = a;
 			}
-			if(!a.isAI() || !(mode==AiMode.OFF)){
+			if (!a.isAI() || !(mode == AiMode.OFF)) {
 				model.notifyNewData(a);
 				this.draw = true;
 			}
