@@ -138,13 +138,14 @@ public class GameLoop extends AnimationTimer implements Controller {
 
 	@Override
 	public void notifyViewEvent(ViewData data) {
+		AiMode mode = gameConfig.getAiMode();
 		if (data.isAction()) {
 			Action a = data.getAction().copy();
-			if(gameConfig.getAiMode()!=AiMode.OFF && a.isAI()){
+			if(mode!=AiMode.OFF && a.isAI()){
 				getCurrentQValueMap(a);
 				view.updateAIMove(a);
 				Action next = a;
-				if (gameConfig.getAiMode() == AiMode.ON) {
+				if (mode == AiMode.ON|| mode==AiMode.ON_FOLLOW) {
 					AiAction act = (AiAction) next;
 					act.setMove(true);
 					next = act;
@@ -155,12 +156,14 @@ public class GameLoop extends AnimationTimer implements Controller {
 				currentUserMove = a;
 				if(!a.isMove()){
 					view.setTileToolTip(model.getWorld().getTileAt(a.getTarget()).getLabelText());
+				}else if(mode==AiMode.ASSIST_FOLLOW|| mode==AiMode.ON_FOLLOW){
+					ai.forceUpdate();
 				}
 			}
 			if (a.isMove()) {
 				mostRecentlyAppliedAction = a;
 			}
-			if(!a.isAI() || !(gameConfig.getAiMode()==AiMode.OFF)){
+			if(!a.isAI() || !(mode==AiMode.OFF)){
 				model.notifyNewData(a);
 				this.draw = true;
 			}

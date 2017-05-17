@@ -16,6 +16,8 @@ public class AiConfigImpl extends AbstractConfigData implements AiConfig {
 	private int waitTime;
 	private int maxEpochs;
 	private double maxError;
+	private double userMoveScore;
+	private boolean followUser;
 
 	public AiConfigImpl() {
 		this.actFunctions = new HashMap<Integer, ActivationFunctions>();
@@ -26,6 +28,8 @@ public class AiConfigImpl extends AbstractConfigData implements AiConfig {
 		this.radius = 1;
 		this.waitTime = 10;
 		this.maxEpochs = 150;
+		this.userMoveScore = 0.5;
+		this.followUser = true;
 		for (int i = 0; i < this.layerCount; i++) {
 			this.actFunctions.put(i, ActivationFunctions.SIGMOID);
 			if (i + 1 == this.layerCount) {
@@ -69,6 +73,24 @@ public class AiConfigImpl extends AbstractConfigData implements AiConfig {
 	@Override
 	public Map<Integer, Integer> getNeuralDensities() {
 		return this.neuralDensities;
+	}
+
+	@Override
+	public double getUserMoveBias() {
+		return this.userMoveScore;
+	}
+
+	@Override
+	public boolean isLearnFromUser() {
+		return this.followUser;
+	}
+
+	public void setUserSelfScore(double score) {
+		this.userMoveScore = score;
+	}
+
+	public void setFollowUser(boolean follow) {
+		this.followUser = follow;
 	}
 
 	public void setActivationFunctions(Map<Integer, ActivationFunctions> funcs) {
@@ -125,6 +147,8 @@ public class AiConfigImpl extends AbstractConfigData implements AiConfig {
 		a.setObservationWaitTime(this.getObservationWaitTime());
 		a.setMaxTrainingEpochs(this.getMaxTrainingEpochs());
 		a.setMaxError(this.getMaxError());
+		a.setFollowUser(this.isLearnFromUser());
+		a.setUserSelfScore(this.getUserMoveBias());
 		return a;
 	}
 
@@ -156,8 +180,8 @@ public class AiConfigImpl extends AbstractConfigData implements AiConfig {
 		sb.append("{");
 		sb.append(" Layers:");
 		sb.append(this.getLayerCount());
-		for(int i=0; i<this.getLayerCount(); i++){
-			sb.append("Layer"+i);
+		for (int i = 0; i < this.getLayerCount(); i++) {
+			sb.append("Layer" + i);
 			sb.append(" NeuronDensity:");
 			sb.append(this.getNeuralDensities().get(i));
 			sb.append(" Activiation:");
@@ -171,6 +195,10 @@ public class AiConfigImpl extends AbstractConfigData implements AiConfig {
 		sb.append(this.getMaxTrainingEpochs());
 		sb.append(" MaxError:");
 		sb.append(this.getMaxError());
+		sb.append(" FollowUser?:");
+		sb.append(this.isLearnFromUser());
+		sb.append(" UserScore:");
+		sb.append(this.getUserMoveBias());
 		sb.append("}");
 		return sb.toString();
 	}

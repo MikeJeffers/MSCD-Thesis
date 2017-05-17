@@ -106,12 +106,10 @@ public class ZoneMapper extends AbstractNetwork implements Learner, Mapper {
 	public void addCase(Model prev, Model current, Action action, WeightVector<CityProperty> weights) {
 		Pos2D pos = action.getTarget();
 		ZoneType zoneAct = action.getZoneType();
-		double prevScore = Rules.score(prev, weights);
-		double currentScore = Rules.score(current, weights);
-		double normalizedScoreDiff = Util.getNormalizedDifference(currentScore, prevScore);
+		double actionScore = getActionScore(prev, current, action, weights);
 		double[] input = Util.appendVectors(getInputAroundTile(prev.getWorld(), pos),ModelToVec.getZoneAsVector(zoneAct));
 		MLData in = new BasicMLData(input);
-		MLData out = new BasicMLData( new double[] { normalizedScoreDiff });
+		MLData out = new BasicMLData( new double[] { actionScore });
 		super.learn(new BasicMLDataPair(in, out));
 
 	}

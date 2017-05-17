@@ -52,6 +52,7 @@ public class NN extends AbstractNetwork implements AI {
 	private Collection<Observer<ViewData>> observers = new ArrayList<Observer<ViewData>>();
 	
 	private Lock lock;
+	private volatile boolean forceUpdate = false;
 
 	public NN(Model state) {
 		this.lock = new ReentrantLock();
@@ -164,26 +165,24 @@ public class NN extends AbstractNetwork implements AI {
 		if (!Util.isWeightVectorValid(weights) || !Util.isActionValid(action)) {
 			return;
 		}
+		int index = Util.getIndexOf(prev.getWorld().getTileAt(action.getTarget()), prev.getWorld().getTiles());
+
+		if (index < 0) {
+			return;
+		}
 		this.zoneDecider.addCase(prev, current, action, weights);
 		this.tileMap.addCase(prev, current, action, weights);
 		this.zoneMap.addCase(prev, current, action, weights);
 
 		double[] tileValues = this.tileMap.getMapOfValues(prev, action);
 		double[] zoneValues = this.tileMap.getMapOfValues(prev, action);
-
-		int index = Util.getIndexOf(prev.getWorld().getTileAt(action.getTarget()), prev.getWorld().getTiles());
-
-		if (index < 0) {
-			return;
-		}
-		double prevScore = Rules.score(prev, weights);
-		double currentScore = Rules.score(state, weights);
-		double normalizedScoreDiff = Util.getNormalizedDifference(currentScore, prevScore);
+		
+		double actionScore = getActionScore(prev, current, action, weights);
 		double[] modelVec = new double[] { tileValues[index], zoneValues[index] };
 		double[] actionVec = ModelToVec.getZoneAsVector(action.getZoneType());
 		double[] input = Util.appendVectors(modelVec, actionVec);
 		MLData in = new BasicMLData(input);
-		MLData out = new BasicMLData(new double[] { normalizedScoreDiff });
+		MLData out = new BasicMLData(new double[] { actionScore });
 		super.learn(new BasicMLDataPair(in, out));
 	}
 
@@ -263,10 +262,11 @@ public class NN extends AbstractNetwork implements AI {
 					this.lock.unlock();
 				}
 			}
-			if (this.counter > conf.getObservationWaitTime()) {
+			if (this.counter > conf.getObservationWaitTime()||this.forceUpdate) {
 				this.lock.lock();
 				try{
 					this.addCase(this.prev, this.state, this.act, this.weights);
+					this.forceUpdate = false;
 					counter = 0;
 					Action act = this.takeNextAction();
 					Platform.runLater(new Runnable() {
@@ -314,6 +314,11 @@ public class NN extends AbstractNetwork implements AI {
 	@Override
 	public Lock getLock() {
 		return this.lock;
+	}
+
+	@Override
+	public void forceUpdate() {
+		this.forceUpdate = true;
 	}
 
 }

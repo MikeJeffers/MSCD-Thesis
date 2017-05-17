@@ -217,18 +217,14 @@ public class ZoneDecider extends AbstractNetwork implements Actor, Learner {
 
 	@Override
 	public void addCase(Model prev, Model current, Action action, WeightVector<CityProperty> weights) {
-		double prevScore = Rules.score(prev, weights);
-		double currentScore = Rules.score(current, weights);
-		double normalizedScoreDiff = Util.getNormalizedDifference(currentScore, prevScore);
+		double actionScore = getActionScore(prev, current, action, weights);
 		CityData cityData = prev.getWorld().getCity().getData();
 		double[] modelVector = ModelToVec.getCityDataVector(cityData);
 		double[] zoneAction = ModelToVec.getZoneAsVector(action.getZoneType());
 		double[] input = Util.appendVectors(modelVector, zoneAction);
-		double[] output = new double[] { normalizedScoreDiff };
+		double[] output = new double[] { actionScore };
 		MLData trainingIn = new BasicMLData(input);
 		MLData idealOut = new BasicMLData(output);
-		//DATASET.add(trainingIn, idealOut);
-		//train();
 		super.learn(new BasicMLDataPair(trainingIn, idealOut));
 	}
 
