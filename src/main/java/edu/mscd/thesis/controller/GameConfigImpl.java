@@ -11,7 +11,7 @@ public class GameConfigImpl extends AbstractConfigData implements GameConfig{
 		this.speed = 0.5;
 		this.isStep =false;
 		this.isPaused = true;
-		this.aiMode = AiMode.ON;
+		this.aiMode = AiMode.ON_FOLLOW;
 	}
 
 	@Override

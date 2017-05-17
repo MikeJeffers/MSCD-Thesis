@@ -15,7 +15,6 @@ import edu.mscd.thesis.model.zones.ZoneType;
 import edu.mscd.thesis.util.ComputeNeuralMapService;
 import edu.mscd.thesis.util.MapExecutorService;
 import edu.mscd.thesis.util.ModelToVec;
-import edu.mscd.thesis.util.Rules;
 import edu.mscd.thesis.util.Util;
 import edu.mscd.thesis.util.WeightVector;
 

@@ -9,12 +9,9 @@ import org.encog.ml.train.MLTrain;
 import org.encog.ml.train.strategy.HybridStrategy;
 import org.encog.neural.networks.BasicNetwork;
 import org.encog.neural.networks.layers.BasicLayer;
-import org.encog.neural.networks.training.propagation.Propagation;
 import org.encog.neural.networks.training.propagation.TrainingContinuation;
-import org.encog.neural.networks.training.propagation.manhattan.ManhattanPropagation;
 import org.encog.neural.networks.training.propagation.resilient.ResilientPropagation;
 import org.encog.neural.networks.training.propagation.scg.ScaledConjugateGradient;
-import org.encog.neural.networks.training.pso.NeuralPSO;
 import org.encog.neural.networks.training.strategy.RegularizationStrategy;
 
 import edu.mscd.thesis.controller.Action;

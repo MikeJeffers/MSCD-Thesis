@@ -20,6 +20,7 @@ public class GameLoop extends AnimationTimer implements Controller {
 	private int turn = 0;
 
 	private Action mostRecentlyAppliedAction = new UserAction();
+	private Action prevUserAct = new UserAction();
 
 	private AiConfig aiConfig = new AiConfigImpl();
 	private GameConfig gameConfig = new GameConfigImpl();
@@ -49,9 +50,7 @@ public class GameLoop extends AnimationTimer implements Controller {
 		if (step) {
 			step = false;
 			turn();
-		}
-
-		if (draw) {
+		}else if (draw) {
 			draw = false;
 			render();
 			if (takeScreen) {
@@ -91,7 +90,6 @@ public class GameLoop extends AnimationTimer implements Controller {
 		map = Util.mapValues(map, norm);
 		model.setOverlay(map);
 		takeScreen = true;
-		draw = true;
 	}
 
 	private void render() {
@@ -131,24 +129,30 @@ public class GameLoop extends AnimationTimer implements Controller {
 		if (data.isAction()) {
 			Action a = data.getAction().copy();
 			if (mode != AiMode.OFF && a.isAI()) {
-
 				view.updateAIMove(a);
 				Action next = a;
 				if (mode == AiMode.ON || mode == AiMode.ON_FOLLOW) {
 					AiAction act = (AiAction) next;
 					act.setMove(true);
-					if (mode == AiMode.ON_FOLLOW) {
+					System.out.println("Displaying Q-Map for AI move");
+					getCurrentQValueMap(a);
+				}
+			} else if (!a.isAI()) {
+				if (!a.isMove()){
+					view.setTileToolTip(model.getWorld().getTileAt(a.getTarget()).getLabelText());
+				} else {
+					if(gameConfig.isPaused()){
+						step=true;
+					}
+					if (mode == AiMode.ASSIST_FOLLOW || mode == AiMode.ON_FOLLOW) {
 						ai.forceUpdate();
 					}
 				}
-				getCurrentQValueMap(a);
-			} else if (!a.isAI()) {
-				if (!a.isMove()) {
-					view.setTileToolTip(model.getWorld().getTileAt(a.getTarget()).getLabelText());
-				} else if (mode == AiMode.ASSIST_FOLLOW || mode == AiMode.ON_FOLLOW) {
-					ai.forceUpdate();
+				if(prevUserAct.getZoneType()!=a.getZoneType()){
+					System.out.println("Displaying Q-Map for user move or selection");
 					getCurrentQValueMap(a);
 				}
+				prevUserAct = a;
 			}
 			if (a.isMove()) {
 				mostRecentlyAppliedAction = a;

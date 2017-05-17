@@ -85,10 +85,7 @@ public class NN extends AbstractNetwork implements AI {
 			input[i] = Util.appendVectors(modelVec, ModelToVec.getZoneAsVector(zone));
 			output[i] = new double[] { (tileValue+zoneValue)/2.0 };
 		}
-		
-		
 
-		
 		for (int j = 0; j < input.length; j++) {
 			MLData trainingIn = new BasicMLData(input[j]);
 			MLData idealOut = new BasicMLData(output[j]);
@@ -173,11 +170,16 @@ public class NN extends AbstractNetwork implements AI {
 		this.zoneDecider.addCase(prev, current, action, weights);
 		this.tileMap.addCase(prev, current, action, weights);
 		this.zoneMap.addCase(prev, current, action, weights);
+		System.out.print("Learning on:");
+		System.out.print(action);
 
 		double[] tileValues = this.tileMap.getMapOfValues(prev, action);
 		double[] zoneValues = this.tileMap.getMapOfValues(prev, action);
 		
 		double actionScore = getActionScore(prev, current, action, weights);
+		System.out.println(" ");
+		System.out.println(" with score "+actionScore);
+		System.out.println(" ");
 		double[] modelVec = new double[] { tileValues[index], zoneValues[index] };
 		double[] actionVec = ModelToVec.getZoneAsVector(action.getZoneType());
 		double[] input = Util.appendVectors(modelVec, actionVec);
@@ -218,7 +220,6 @@ public class NN extends AbstractNetwork implements AI {
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
-
 	}
 
 	private void processNewConfig(AiConfig configuration) {
@@ -267,19 +268,20 @@ public class NN extends AbstractNetwork implements AI {
 				try{
 					this.addCase(this.prev, this.state, this.act, this.weights);
 					this.forceUpdate = false;
-					counter = 0;
-					Action act = this.takeNextAction();
-					Platform.runLater(new Runnable() {
-						@Override
-						public void run() {
-							notifyObserver(act);
-						}
-					});
-					this.prev = this.state;
+					if(this.counter > conf.getObservationWaitTime()){
+						counter = 0;
+						Action act = this.takeNextAction();
+						Platform.runLater(new Runnable() {
+							@Override
+							public void run() {
+								notifyObserver(act);
+							}
+						});
+						this.prev = this.state;
+					}
 				}finally{
 					this.lock.unlock();
 				}
-				
 			}
 		}
 		this.zoneDecider.shutdown();
@@ -301,9 +303,7 @@ public class NN extends AbstractNetwork implements AI {
 			counter++;
 		}finally{
 			this.lock.unlock();
-		}
-		
-		
+		}	
 	}
 
 	@Override

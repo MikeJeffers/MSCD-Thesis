@@ -140,7 +140,7 @@ public class GUI implements View {
 		controlPane.add(tileInfoPane, 1, 7);
 		controlPane.add(weightSliders, 1, 8);
 
-		Util.setGridVisible(controlPane);
+		//Util.setGridVisible(controlPane);
 
 		canvasTipPane = makeTileLabelPane(canvasTileLabel);
 
