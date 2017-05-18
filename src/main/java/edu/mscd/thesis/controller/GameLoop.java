@@ -187,7 +187,10 @@ public class GameLoop extends AnimationTimer implements Controller {
 				sb.append("--NewConfig--");
 				sb.append(conf.toString());
 			}
+			sb.append("\n--Weights--");
+			sb.append(view.getWeightVector().toString());
 			Util.report(sb.toString());
+			
 		}
 	}
 	

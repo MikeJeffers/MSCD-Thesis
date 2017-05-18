@@ -2,8 +2,6 @@ package edu.mscd.thesis.nn;
 
 import static org.junit.Assert.assertTrue;
 
-import java.util.Arrays;
-
 import org.encog.engine.network.activation.ActivationFunction;
 import org.junit.Test;
 
@@ -31,7 +29,6 @@ public abstract class TestActivation {
 		for(int i=0; i<size; i++){
 			inputs[i] = i*step;
 		}
-		double[] x = Arrays.copyOf(inputs, size);
 		act.activationFunction(inputs, 0, size);
 		for(int i=0; i<size; i++){
 			assertTrue(inputs[i]<=2.0);
