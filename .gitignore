@@ -76,6 +76,7 @@ resources/
 .project
 
 screenshots/
+reports/
 
 .gradle
 /build/

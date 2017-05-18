@@ -50,7 +50,7 @@ public class NN extends AbstractNetwork implements AI {
 	private ZoneMapper zoneMap;
 
 	private Collection<Observer<ViewData>> observers = new ArrayList<Observer<ViewData>>();
-	
+
 	private Lock lock;
 	private volatile boolean forceUpdate = false;
 
@@ -73,17 +73,17 @@ public class NN extends AbstractNetwork implements AI {
 	protected void initTraining() {
 		super.initTraining();
 		Random r = new Random();
-		int limit =100;
+		int limit = 100;
 		double[][] input = new double[limit][inputLayerSize];
 		double[][] output = new double[limit][OUTPUT_LAYER_SIZE];
-		
-		for(int i=0; i<limit; i++){
+
+		for (int i = 0; i < limit; i++) {
 			double tileValue = r.nextDouble();
 			double zoneValue = r.nextDouble();
 			double[] modelVec = new double[] { tileValue, zoneValue };
 			ZoneType zone = ZoneType.values()[r.nextInt(ZoneType.values().length)];
 			input[i] = Util.appendVectors(modelVec, ModelToVec.getZoneAsVector(zone));
-			output[i] = new double[] { (tileValue+zoneValue)/2.0 };
+			output[i] = new double[] { (tileValue + zoneValue) / 2.0 };
 		}
 
 		for (int j = 0; j < input.length; j++) {
@@ -133,8 +133,7 @@ public class NN extends AbstractNetwork implements AI {
 
 		System.out.println(
 				"Possible actions based on Mapped Score domain[" + combined[minIndex] + "," + combined[maxIndex] + "]");
-		System.out.println(
-				"Difference:" +(maxScore-minScore));
+		System.out.println("Difference:" + (maxScore - minScore));
 		System.out.print("Best move:{");
 		System.out.print(locations[maxIndex]);
 		System.out.println();
@@ -175,10 +174,10 @@ public class NN extends AbstractNetwork implements AI {
 
 		double[] tileValues = this.tileMap.getMapOfValues(prev, action);
 		double[] zoneValues = this.tileMap.getMapOfValues(prev, action);
-		
+
 		double actionScore = getActionScore(prev, current, action, weights);
 		System.out.println(" ");
-		System.out.println(" with score "+actionScore);
+		System.out.println(" with score " + actionScore);
 		System.out.println(" ");
 		double[] modelVec = new double[] { tileValues[index], zoneValues[index] };
 		double[] actionVec = ModelToVec.getZoneAsVector(action.getZoneType());
@@ -257,18 +256,18 @@ public class NN extends AbstractNetwork implements AI {
 			AiConfig msg;
 			while ((msg = queue.poll()) != null) {
 				this.lock.lock();
-				try{
+				try {
 					processNewConfig(msg);
-				}finally{
+				} finally {
 					this.lock.unlock();
 				}
 			}
-			if (this.counter > conf.getObservationWaitTime()||this.forceUpdate) {
+			if (this.counter > conf.getObservationWaitTime() || this.forceUpdate) {
 				this.lock.lock();
-				try{
+				try {
 					this.addCase(this.prev, this.state, this.act, this.weights);
 					this.forceUpdate = false;
-					if(this.counter > conf.getObservationWaitTime()){
+					if (this.counter > conf.getObservationWaitTime()) {
 						counter = 0;
 						Action act = this.takeNextAction();
 						Platform.runLater(new Runnable() {
@@ -279,7 +278,7 @@ public class NN extends AbstractNetwork implements AI {
 						});
 						this.prev = this.state;
 					}
-				}finally{
+				} finally {
 					this.lock.unlock();
 				}
 			}
@@ -293,7 +292,7 @@ public class NN extends AbstractNetwork implements AI {
 	@Override
 	public void update(Model state, Action action, WeightVector<CityProperty> weights) {
 		this.lock.lock();
-		try{
+		try {
 			if (counter == 0) {
 				this.prev = ModelStripper.reducedCopy(state);
 				this.act = action.copy();
@@ -301,9 +300,9 @@ public class NN extends AbstractNetwork implements AI {
 			}
 			this.setState(state);
 			counter++;
-		}finally{
+		} finally {
 			this.lock.unlock();
-		}	
+		}
 	}
 
 	@Override

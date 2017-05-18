@@ -1,7 +1,9 @@
 package edu.mscd.thesis.util;
 
 import java.awt.image.RenderedImage;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -50,6 +52,7 @@ public class Util {
 	public static final double SCALE_FACTOR = Util.getScaleFactor(Rules.WORLD_X, Rules.WORLD_Y, WINDOW_WIDTH,
 			WINDOW_HEIGHT);
 	public static final boolean SCREENSHOT = false;
+	public static final boolean REPORT = true;
 	public static final int ZONETYPES = ZoneType.values().length;
 	public static final int TILE_ATTRIBUTES = 5;
 	public static final int MAX_RADIUS = 6;
@@ -355,9 +358,39 @@ public class Util {
 	public static String truncateValueToDisplay(double value, int numDigits) {
 		String toDisplay = Double.toString((value));
 		if (toDisplay.length() > numDigits) {
-			toDisplay = toDisplay.substring(0, 7);
+			toDisplay = toDisplay.substring(0, numDigits);
 		}
 		return toDisplay;
+	}
+
+	public synchronized static void report(String data) {
+		String dirString = "reports/Take_" + df.format(compileTime);
+		File dir = new File(dirString);
+		if (!dir.exists()) {
+			dir.mkdirs();
+		}
+		FileWriter fw = null;
+		BufferedWriter bw = null;
+		try {
+			fw = new FileWriter(dirString + "/report_" + df.format(compileTime) + ".txt", true);
+			bw = new BufferedWriter(fw);
+			bw.write(data);
+			bw.newLine();
+			System.out.println("reported: " + data);
+		} catch (IOException e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				if (bw != null)
+					bw.close();
+
+				if (fw != null)
+					fw.close();
+
+			} catch (IOException ex) {
+				ex.printStackTrace();
+			}
+		}
 	}
 
 	public static void takeScreenshot(Stage stage) {

@@ -50,7 +50,7 @@ public class GameLoop extends AnimationTimer implements Controller {
 		if (step) {
 			step = false;
 			turn();
-		}else if (draw) {
+		} else if (draw) {
 			draw = false;
 			render();
 			if (takeScreen) {
@@ -120,7 +120,9 @@ public class GameLoop extends AnimationTimer implements Controller {
 	@Override
 	public void notifyModelEvent(ModelData data) {
 		view.updateCityData(data, turn);
-		view.updateScore(Rules.score(model, view.getWeightVector()), turn);
+		double score = Rules.score(model, view.getWeightVector());
+		view.updateScore(score, turn);
+		reportScore(score, turn);
 	}
 
 	@Override
@@ -138,17 +140,17 @@ public class GameLoop extends AnimationTimer implements Controller {
 					getCurrentQValueMap(a);
 				}
 			} else if (!a.isAI()) {
-				if (!a.isMove()){
+				if (!a.isMove()) {
 					view.setTileToolTip(model.getWorld().getTileAt(a.getTarget()).getLabelText());
 				} else {
-					if(gameConfig.isPaused()){
-						step=true;
+					if (gameConfig.isPaused()) {
+						step = true;
 					}
 					if (mode == AiMode.ASSIST_FOLLOW || mode == AiMode.ON_FOLLOW) {
 						ai.forceUpdate();
 					}
 				}
-				if(prevUserAct.getZoneType()!=a.getZoneType()){
+				if (prevUserAct.getZoneType() != a.getZoneType()) {
 					System.out.println("Displaying Q-Map for user move or selection");
 					getCurrentQValueMap(a);
 				}
@@ -166,10 +168,27 @@ public class GameLoop extends AnimationTimer implements Controller {
 			if (config.isAiConfig()) {
 				this.aiConfig = (AiConfig) config.getAiConfig().copy();
 				this.ai.configure(aiConfig);
+				reportNewConfig(aiConfig, this.turn);
 			} else if (config.isGameConfig()) {
 				this.gameConfig = (GameConfig) config.getGameConfiguration().copy();
 				this.step = gameConfig.isStep() && gameConfig.isPaused();
 			}
+		}
+	}
+
+	private void reportNewConfig(AiConfig conf, int turnCount) {
+		if(Util.REPORT){
+			StringBuilder sb = new StringBuilder("Turn:");
+			sb.append(turnCount);
+			sb.append("--NewConfig--");
+			sb.append(conf.toString());
+			Util.report(sb.toString());
+		}
+	}
+	
+	private void reportScore(double score, int turn){
+		if(Util.REPORT){
+			Util.report("Turn:" + turn + "; Score=" + score);
 		}
 	}
 

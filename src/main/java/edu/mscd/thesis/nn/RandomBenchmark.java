@@ -163,4 +163,5 @@ public class RandomBenchmark implements AI {
 	public void forceUpdate() {
 		// Does nothing on randombenchmark
 	}
+
 }

@@ -26,4 +26,5 @@ public interface AI extends Actor, Learner, Mapper, Configurable, Observable<Vie
 	
 	
 	public Lock getLock();
+	
 }

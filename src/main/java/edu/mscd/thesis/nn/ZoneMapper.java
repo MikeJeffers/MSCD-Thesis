@@ -29,19 +29,17 @@ import edu.mscd.thesis.util.WeightVector;
 public class ZoneMapper extends AbstractNetwork implements Learner, Mapper {
 
 	private static final int ZONETYPES = ZoneType.values().length;
-	private int neighborhoodSize = (int)Math.pow(conf.getObservationRadius()*2+1, 2);
+	private int neighborhoodSize = (int) Math.pow(conf.getObservationRadius() * 2 + 1, 2);
 	private MapExecutorService pool;
 
-
 	public ZoneMapper(Model state) {
-		
-		inputLayerSize = ZONETYPES+ZONETYPES*neighborhoodSize;
+
+		inputLayerSize = ZONETYPES + ZONETYPES * neighborhoodSize;
 		initNetwork();
 		initTraining();
 		train();
 		this.pool = new ComputeNeuralMapService(network, conf, ModelToVec::getTileAsZoneVector, Util.ZONETYPES);
 	}
-
 
 	@Override
 	protected void initTraining() {
@@ -54,23 +52,23 @@ public class ZoneMapper extends AbstractNetwork implements Learner, Mapper {
 		double[] empty = ModelToVec.getZoneAsVector(ZoneType.EMPTY);
 		input[0] = constructSampleInput(r, empty);
 		output[0] = new double[] { 0 };
-		input[1] =  constructSampleInput(c, empty);
+		input[1] = constructSampleInput(c, empty);
 		output[1] = new double[] { 0 };
-		input[2] =  constructSampleInput(indy, empty);
+		input[2] = constructSampleInput(indy, empty);
 		output[2] = new double[] { 1 };
-		input[3] =  constructSampleInput(c, indy);
+		input[3] = constructSampleInput(c, indy);
 		output[3] = new double[] { 0.1 };
-		input[4] =  constructSampleInput(r, indy);
+		input[4] = constructSampleInput(r, indy);
 		output[4] = new double[] { 0.1 };
-		input[5] =  constructSampleInput(indy, r);
+		input[5] = constructSampleInput(indy, r);
 		output[5] = new double[] { 0.9 };
-		input[6] =  constructSampleInput(indy, c);
+		input[6] = constructSampleInput(indy, c);
 		output[6] = new double[] { 0.9 };
-		input[7] =  constructSampleInput(empty, r);
+		input[7] = constructSampleInput(empty, r);
 		output[7] = new double[] { 1 };
-		input[8] =  constructSampleInput(empty, c);
+		input[8] = constructSampleInput(empty, c);
 		output[8] = new double[] { 1 };
-		input[9] =  constructSampleInput(empty, indy);
+		input[9] = constructSampleInput(empty, indy);
 		output[9] = new double[] { 1 };
 
 		for (int i = 0; i < input.length; i++) {
@@ -93,7 +91,6 @@ public class ZoneMapper extends AbstractNetwork implements Learner, Mapper {
 		return inputSet;
 	}
 
-
 	@Override
 	public double[] getMapOfValues(Model state, Action action) {
 		ZoneType zoneAction = action.getZoneType();
@@ -106,13 +103,13 @@ public class ZoneMapper extends AbstractNetwork implements Learner, Mapper {
 		Pos2D pos = action.getTarget();
 		ZoneType zoneAct = action.getZoneType();
 		double actionScore = getActionScore(prev, current, action, weights);
-		double[] input = Util.appendVectors(getInputAroundTile(prev.getWorld(), pos),ModelToVec.getZoneAsVector(zoneAct));
+		double[] input = Util.appendVectors(getInputAroundTile(prev.getWorld(), pos),
+				ModelToVec.getZoneAsVector(zoneAct));
 		MLData in = new BasicMLData(input);
-		MLData out = new BasicMLData( new double[] { actionScore });
+		MLData out = new BasicMLData(new double[] { actionScore });
 		super.learn(new BasicMLDataPair(in, out));
 
 	}
-
 
 	private double[] getInputAroundTile(World w, Pos2D p) {
 		Tile[] tiles = getNeighbors(w, p);
@@ -127,13 +124,13 @@ public class ZoneMapper extends AbstractNetwork implements Learner, Mapper {
 		}
 		return vals;
 	}
-	
+
 	private Tile[] getNeighbors(World w, Pos2D p) {
 		Tile[] tiles = new Tile[this.neighborhoodSize];
 		int r = conf.getObservationRadius();
 		int index = 0;
-		for (int i = -r; i<=r; i++) {
-			for (int j = -r; j<=r; j++) {
+		for (int i = -r; i <= r; i++) {
+			for (int j = -r; j <= r; j++) {
 				Pos2D nLoc = new Pos2D(p.getX() + i, p.getY() + j);
 				tiles[index] = w.getTileAt(nLoc);
 				index++;
@@ -142,13 +139,13 @@ public class ZoneMapper extends AbstractNetwork implements Learner, Mapper {
 		return tiles;
 	}
 
-
 	@Override
 	public void configure(AiConfig configuration) {
-		this.neighborhoodSize = (int)Math.pow(configuration.getObservationRadius()*2+1, 2);
-		inputLayerSize = ZONETYPES+ZONETYPES*neighborhoodSize;
+		this.neighborhoodSize = (int) Math.pow(configuration.getObservationRadius() * 2 + 1, 2);
+		inputLayerSize = ZONETYPES + ZONETYPES * neighborhoodSize;
 		super.configure(configuration);
-		this.pool = new ComputeNeuralMapService(this.network, this.conf, ModelToVec::getTileAsZoneVector, Util.ZONETYPES);
+		this.pool = new ComputeNeuralMapService(this.network, this.conf, ModelToVec::getTileAsZoneVector,
+				Util.ZONETYPES);
 	}
 
 }

@@ -98,8 +98,6 @@ public class TileMapper extends AbstractNetwork implements Learner, Mapper {
 		super.learn(new BasicMLDataPair(in, out));
 	}
 
-
-
 	private double[] getInputAroundTile(World w, Pos2D p) {
 		Tile[] tiles = getNeighbors(w, p);
 		double[] vals = new double[tiles.length * TILE_ATTRIBUTES];
@@ -135,7 +133,6 @@ public class TileMapper extends AbstractNetwork implements Learner, Mapper {
 		super.configure(configuration);
 		this.pool = new ComputeNeuralMapService(this.network, this.conf, ModelToVec::getTileAttributesAsVector,
 				TILE_ATTRIBUTES);
-
 	}
 
 }

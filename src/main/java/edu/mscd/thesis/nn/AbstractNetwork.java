@@ -107,5 +107,8 @@ public abstract class AbstractNetwork implements Configurable {
 		this.train.finishTraining();
 		Encog.getInstance().shutdown();
 	}
+	
+	
+
 
 }

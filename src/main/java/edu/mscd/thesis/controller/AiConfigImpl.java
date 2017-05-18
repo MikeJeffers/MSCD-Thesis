@@ -176,18 +176,20 @@ public class AiConfigImpl extends AbstractConfigData implements AiConfig {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append(this.getClass().getName());
+		sb.append(this.getClass().getSimpleName());
 		sb.append("{");
 		sb.append(" Layers:");
 		sb.append(this.getLayerCount());
+		sb.append("\n");
 		for (int i = 0; i < this.getLayerCount(); i++) {
 			sb.append("Layer" + i);
-			sb.append(" NeuronDensity:");
+			sb.append("{ NeuronDensity:");
 			sb.append(this.getNeuralDensities().get(i));
 			sb.append(" Activiation:");
 			sb.append(this.getActivationFunctions().get(i).name());
+			sb.append("}\n");
 		}
-		sb.append(" ObserveRadius:");
+		sb.append("ObserveRadius:");
 		sb.append(this.getObservationRadius());
 		sb.append(" ObserveTime:");
 		sb.append(this.getObservationWaitTime());
@@ -199,7 +201,7 @@ public class AiConfigImpl extends AbstractConfigData implements AiConfig {
 		sb.append(this.isLearnFromUser());
 		sb.append(" UserScore:");
 		sb.append(this.getUserMoveBias());
-		sb.append("}");
+		sb.append("}\n");
 		return sb.toString();
 	}
 
