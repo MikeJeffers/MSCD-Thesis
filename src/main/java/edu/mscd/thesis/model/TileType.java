@@ -17,7 +17,7 @@ public enum TileType {
 	RIVER("River", true, true, Rules.MAX*0.55, Rules.MAX*0.55, Density.MED, new Color(0, 0.25, 1.0, 0.2)),
 	DELTA("Delta", true, true, Rules.MAX*0.75, Rules.MAX*0.3, Density.LOW, new Color(0.25, 0, 1.0, 0.2)),
 	BEACH("Beach", true, true, Rules.MAX*0.1, Rules.MAX*0.95, Density.HIGH, new Color(0.8, 0.8, 0.1, 0.2)),
-	OCEAN("Sea", false, false, Rules.MAX, Rules.MAX, Density.NONE, new Color(0, 0.005, 1.0, 0.5));
+	OCEAN("Sea", false, false, Rules.MAX*0.01, Rules.MAX, Density.NONE, new Color(0, 0.005, 1.0, 0.5));
 	
 	
 	private boolean zonable;

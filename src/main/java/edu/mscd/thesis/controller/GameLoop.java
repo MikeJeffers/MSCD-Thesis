@@ -2,6 +2,7 @@ package edu.mscd.thesis.controller;
 
 import edu.mscd.thesis.model.Model;
 import edu.mscd.thesis.nn.AI;
+import edu.mscd.thesis.nn.RandomBenchmark;
 import edu.mscd.thesis.util.Rules;
 import edu.mscd.thesis.util.Util;
 import edu.mscd.thesis.view.View;
@@ -180,8 +181,12 @@ public class GameLoop extends AnimationTimer implements Controller {
 		if(Util.REPORT){
 			StringBuilder sb = new StringBuilder("Turn:");
 			sb.append(turnCount);
-			sb.append("--NewConfig--");
-			sb.append(conf.toString());
+			if(ai instanceof RandomBenchmark){
+				sb.append("--RANDOM--");
+			}else{
+				sb.append("--NewConfig--");
+				sb.append(conf.toString());
+			}
 			Util.report(sb.toString());
 		}
 	}

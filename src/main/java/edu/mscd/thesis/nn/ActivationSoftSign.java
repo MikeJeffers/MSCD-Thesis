@@ -39,7 +39,7 @@ public class ActivationSoftSign implements ActivationFunction {
 	 */
 	@Override
 	public final double derivativeFunction(final double b, final double a) {
-		return 1.0/BoundMath.pow(1.0+Math.abs(a), 2);
+		return 1.0/BoundMath.pow(1.0+Math.abs(b), 2);
 	}
 
 	/**

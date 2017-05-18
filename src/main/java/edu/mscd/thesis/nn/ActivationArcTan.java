@@ -40,7 +40,7 @@ public class ActivationArcTan implements ActivationFunction {
 	 */
 	@Override
 	public final double derivativeFunction(final double b, final double a) {
-		return 1.0/(1.0+BoundMath.pow((Math.PI/2.0)*a, 2));
+		return 1.0/(1.0+BoundMath.pow((Math.PI/2.0)*b, 2));
 	}
 
 	/**

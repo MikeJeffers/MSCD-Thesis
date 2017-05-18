@@ -78,8 +78,8 @@ public class Launcher extends Application {
 	}
 
 	private AI initAi(Model initialState) {
-		//AI ai = new RandomBenchmark(initialState);
-		AI ai = new NN(initialState);
+		AI ai = new RandomBenchmark(initialState);
+		//AI ai = new NN(initialState);
 		aiThread = new Thread(ai);
 		aiThread.start();
 		return ai;
