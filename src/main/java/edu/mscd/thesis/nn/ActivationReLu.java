@@ -38,7 +38,7 @@ public class ActivationReLu implements ActivationFunction {
 	 */
 	@Override
 	public final double derivativeFunction(final double b, final double a) {
-		if(a>=0){
+		if(b>=0){
 			return 1.0;
 		}else{
 			return 0.0;

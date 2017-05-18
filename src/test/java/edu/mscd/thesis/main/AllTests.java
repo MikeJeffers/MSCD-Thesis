@@ -13,6 +13,7 @@ import org.junit.runners.Suite;
 	TestLaunch.class, 
 	edu.mscd.thesis.model.TestModelSuite.class,
 	edu.mscd.thesis.util.TestUtilSuite.class,
+	edu.mscd.thesis.nn.TestNNSuite.class
 
 })
 

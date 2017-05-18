@@ -23,7 +23,7 @@ public class ActivationArcTan implements ActivationFunction {
 	public final void activationFunction(final double[] x, final int start,
 			final int size) {
 		for (int i = start; i < start + size; i++) {
-			x[i] = (2.0/Math.PI)*Math.atan(BoundNumbers.bound((Math.PI/2.0)*x[i]));
+			x[i] = Math.atan(BoundNumbers.bound((Math.PI/2.0)*x[i]));
 		}
 	}
 
@@ -40,7 +40,7 @@ public class ActivationArcTan implements ActivationFunction {
 	 */
 	@Override
 	public final double derivativeFunction(final double b, final double a) {
-		return 1.0/(1.0+BoundMath.pow(a, 2));
+		return 1.0/(1.0+BoundMath.pow((Math.PI/2.0)*a, 2));
 	}
 
 	/**

@@ -3,6 +3,8 @@ package edu.mscd.thesis.nn;
 import org.encog.engine.network.activation.ActivationFunction;
 import org.encog.mathutil.BoundMath;
 
+import edu.mscd.thesis.util.Util;
+
 /**
  * SoftPlus activation function implementation for Encog's ActivationFunction interface
  * @author Mike
@@ -10,6 +12,9 @@ import org.encog.mathutil.BoundMath;
 public class ActivationSoftPlus implements ActivationFunction {
 	private static final long serialVersionUID = 1L;
 	private final double[] params;
+	private static final double SOFTPLUSMAX = BoundMath.log(1.0+BoundMath.exp(1.0));
+	private static final double[] SRC = new double[]{0, SOFTPLUSMAX};
+	private static final double[] NORM = new double[]{0, 1};
 
 	public ActivationSoftPlus() {
 		this.params = new double[0];
@@ -22,7 +27,7 @@ public class ActivationSoftPlus implements ActivationFunction {
 	public final void activationFunction(final double[] x, final int start,
 			final int size) {
 		for (int i = start; i < start + size; i++) {
-			x[i] = BoundMath.log(1.0+BoundMath.exp(x[i]));
+			x[i] = Util.mapValue(BoundMath.log(1.0+BoundMath.exp(x[i])), SRC, NORM);
 		}
 	}
 
@@ -39,7 +44,7 @@ public class ActivationSoftPlus implements ActivationFunction {
 	 */
 	@Override
 	public final double derivativeFunction(final double b, final double a) {
-		return 1.0/(1.0+BoundMath.exp(-a));
+		return 1.0/(1.0+BoundMath.exp(-b));
 	}
 
 	/**
