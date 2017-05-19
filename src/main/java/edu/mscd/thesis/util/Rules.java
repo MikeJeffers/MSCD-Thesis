@@ -29,7 +29,7 @@ public class Rules {
 	// Zone growth factors
 	public static final int GROWTH_THRESHOLD = 125;
 	public static final int BASE_GROWTH_COST = 25;
-	public static final double GROWTH_RATE = 0.1;
+	public static final double GROWTH_RATE = 1.0;
 	// City population and Person constants
 	public static final int STARTING_POPULATION = 100;
 	public static final int BASE_POPULATION = 50;
