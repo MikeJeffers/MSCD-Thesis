@@ -9,17 +9,20 @@ import org.encog.ml.train.MLTrain;
 import org.encog.ml.train.strategy.HybridStrategy;
 import org.encog.neural.networks.BasicNetwork;
 import org.encog.neural.networks.layers.BasicLayer;
-import org.encog.neural.networks.training.propagation.Propagation;
 import org.encog.neural.networks.training.propagation.TrainingContinuation;
-import org.encog.neural.networks.training.propagation.manhattan.ManhattanPropagation;
 import org.encog.neural.networks.training.propagation.resilient.ResilientPropagation;
 import org.encog.neural.networks.training.propagation.scg.ScaledConjugateGradient;
-import org.encog.neural.networks.training.pso.NeuralPSO;
 import org.encog.neural.networks.training.strategy.RegularizationStrategy;
 
+import edu.mscd.thesis.controller.Action;
 import edu.mscd.thesis.controller.AiConfig;
 import edu.mscd.thesis.controller.AiConfigImpl;
+import edu.mscd.thesis.model.Model;
+import edu.mscd.thesis.model.city.CityProperty;
 import edu.mscd.thesis.util.NNConstants;
+import edu.mscd.thesis.util.Rules;
+import edu.mscd.thesis.util.Util;
+import edu.mscd.thesis.util.WeightVector;
 
 public abstract class AbstractNetwork implements Configurable {
 	protected AiConfig conf = new AiConfigImpl();
@@ -30,7 +33,7 @@ public abstract class AbstractNetwork implements Configurable {
 	protected int lastIteration;
 	protected int inputLayerSize;
 	protected final int OUTPUT_LAYER_SIZE = 1;
-
+	
 	protected void initTraining() {
 		DATASET.close();
 		DATASET = new BasicMLDataSet();
@@ -76,6 +79,16 @@ public abstract class AbstractNetwork implements Configurable {
 		this.initTraining();
 		this.train();
 	}
+	
+	protected double getActionScore(Model prev, Model current, Action act, WeightVector<CityProperty> weights ){
+		if(!act.isAI() && conf.isLearnFromUser()){
+			return conf.getUserMoveBias();
+		}
+		double prevScore = Rules.score(prev, weights);
+		double currentScore = Rules.score(current, weights);
+		double actionScore = Util.getNormalizedDifference(currentScore, prevScore);
+		return actionScore;
+	}
 
 
 	protected void learn(MLDataPair pair) {
@@ -94,5 +107,8 @@ public abstract class AbstractNetwork implements Configurable {
 		this.train.finishTraining();
 		Encog.getInstance().shutdown();
 	}
+	
+	
+
 
 }

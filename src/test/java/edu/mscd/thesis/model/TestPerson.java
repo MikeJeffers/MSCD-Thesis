@@ -6,7 +6,6 @@ import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Rule;
 import org.junit.Test;
 
 import edu.mscd.thesis.model.bldgs.Building;
@@ -15,8 +14,6 @@ import edu.mscd.thesis.model.bldgs.House;
 import edu.mscd.thesis.model.city.Citizen;
 import edu.mscd.thesis.model.zones.Density;
 import edu.mscd.thesis.model.zones.ZoneType;
-import edu.mscd.thesis.util.JavaFXThreadingRule;
-
 
 public class TestPerson {
 	private static Building work;

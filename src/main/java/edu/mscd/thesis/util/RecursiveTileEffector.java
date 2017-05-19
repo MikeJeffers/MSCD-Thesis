@@ -51,7 +51,6 @@ public class RecursiveTileEffector extends RecursiveTask<World>{
 			double dist = Math.max(t.getPos().distBetween(origin.getPos()), 0.1);//TODO arbitrary minimum factor
 			double pollutionAmount = Rules.POLLUTION_UNIT*(intensity*(1-(dist/intensity)));
 			t.pollute(pollutionAmount);
-			t.modifyLandValue(-pollutionAmount);
 		}
 	}
 	

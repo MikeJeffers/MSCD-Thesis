@@ -13,6 +13,8 @@ public interface AiConfig {
 	public int getObservationWaitTime();
 	public int getMaxTrainingEpochs();
 	public double getMaxError();
+	public double getUserMoveBias();
+	public boolean isLearnFromUser();
 	
 	
 	public AiConfig copy();

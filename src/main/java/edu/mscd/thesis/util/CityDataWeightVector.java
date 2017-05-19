@@ -14,7 +14,7 @@ public class CityDataWeightVector implements WeightVector<CityProperty>{
 
 	@Override
 	public void setWeightFor(CityProperty key, double value) {
-		this.weightMap.put(key, value);
+		this.weightMap.put(key, Math.max(value, 0.000001));
 	}
 
 	@Override
@@ -34,6 +34,22 @@ public class CityDataWeightVector implements WeightVector<CityProperty>{
 	@Override
 	public int getNumWeights() {
 		return this.weightMap.size();
+	}
+	
+	@Override
+	public String toString(){
+		StringBuilder sb = new StringBuilder();
+		sb.append(this.getClass().getSimpleName());
+		sb.append(" {");
+		for(Entry<CityProperty, Double> pair: this.weightMap.entrySet()){
+			sb.append("[");
+			sb.append(pair.getKey());
+			sb.append(":");
+			sb.append(pair.getValue());
+			sb.append("]");
+		}
+		sb.append("}");
+		return sb.toString();
 	}
 	
 	

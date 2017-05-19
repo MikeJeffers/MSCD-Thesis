@@ -2,7 +2,9 @@ package edu.mscd.thesis.controller;
 
 public enum AiMode {
 	ON(),
+	ON_FOLLOW(),
 	OFF(),
-	ASSIST();
+	ASSIST(), 
+	ASSIST_FOLLOW();
 
 }

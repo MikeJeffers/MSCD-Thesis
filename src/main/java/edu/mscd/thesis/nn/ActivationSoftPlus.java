@@ -4,7 +4,9 @@ import org.encog.engine.network.activation.ActivationFunction;
 import org.encog.mathutil.BoundMath;
 
 /**
- * SoftPlus activation function implementation for Encog's ActivationFunction interface
+ * SoftPlus activation function implementation for Encog's ActivationFunction
+ * interface
+ * 
  * @author Mike
  */
 public class ActivationSoftPlus implements ActivationFunction {
@@ -19,10 +21,9 @@ public class ActivationSoftPlus implements ActivationFunction {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public final void activationFunction(final double[] x, final int start,
-			final int size) {
+	public final void activationFunction(final double[] x, final int start, final int size) {
 		for (int i = start; i < start + size; i++) {
-			x[i] = BoundMath.log(1.0+BoundMath.exp(x[i]));
+			x[i] = BoundMath.log(1.0 + BoundMath.exp(x[i]));
 		}
 	}
 
@@ -39,7 +40,7 @@ public class ActivationSoftPlus implements ActivationFunction {
 	 */
 	@Override
 	public final double derivativeFunction(final double b, final double a) {
-		return 1.0/(1.0+BoundMath.exp(-a));
+		return 1.0 / (1.0 + BoundMath.exp(-b));
 	}
 
 	/**
@@ -74,7 +75,7 @@ public class ActivationSoftPlus implements ActivationFunction {
 	public final void setParam(final int index, final double value) {
 		this.params[index] = value;
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */

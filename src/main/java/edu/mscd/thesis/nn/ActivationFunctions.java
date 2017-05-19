@@ -9,7 +9,7 @@ public enum ActivationFunctions {
     //COMPETITVE(new ActivationCompetitive()), 
     ELLIOT(new ActivationElliott()), 
     //ELLIOT_SYM(new ActivationElliottSymmetric()), 
-    //GAUSSIAN(new ActivationGaussian()), 
+    GAUSSIAN(new ActivationGaussian()), 
     //LINEAR(new ActivationLinear()), 
     LOG(new ActivationLOG()), 
     RAMP(new ActivationRamp(1, 0, 1, 0)), 
@@ -20,7 +20,7 @@ public enum ActivationFunctions {
     SOFTSIGN(new ActivationSoftSign()),
     SIGMOID_STEEP(new ActivationSteepenedSigmoid()), 
     RELU(new ActivationReLu()),
-    //STEP(new ActivationStep(0,0.5,1.0)), 
+    STEP(new ActivationStep(0,0.5,1.0)), 
     TANH(new ActivationTANH()),
 	ATAN(new ActivationArcTan());
 	

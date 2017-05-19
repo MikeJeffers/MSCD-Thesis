@@ -3,7 +3,6 @@ package edu.mscd.thesis.view;
 import edu.mscd.thesis.model.bldgs.Building;
 import edu.mscd.thesis.model.zones.Zone;
 import edu.mscd.thesis.util.Rules;
-import edu.mscd.thesis.util.Util;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 
