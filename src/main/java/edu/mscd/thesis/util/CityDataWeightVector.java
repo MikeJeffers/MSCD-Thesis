@@ -14,7 +14,7 @@ public class CityDataWeightVector implements WeightVector<CityProperty>{
 
 	@Override
 	public void setWeightFor(CityProperty key, double value) {
-		this.weightMap.put(key, value);
+		this.weightMap.put(key, Math.max(value, 0.000001));
 	}
 
 	@Override

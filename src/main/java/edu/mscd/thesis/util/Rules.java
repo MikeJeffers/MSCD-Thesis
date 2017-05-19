@@ -42,6 +42,10 @@ public class Rules {
 	public static final int POLLUTION_HALFLIFE = 10;
 	public static final int LANDVALUE_UNIT = 1;
 	public static final int LANDVALUE_DECAY = 10;
+	
+	//Common vars
+	private static final double[] NORM = new double[]{0,1};
+	private static final double[] MAX_RANGE = new double[]{0,255};
 
 	/**
 	 * Method to produce value for which a given tile's zone should grow. This
@@ -58,7 +62,7 @@ public class Rules {
 	public static double getGrowthValue(Tile t, ZoneType z) {
 		double value = 0;
 		double valueAdded = t.getCurrentLandValue() - t.baseLandValue();
-		double normed = Util.mapValue(valueAdded, new double[] { 0, Rules.MAX }, new double[] { 0, 1 });
+		double normed = Util.mapValue(valueAdded, MAX_RANGE, NORM);
 		double rtd = Math.sqrt(Math.abs(normed));
 		valueAdded = Util.boundValue(rtd * MAX, 0, MAX);
 
@@ -128,6 +132,7 @@ public class Rules {
 
 	/**
 	 * Produces score on Model state REQUIRES: Model is reduced form
+	 * Used only when Weightvector not available
 	 * 
 	 * @param m
 	 *            - Model THAT HAS BEEN REDUCED
@@ -169,6 +174,18 @@ public class Rules {
 		World w = model.getWorld();
 		City c = w.getCity();
 		CityData data = c.getData();
+		return scoring(data, weights);
+	}
+	
+
+	/**
+	 * Testable logic component of Scoring algorithm
+	 * Use score(Model, Weights) method 
+	 * @param data
+	 * @param weights
+	 * @return
+	 */
+	static double scoring(CityData data, WeightVector<CityProperty> weights){
 		double weightSum = weights.getSum();
 		double cityScore = 0;
 		for (CityProperty prop : CityProperty.values()) {
@@ -183,7 +200,6 @@ public class Rules {
 		}
 		cityScore = cityScore / weightSum;
 		cityScore = Util.boundValue(cityScore, 0, 1);
-
 		return cityScore;
 	}
 
