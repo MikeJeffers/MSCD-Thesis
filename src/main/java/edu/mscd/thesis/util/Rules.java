@@ -29,7 +29,7 @@ public class Rules {
 	// Zone growth factors
 	public static final int GROWTH_THRESHOLD = 125;
 	public static final int BASE_GROWTH_COST = 25;
-	public static final double GROWTH_RATE = 1.0;
+	public static final double GROWTH_RATE = 0.5;
 	// City population and Person constants
 	public static final int STARTING_POPULATION = 100;
 	public static final int BASE_POPULATION = 50;
@@ -58,16 +58,19 @@ public class Rules {
 	public static double getGrowthValue(Tile t, ZoneType z) {
 		double value = 0;
 		double valueAdded = t.getCurrentLandValue() - t.baseLandValue();
+		double normed = Util.mapValue(valueAdded, new double[] { 0, Rules.MAX }, new double[] { 0, 1 });
+		double rtd = Math.sqrt(Math.abs(normed));
+		valueAdded = Util.boundValue(rtd * MAX, 0, MAX);
+
 		if (z == ZoneType.COMMERICAL) {
 			value += (valueAdded * 1.0 - t.getPollution() * 1.0);
 		} else if (z == ZoneType.INDUSTRIAL) {
-			value += (valueAdded * 0.1 + t.getPollution() * 1.0);
+			value += (t.materialValue() * 0.5 + t.getPollution() * 0.5);
 		} else if (z == ZoneType.RESIDENTIAL) {
 			value += (valueAdded * 1.0 - t.getPollution() * 1.0);
 		}
 		return value * GROWTH_RATE;
 	}
-
 
 	public static double getDemandForZoneType(ZoneType zt, World w) {
 		int r = w.getCity().getZoneCount(ZoneType.RESIDENTIAL);
@@ -183,6 +186,5 @@ public class Rules {
 
 		return cityScore;
 	}
-
 
 }
