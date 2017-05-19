@@ -1,6 +1,7 @@
 package edu.mscd.thesis.controller;
 
 import edu.mscd.thesis.model.Model;
+import edu.mscd.thesis.model.Tile;
 import edu.mscd.thesis.nn.AI;
 import edu.mscd.thesis.nn.RandomBenchmark;
 import edu.mscd.thesis.util.Rules;
@@ -142,7 +143,10 @@ public class GameLoop extends AnimationTimer implements Controller {
 				}
 			} else if (!a.isAI()) {
 				if (!a.isMove()) {
-					view.setTileToolTip(model.getWorld().getTileAt(a.getTarget()).getLabelText());
+					Tile targ = model.getWorld().getTileAt(a.getTarget());
+					if(targ!=null){
+						view.setTileToolTip(targ.getLabelText());
+					}
 				} else {
 					if (gameConfig.isPaused()) {
 						step = true;
