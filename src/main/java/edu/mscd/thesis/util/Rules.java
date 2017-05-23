@@ -38,9 +38,9 @@ public class Rules {
 	public static final int MIN_SPAWN_RATE = 1;
 	public static final int MAX_SPAWN_RATE = MIN_SPAWN_RATE * 5;
 	public static final int LIFE_SPAN = 100;
-	public static final int WEALTH_UNIT = 15;
+	public static final int WEALTH_UNIT = 10;
 	public static final int WEALTH_DECAY = 5;
-	public static final int HAPPINESS_UNIT = 15;
+	public static final int HAPPINESS_UNIT = 10;
 	public static final int HAPPINESS_DECAY = 5;
 	public static final double R_DEMAND_BASE = 0.05;
 	// Tile effect factors
@@ -218,7 +218,6 @@ public class Rules {
 	public static boolean willSpawn(Person p, int currentPopulation){
 		if(p.employed() && !p.homeless()){
 			double [] src = new double[]{BASE_POPULATION, MAX_POPULATION};
-			double [] targ =new double[]{MIN_SPAWN_RATE, MAX_SPAWN_RATE};
 			double popFactor = Util.mapValue(currentPopulation, src, NORM);
 			popFactor = (1.0-Math.pow(popFactor, 1.5))*(double)(MAX_SPAWN_RATE- MIN_SPAWN_RATE);
 			double spawnRate = MIN_SPAWN_RATE+popFactor;

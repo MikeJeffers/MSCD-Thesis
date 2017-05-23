@@ -14,6 +14,7 @@ public interface AiConfig {
 	public int getMaxTrainingEpochs();
 	public double getMaxError();
 	public double getUserMoveBias();
+	public int getRegularizationFactor();
 	public boolean isLearnFromUser();
 	
 	

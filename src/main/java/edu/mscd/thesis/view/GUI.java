@@ -200,6 +200,7 @@ public class GUI implements View {
 		Pane waitTime = makeWaitTimeSelector();
 		Pane epochs = makeEpochSelector();
 		Pane error = makeErrorSelector();
+		Pane regularization = makeRegSelector();
 		Pane submitButton = makeSubmitButton();
 
 		Label modeLabel = new Label("Ai Mode: ");
@@ -209,6 +210,7 @@ public class GUI implements View {
 		Label waitLabel = new Label("Observe cycle: ");
 		Label epochLabel = new Label("Training Epochs: ");
 		Label errorLabel = new Label("Error rate: ");
+		Label regLabel = new Label("Regularization Factor: ");
 		Label submitLabel = new Label("Commit Changes: ");
 		int i = 0;
 		GridPane.setConstraints(modeLabel, 0, i, 1, 1, HPos.LEFT, VPos.BASELINE);
@@ -229,6 +231,9 @@ public class GUI implements View {
 		GridPane.setConstraints(errorLabel, 0, i, 1, 1, HPos.LEFT, VPos.BASELINE);
 		GridPane.setConstraints(error, 1, i, 1, 1, HPos.LEFT, VPos.BASELINE);
 		i++;
+		GridPane.setConstraints(regLabel, 0, i, 1, 1, HPos.LEFT, VPos.BASELINE);
+		GridPane.setConstraints(regularization, 1, i, 1, 1, HPos.LEFT, VPos.BASELINE);
+		i++;
 		GridPane.setConstraints(depthLabel, 0, i, 1, 1, HPos.LEFT, VPos.BASELINE);
 		GridPane.setConstraints(depthSelector, 1, i, 1, 1, HPos.LEFT, VPos.BASELINE);
 		i++;
@@ -236,15 +241,34 @@ public class GUI implements View {
 		GridPane.setConstraints(submitButton, 1, i, 1, 1, HPos.LEFT, VPos.BASELINE);
 
 		pane.getChildren().addAll(aiModeCombo, depthSelector, learnRadius, waitTime, submitButton, modeLabel,
-				depthLabel, radiusLabel, waitLabel, submitLabel, epochs, epochLabel, error, errorLabel, userScoreLabel, userMoveScoreSlider);
+				depthLabel, radiusLabel, waitLabel, submitLabel, epochs, epochLabel, error, errorLabel, userScoreLabel,
+				userMoveScoreSlider, regularization, regLabel);
 		return pane;
 	}
-	
+
+	private Pane makeRegSelector() {
+		GridPane pane = new GridPane();
+		Spinner<Integer> selector = new Spinner<Integer>(NNConstants.MIN_REG, NNConstants.MAX_REG,
+				(NNConstants.MIN_REG + NNConstants.MAX_REG) / 2);
+		selector.setTooltip(new Tooltip("Sets a negative power of 10 for Regularization of weights in the network"));
+		selector.setMaxSize(100, 25);
+		selector.valueProperty().addListener(new ChangeListener<Integer>() {
+			@Override
+			public void changed(ObservableValue<? extends Integer> observable, Integer oldValue, Integer newValue) {
+				aiConfig.setRegularizationFactor(newValue);
+			}
+		});
+		pane.add(selector, 0, 0);
+		aiConfig.setRegularizationFactor(selector.getValue());
+		return pane;
+	}
+
 	private Pane makeUserSelfScoreSlider() {
 		GridPane pane = new GridPane();
 		Label dataReadout = new Label("0.5");
 		Slider slider = new Slider(0.0, 1.0, 0.5);
-		Tooltip tip = new Tooltip("If using follow-mode, this will weight the amount the AI will train towards your moves.");
+		Tooltip tip = new Tooltip(
+				"If using follow-mode, this will weight the amount the AI will train towards your moves.");
 		slider.setTooltip(tip);
 		aiConfig.setUserSelfScore(0.5);
 		slider.valueProperty().addListener(new ChangeListener<Number>() {
@@ -263,7 +287,6 @@ public class GUI implements View {
 		return pane;
 	}
 
-	
 	private Pane depthSelector() {
 		GridPane pane = new GridPane();
 		Spinner<Integer> selector = new Spinner<Integer>(NNConstants.MIN_LAYERS, NNConstants.MAX_LAYERS,
@@ -288,7 +311,6 @@ public class GUI implements View {
 		return pane;
 	}
 
-	
 	private Pane layerConfigPane(int layerIndex) {
 		GridPane pane = new GridPane();
 		Label layerName = new Label("Layer " + layerIndex + ": ");
@@ -331,7 +353,7 @@ public class GUI implements View {
 		});
 		if (index + 1 == aiConfig.getLayerCount()) {
 			selector.setDisable(true);
-		}else{
+		} else {
 			selector.setDisable(false);
 		}
 		pane.add(selector, 0, 0);
@@ -352,38 +374,39 @@ public class GUI implements View {
 		pane.add(button, 0, 0);
 		return pane;
 	}
-	
+
 	private Pane makeErrorSelector() {
 		GridPane pane = new GridPane();
-		SpinnerValueFactory.DoubleSpinnerValueFactory fac = new SpinnerValueFactory.DoubleSpinnerValueFactory(NNConstants.MIN_ERROR_RATE, NNConstants.MAX_ERROR_RATE,
-				aiConfig.getMaxError(), NNConstants.MIN_ERROR_RATE);
+		SpinnerValueFactory.DoubleSpinnerValueFactory fac = new SpinnerValueFactory.DoubleSpinnerValueFactory(
+				NNConstants.MIN_ERROR_RATE, NNConstants.MAX_ERROR_RATE, aiConfig.getMaxError(),
+				NNConstants.MIN_ERROR_RATE);
 		fac.setConverter(new StringConverter<Double>() {
-		     private final DecimalFormat df = new DecimalFormat("#.###");
-		     
-		     @Override 
-		     public String toString(Double value) {
-		         if (value == null) {
-		             return "";
-		         }
-		         return df.format(value);
-		     }
+			private final DecimalFormat df = new DecimalFormat("#.###");
 
-		     @Override 
-		     public Double fromString(String value) {
-		         try {
-		             if (value == null) {
-		                 return null;
-		             }
-		             value = value.trim();
-		             if (value.length() < 1) {
-		                 return null;
-		             }
-		             return df.parse(value).doubleValue();
-		         } catch (ParseException ex) {
-		             throw new RuntimeException(ex);
-		         }
-		     }
-		 });
+			@Override
+			public String toString(Double value) {
+				if (value == null) {
+					return "";
+				}
+				return df.format(value);
+			}
+
+			@Override
+			public Double fromString(String value) {
+				try {
+					if (value == null) {
+						return null;
+					}
+					value = value.trim();
+					if (value.length() < 1) {
+						return null;
+					}
+					return df.parse(value).doubleValue();
+				} catch (ParseException ex) {
+					throw new RuntimeException(ex);
+				}
+			}
+		});
 		Spinner<Double> selector = new Spinner<Double>(fac);
 		selector.setTooltip(new Tooltip("Sets target error-rate to train to"));
 		selector.setMaxSize(100, 25);
@@ -456,9 +479,9 @@ public class GUI implements View {
 			@Override
 			public void changed(ObservableValue<? extends AiMode> observable, AiMode oldValue, AiMode newValue) {
 				gameConfig.setAiMode(newValue);
-				if(newValue==AiMode.ASSIST_FOLLOW||newValue==AiMode.ON_FOLLOW){
+				if (newValue == AiMode.ASSIST_FOLLOW || newValue == AiMode.ON_FOLLOW) {
 					aiConfig.setFollowUser(true);
-				}else{
+				} else {
 					aiConfig.setFollowUser(false);
 				}
 				notifyObserver((ViewData) aiConfig.copy());

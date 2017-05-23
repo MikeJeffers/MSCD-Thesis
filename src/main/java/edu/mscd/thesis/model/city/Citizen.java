@@ -19,9 +19,9 @@ public class Citizen implements Person {
 
 	public Citizen(int _id) {
 		this.id = _id;
-		this.money = Util.getRandomBetween(1, Rules.MAX / 2);
-		this.happiness = Util.getRandomBetween(1, Rules.MAX / 2);
-		this.age = Util.getRandomBetween(1, Rules.LIFE_SPAN);
+		this.money = Rules.MAX/2;
+		this.happiness = Rules.MAX/2;
+		this.age = Util.getRandomBetween(1, Rules.LIFE_SPAN/2);
 	}
 
 	@Override
@@ -102,16 +102,16 @@ public class Citizen implements Person {
 	public void update() {
 		age++;
 		if (this.employed()) {
-			happiness+=Rules.HAPPINESS_UNIT;
-			money+=Rules.WEALTH_UNIT;
+			happiness += Rules.HAPPINESS_UNIT;
+			money += Rules.WEALTH_UNIT;
 		}
 		if (!this.homeless()) {
-			happiness+=Rules.HAPPINESS_UNIT;
-			money-=Rules.WEALTH_DECAY;
+			happiness += Rules.HAPPINESS_UNIT;
+			money -= Rules.WEALTH_DECAY;
 		}
-		happiness-=Rules.HAPPINESS_DECAY;
-		money-=Rules.WEALTH_DECAY;
-		
+		happiness -= Rules.HAPPINESS_DECAY;
+		money -= Rules.WEALTH_DECAY;
+
 		happiness = (int) Util.boundValue(happiness, -Rules.MAX, Rules.MAX);
 		money = (int) Util.boundValue(money, -Rules.MAX, Rules.MAX);
 	}

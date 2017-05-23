@@ -18,6 +18,7 @@ public class AiConfigImpl extends AbstractConfigData implements AiConfig {
 	private double maxError;
 	private double userMoveScore;
 	private boolean followUser;
+	private int regularizationFactor;
 
 	public AiConfigImpl() {
 		this.actFunctions = new HashMap<Integer, ActivationFunctions>();
@@ -29,6 +30,7 @@ public class AiConfigImpl extends AbstractConfigData implements AiConfig {
 		this.waitTime = 10;
 		this.maxEpochs = 150;
 		this.userMoveScore = 0.5;
+		this.regularizationFactor = -6;
 		this.followUser = true;
 		for (int i = 0; i < this.layerCount; i++) {
 			this.actFunctions.put(i, ActivationFunctions.SIGMOID);
@@ -83,6 +85,15 @@ public class AiConfigImpl extends AbstractConfigData implements AiConfig {
 	@Override
 	public boolean isLearnFromUser() {
 		return this.followUser;
+	}
+	
+	@Override
+	public int getRegularizationFactor() {
+		return this.regularizationFactor;
+	}
+	
+	public void setRegularizationFactor(int factor){
+		this.regularizationFactor = factor;
 	}
 
 	public void setUserSelfScore(double score) {
@@ -148,6 +159,7 @@ public class AiConfigImpl extends AbstractConfigData implements AiConfig {
 		a.setMaxTrainingEpochs(this.getMaxTrainingEpochs());
 		a.setMaxError(this.getMaxError());
 		a.setFollowUser(this.isLearnFromUser());
+		a.setRegularizationFactor(this.getRegularizationFactor());
 		a.setUserSelfScore(this.getUserMoveBias());
 		return a;
 	}
@@ -197,6 +209,8 @@ public class AiConfigImpl extends AbstractConfigData implements AiConfig {
 		sb.append(this.getMaxTrainingEpochs());
 		sb.append(" MaxError:");
 		sb.append(this.getMaxError());
+		sb.append(" RegFactor:");
+		sb.append(this.getRegularizationFactor());
 		sb.append(" FollowUser?:");
 		sb.append(this.isLearnFromUser());
 		sb.append(" UserScore:");
@@ -204,5 +218,7 @@ public class AiConfigImpl extends AbstractConfigData implements AiConfig {
 		sb.append("}\n");
 		return sb.toString();
 	}
+
+	
 
 }

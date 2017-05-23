@@ -1,6 +1,5 @@
 package edu.mscd.thesis.nn;
 
-
 import org.encog.Encog;
 import org.encog.ml.data.MLDataPair;
 import org.encog.ml.data.MLDataSet;
@@ -33,7 +32,7 @@ public abstract class AbstractNetwork implements Configurable {
 	protected int lastIteration;
 	protected int inputLayerSize;
 	protected final int OUTPUT_LAYER_SIZE = 1;
-	
+
 	protected void initTraining() {
 		DATASET.close();
 		DATASET = new BasicMLDataSet();
@@ -42,7 +41,7 @@ public abstract class AbstractNetwork implements Configurable {
 	protected void train() {
 		ScaledConjugateGradient scg = new ScaledConjugateGradient(network, DATASET);
 		this.train = new ResilientPropagation(network, DATASET);
-		this.train.addStrategy(new RegularizationStrategy(0.00001));
+		this.train.addStrategy(new RegularizationStrategy(NNConstants.getRegularization(conf.getRegularizationFactor())));
 		this.train.addStrategy(new HybridStrategy(scg));
 
 		int epoch = 0;
@@ -79,9 +78,9 @@ public abstract class AbstractNetwork implements Configurable {
 		this.initTraining();
 		this.train();
 	}
-	
-	protected double getActionScore(Model prev, Model current, Action act, WeightVector<CityProperty> weights ){
-		if(!act.isAI() && conf.isLearnFromUser()){
+
+	protected double getActionScore(Model prev, Model current, Action act, WeightVector<CityProperty> weights) {
+		if (!act.isAI() && conf.isLearnFromUser()) {
 			return conf.getUserMoveBias();
 		}
 		double prevScore = Rules.score(prev, weights);
@@ -90,25 +89,21 @@ public abstract class AbstractNetwork implements Configurable {
 		return actionScore;
 	}
 
-
 	protected void learn(MLDataPair pair) {
-		int epoch=0;
+		int epoch = 0;
 		DATASET.add(pair);
 		train.resume(pauseState);
-		while (train.getError() > conf.getMaxError() && epoch<conf.getMaxTrainingEpochs() || epoch<1) {
+		while (train.getError() > conf.getMaxError() && epoch < conf.getMaxTrainingEpochs() || epoch < 1) {
 			epoch++;
 			train.iteration();
 		}
 		System.out.println("Epochs Required:" + epoch + " to achieve Error:" + train.getError());
 		pauseState = train.pause();
 	}
-	
-	protected void shutdown(){
+
+	protected void shutdown() {
 		this.train.finishTraining();
 		Encog.getInstance().shutdown();
 	}
-	
-	
-
 
 }
