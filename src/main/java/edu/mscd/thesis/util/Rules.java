@@ -3,6 +3,7 @@ package edu.mscd.thesis.util;
 import java.util.Map;
 
 import edu.mscd.thesis.model.Model;
+import edu.mscd.thesis.model.Person;
 import edu.mscd.thesis.model.Tile;
 import edu.mscd.thesis.model.TileType;
 import edu.mscd.thesis.model.World;
@@ -34,20 +35,23 @@ public class Rules {
 	public static final int STARTING_POPULATION = 100;
 	public static final int BASE_POPULATION = 50;
 	public static final int MAX_POPULATION = TILE_COUNT * Density.VERYHIGH.getDensityLevel();
-	public static final int BIRTH_RATE = 5;
+	public static final int MIN_SPAWN_RATE = 1;
+	public static final int MAX_SPAWN_RATE = MIN_SPAWN_RATE * 5;
 	public static final int LIFE_SPAN = 100;
-	public static final int WEALTH_UNIT = 5;
-	public static final int HAPPINESS_UNIT = 5;
+	public static final int WEALTH_UNIT = 15;
+	public static final int WEALTH_DECAY = 5;
+	public static final int HAPPINESS_UNIT = 15;
+	public static final int HAPPINESS_DECAY = 5;
 	public static final double R_DEMAND_BASE = 0.05;
 	// Tile effect factors
 	public static final int POLLUTION_UNIT = 1;
 	public static final int POLLUTION_HALFLIFE = 10;
 	public static final int LANDVALUE_UNIT = 1;
 	public static final int LANDVALUE_DECAY = 10;
-	
-	//Common vars
-	private static final double[] NORM = new double[]{0,1};
-	private static final double[] MAX_RANGE = new double[]{0,255};
+
+	// Common vars
+	private static final double[] NORM = new double[] { 0, 1 };
+	private static final double[] MAX_RANGE = new double[] { 0, 255 };
 
 	/**
 	 * Method to produce value for which a given tile's zone should grow. This
@@ -133,8 +137,8 @@ public class Rules {
 	}
 
 	/**
-	 * Produces score on Model state REQUIRES: Model is reduced form
-	 * Used only when Weightvector not available
+	 * Produces score on Model state REQUIRES: Model is reduced form Used only
+	 * when Weightvector not available
 	 * 
 	 * @param m
 	 *            - Model THAT HAS BEEN REDUCED
@@ -178,16 +182,16 @@ public class Rules {
 		CityData data = c.getData();
 		return scoring(data, weights);
 	}
-	
 
 	/**
-	 * Testable logic component of Scoring algorithm
-	 * Use score(Model, Weights) method 
+	 * Testable logic component of Scoring algorithm Use score(Model, Weights)
+	 * method
+	 * 
 	 * @param data
 	 * @param weights
 	 * @return
 	 */
-	static double scoring(CityData data, WeightVector<CityProperty> weights){
+	static double scoring(CityData data, WeightVector<CityProperty> weights) {
 		double weightSum = weights.getSum();
 		double cityScore = 0;
 		for (CityProperty prop : CityProperty.values()) {
@@ -203,6 +207,27 @@ public class Rules {
 		cityScore = cityScore / weightSum;
 		cityScore = Util.boundValue(cityScore, 0, 1);
 		return cityScore;
+	}
+
+	/**
+	 * Per-Capita birthrate game logic
+	 * @param p - Person w/ attributes to determine spawn potential
+	 * @param currentPopulation - Birthrate declines as world fills to max potential
+	 * @return true if this Person will spawn another Person
+	 */
+	public static boolean willSpawn(Person p, int currentPopulation){
+		if(p.employed() && !p.homeless()){
+			double [] src = new double[]{BASE_POPULATION, MAX_POPULATION};
+			double [] targ =new double[]{MIN_SPAWN_RATE, MAX_SPAWN_RATE};
+			double popFactor = Util.mapValue(currentPopulation, src, NORM);
+			popFactor = (1.0-Math.pow(popFactor, 1.5))*(double)(MAX_SPAWN_RATE- MIN_SPAWN_RATE);
+			double spawnRate = MIN_SPAWN_RATE+popFactor;
+			int rand = Util.getRandomBetween(0, 100);
+			if(spawnRate>rand){
+				return true;
+			}
+		}
+		return false;
 	}
 
 }

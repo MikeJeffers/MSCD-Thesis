@@ -102,19 +102,16 @@ public class Citizen implements Person {
 	public void update() {
 		age++;
 		if (this.employed()) {
-			this.happiness+=Rules.HAPPINESS_UNIT;
-			this.money+=Rules.WEALTH_UNIT;
-		} else {
-			money--;
+			happiness+=Rules.HAPPINESS_UNIT;
+			money+=Rules.WEALTH_UNIT;
 		}
 		if (!this.homeless()) {
-			this.happiness+=Rules.HAPPINESS_UNIT;
-		} else {
-			happiness--;
+			happiness+=Rules.HAPPINESS_UNIT;
+			money-=Rules.WEALTH_DECAY;
 		}
-		if (this.homeless() && !this.employed()) {
-			this.happiness--;
-		}
+		happiness-=Rules.HAPPINESS_DECAY;
+		money-=Rules.WEALTH_DECAY;
+		
 		happiness = (int) Util.boundValue(happiness, -Rules.MAX, Rules.MAX);
 		money = (int) Util.boundValue(money, -Rules.MAX, Rules.MAX);
 	}

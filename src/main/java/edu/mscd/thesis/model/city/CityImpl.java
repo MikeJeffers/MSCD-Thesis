@@ -164,7 +164,8 @@ public class CityImpl implements City {
 	@Override
 	public void update() {
 		Collection<Person> toRemove = new HashSet<Person>();
-		int toAddCounter = 0;
+		int toAddCounter = Rules.MIN_SPAWN_RATE;
+		int currentPop = this.totalPopulation();
 		synchronized (this.population) {
 			for (Person p : population) {
 				p.update();
@@ -172,13 +173,11 @@ public class CityImpl implements City {
 					toRemove.add(p);
 				} else if (p.getAge() > Rules.LIFE_SPAN) {
 					toRemove.add(p);
-				} else if (p.employed() && !p.homeless()) {
-					int rand = Util.getRandomBetween(0, 100);
-					if (rand < Rules.BIRTH_RATE) {
-						toAddCounter++;
-					}
 				} else if (p.getHappiness() < 0 || p.getMoney() < 0) {
 					toRemove.add(p);
+				}
+				if(Rules.willSpawn(p, currentPop)){
+					toAddCounter++;
 				}
 			}
 			for (Person p : toRemove) {
