@@ -36,6 +36,8 @@ public class Rules {
 	public static final int MAX_POPULATION = TILE_COUNT * Density.VERYHIGH.getDensityLevel();
 	public static final int BIRTH_RATE = 5;
 	public static final int LIFE_SPAN = 100;
+	public static final int WEALTH_UNIT = 5;
+	public static final int HAPPINESS_UNIT = 5;
 	public static final double R_DEMAND_BASE = 0.05;
 	// Tile effect factors
 	public static final int POLLUTION_UNIT = 1;
