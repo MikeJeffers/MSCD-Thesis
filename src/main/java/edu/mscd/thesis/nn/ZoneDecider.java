@@ -196,7 +196,7 @@ public class ZoneDecider extends AbstractNetwork implements Actor, Learner {
 			double[] zoneAction = ModelToVec.getZoneAsVector(ZoneType.values()[i]);
 			double[] input = Util.appendVectors(modelVector, zoneAction);
 			MLData data = new BasicMLData(input);
-			double qValue = network.compute(data).getData(0);
+			double qValue = computeOutput(data);
 			qValues[i] = qValue;
 			if (qValue > maxScore) {
 				maxScore = qValue;

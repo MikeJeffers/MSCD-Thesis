@@ -20,6 +20,8 @@ public class GameLoop extends AnimationTimer implements Controller {
 	private long previousTime = System.currentTimeMillis();
 
 	private int turn = 0;
+	
+	private boolean repeatMove;
 
 	private Action mostRecentlyAppliedAction = new UserAction();
 	private Action prevUserAct = new UserAction();
@@ -129,9 +131,13 @@ public class GameLoop extends AnimationTimer implements Controller {
 
 	@Override
 	public void notifyViewEvent(ViewData data) {
+		if(data==null){
+			return;
+		}
 		AiMode mode = gameConfig.getAiMode();
 		if (data.isAction()) {
 			Action a = data.getAction().copy();
+			repeatMove = mostRecentlyAppliedAction.equals(a);
 			if (mode != AiMode.OFF && a.isAI()) {
 				view.updateAIMove(a);
 				Action next = a;
@@ -148,15 +154,17 @@ public class GameLoop extends AnimationTimer implements Controller {
 						view.setTileToolTip(targ.getLabelText());
 					}
 				} else {
-					if (gameConfig.isPaused()) {
-						step = true;
-					}
-					if (mode == AiMode.ASSIST_FOLLOW || mode == AiMode.ON_FOLLOW) {
-						ai.forceUpdate();
+					if(!repeatMove){
+						if (gameConfig.isPaused()) {
+							step = true;
+						}
+						if (mode == AiMode.ASSIST_FOLLOW || mode == AiMode.ON_FOLLOW) {
+							ai.forceUpdate();
+						}
 					}
 				}
 				if (prevUserAct.getZoneType() != a.getZoneType()) {
-					System.out.println("Displaying Q-Map for user move or selection");
+					System.out.println("Displaying Q-Map for "+a.getZoneType());
 					getCurrentQValueMap(a);
 				}
 				prevUserAct = a;

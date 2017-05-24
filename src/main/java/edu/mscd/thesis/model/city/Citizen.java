@@ -19,9 +19,9 @@ public class Citizen implements Person {
 
 	public Citizen(int _id) {
 		this.id = _id;
-		this.money = Rules.MAX/2;
-		this.happiness = Rules.MAX/2;
-		this.age = Util.getRandomBetween(1, Rules.LIFE_SPAN/2);
+		this.age = Util.getRandomBetween(1, Rules.LIFE_SPAN-1);
+		this.money = (int) Util.mapValue(age, new double[]{0,  Rules.LIFE_SPAN}, new double[]{1, Rules.MAX*0.75});
+		this.happiness = (int) Util.mapValue(age, new double[]{0,  Rules.LIFE_SPAN}, new double[]{1, Rules.MAX*0.75});
 	}
 
 	@Override

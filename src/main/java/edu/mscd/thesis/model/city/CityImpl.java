@@ -11,7 +11,6 @@ import edu.mscd.thesis.model.bldgs.Building;
 import edu.mscd.thesis.model.zones.Density;
 import edu.mscd.thesis.model.zones.ZoneType;
 import edu.mscd.thesis.util.Rules;
-import edu.mscd.thesis.util.Util;
 
 public class CityImpl implements City {
 

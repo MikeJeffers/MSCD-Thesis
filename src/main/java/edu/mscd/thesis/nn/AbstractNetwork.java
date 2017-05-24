@@ -1,6 +1,7 @@
 package edu.mscd.thesis.nn;
 
 import org.encog.Encog;
+import org.encog.ml.data.MLData;
 import org.encog.ml.data.MLDataPair;
 import org.encog.ml.data.MLDataSet;
 import org.encog.ml.data.basic.BasicMLDataSet;
@@ -97,8 +98,12 @@ public abstract class AbstractNetwork implements Configurable {
 			epoch++;
 			train.iteration();
 		}
-		System.out.println("Epochs Required:" + epoch + " to achieve Error:" + train.getError());
+		System.out.println(this.getClass().getSimpleName()+"; Epochs Required:" + epoch + " to achieve Error:" + train.getError());
 		pauseState = train.pause();
+	}
+	
+	protected double computeOutput(MLData input){
+		return network.compute(input).getData(0);
 	}
 
 	protected void shutdown() {

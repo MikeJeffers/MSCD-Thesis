@@ -1,6 +1,7 @@
 package edu.mscd.thesis.nn;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Random;
@@ -45,6 +46,9 @@ public class NN extends AbstractNetwork implements AI {
 	private Action act;
 	private WeightVector<CityProperty> weights;
 
+	private AiAction prevAct = new AiAction();
+	private Action prevLearned = new AiAction();
+
 	private TileMapper tileMap;
 	private ZoneDecider zoneDecider;
 	private ZoneMapper zoneMap;
@@ -53,6 +57,8 @@ public class NN extends AbstractNetwork implements AI {
 
 	private Lock lock;
 	private volatile boolean forceUpdate = false;
+	
+	private static final int MAX_ITERATION = 15;
 
 	public NN(Model state) {
 		this.lock = new ReentrantLock();
@@ -95,6 +101,7 @@ public class NN extends AbstractNetwork implements AI {
 
 	@Override
 	public Action takeNextAction() {
+		AiAction move = (AiAction) prevAct.copy();
 		Action zoneAction = this.zoneDecider.takeNextAction();
 		ZoneType zoneType = zoneAction.getZoneType();
 		int radius = zoneAction.getRadius();
@@ -102,57 +109,86 @@ public class NN extends AbstractNetwork implements AI {
 		double[] mapA = this.tileMap.getMapOfValues(this.state, zoneAction);
 		double[] mapB = this.zoneMap.getMapOfValues(this.state, zoneAction);
 		double[] combined = new double[mapA.length];
-		int maxIndex = 0;
-		int minIndex = 0;
-		double maxScore = -Rules.MAX;
-		double minScore = Rules.MAX;
-		assert (mapA.length == mapB.length && locations.length == mapA.length);
 		double[] zoneVec = ModelToVec.getZoneAsVector(zoneType);
-		List<Integer> ties = new ArrayList<Integer>();
-		for (int i = 0; i < mapA.length; i++) {
+		assert (mapA.length == mapB.length && locations.length == mapA.length);
+		for(int i=0; i<mapA.length; i++){
 			locations[i] = this.state.getWorld().getTiles()[i].getPos();
 			double[] modelMapValues = new double[] { mapA[i], mapB[i] };
 			double[] inputVec = Util.appendVectors(modelMapValues, zoneVec);
 			MLData input = new BasicMLData(inputVec);
-			double value = network.compute(input).getData(0);
+			double value = computeOutput(input);
 			combined[i] = value;
-			if (value <= minScore) {
-				minScore = value;
-				minIndex = i;
-			}
-			if (value >= maxScore) {
-				if (value > maxScore) {
-					ties.clear();
+		}
+		
+		List<Integer> blackListed = new ArrayList<Integer>();
+		int count=0;
+		while (move.equals(prevAct) && count<MAX_ITERATION) {
+			int maxIndex = 0;
+			int minIndex = 0;
+			double maxScore = -Rules.MAX;
+			double minScore = Rules.MAX;
+			List<Integer> ties = new ArrayList<Integer>();
+			System.out.println(Arrays.toString(blackListed.toArray()));
+			for (int i = 0; i < mapA.length; i++) {
+				if(blackListed.contains(i)){
+					continue;
 				}
-				maxScore = value;
-				maxIndex = i;
-				ties.add(i);
+				double value = combined[i];
+				if (value <= minScore) {
+					minScore = value;
+					minIndex = i;
+				}
+				if (value >= maxScore) {
+					if (value > maxScore) {
+						ties.clear();
+					}
+					maxScore = value;
+					maxIndex = i;
+					ties.add(i);
+				}
 			}
+			if(ties.isEmpty()){
+				count++;
+				System.out.println("--NN Iteration["+count+"]--");
+				continue;
+			}
+			maxIndex = ties.get((int) Math.random() * ties.size());
+			blackListed.add(maxIndex);
+			double difference = maxScore - minScore;
+
+			
+			System.out.println("Possible actions based on Mapped Score domain[" + combined[minIndex] + ","
+					+ combined[maxIndex] + "]");
+			System.out.println("Difference:" + (maxScore - minScore));
+			System.out.print("Best move:{");
+			System.out.print(locations[maxIndex]);
+			System.out.println();
+			System.out.print("Worst move:{");
+			System.out.print(locations[minIndex]);
+			System.out.println();
+			System.out.println("ZoneDecider picked:{" + zoneType + "}");
+			
+			if (minIndex == maxIndex || difference==0) {
+				System.out.println("AI can not find ideal move to make");
+				count++;
+				System.out.println("--NN Iteration["+count+"]--");
+				continue;
+			}
+
+			move.setTarget(locations[maxIndex]);
+			move.setZoneType(zoneType);
+			move.setRadius(radius);
+			move.setSquare(false);
+			move.setMove(false);
+			count++;
 		}
-		maxIndex = ties.get((int) Math.random() * ties.size());
-
-		System.out.println(
-				"Possible actions based on Mapped Score domain[" + combined[minIndex] + "," + combined[maxIndex] + "]");
-		System.out.println("Difference:" + (maxScore - minScore));
-		System.out.print("Best move:{");
-		System.out.print(locations[maxIndex]);
-		System.out.println();
-		System.out.print("Worst move:{");
-		System.out.print(locations[minIndex]);
-		System.out.println();
-
-		System.out.println("ZoneDecider picked:{" + zoneType + "}");
-		if (minIndex == maxIndex) {
-			System.out.println("AI can not find ideal move to make");
-			return null;
+		if(count>=MAX_ITERATION){
+			this.configure(this.conf);
 		}
-
-		AiAction move = new AiAction();
-		move.setTarget(locations[maxIndex]);
-		move.setZoneType(zoneType);
-		move.setRadius(radius);
-		move.setSquare(false);
-		move.setMove(false);
+		System.out.println(move);
+		System.out.println(prevAct);
+		prevAct = move;
+		System.out.println("AI-move success!");
 		return move;
 	}
 
@@ -166,16 +202,21 @@ public class NN extends AbstractNetwork implements AI {
 		if (index < 0) {
 			return;
 		}
+		if(action.equals(prevLearned)){
+			System.out.println("Ignoring repeat move on Learn cycle");
+			return;
+		}
 		this.zoneDecider.addCase(prev, current, action, weights);
 		this.tileMap.addCase(prev, current, action, weights);
 		this.zoneMap.addCase(prev, current, action, weights);
-		System.out.print("Learning on:");
-		System.out.print(action);
+		
 
 		double[] tileValues = this.tileMap.getMapOfValues(prev, action);
 		double[] zoneValues = this.tileMap.getMapOfValues(prev, action);
 
 		double actionScore = getActionScore(prev, current, action, weights);
+		System.out.print("Learning on:");
+		System.out.println(action);
 		System.out.println(" ");
 		System.out.println(" with score " + actionScore);
 		System.out.println(" ");
@@ -184,6 +225,7 @@ public class NN extends AbstractNetwork implements AI {
 		double[] input = Util.appendVectors(modelVec, actionVec);
 		MLData in = new BasicMLData(input);
 		MLData out = new BasicMLData(new double[] { actionScore });
+		this.prevLearned = action;
 		super.learn(new BasicMLDataPair(in, out));
 	}
 

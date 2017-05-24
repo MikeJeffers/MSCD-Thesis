@@ -39,9 +39,9 @@ public class Rules {
 	public static final int MAX_SPAWN_RATE = MIN_SPAWN_RATE * 5;
 	public static final int LIFE_SPAN = 100;
 	public static final int WEALTH_UNIT = 10;
-	public static final int WEALTH_DECAY = 5;
+	public static final int WEALTH_DECAY = 2;
 	public static final int HAPPINESS_UNIT = 10;
-	public static final int HAPPINESS_DECAY = 5;
+	public static final int HAPPINESS_DECAY = 2;
 	public static final double R_DEMAND_BASE = 0.05;
 	// Tile effect factors
 	public static final int POLLUTION_UNIT = 1;
@@ -73,7 +73,7 @@ public class Rules {
 		valueAdded = Util.boundValue(rtd * MAX, 0, MAX);
 
 		if (z == ZoneType.COMMERICAL) {
-			value += (valueAdded * 1.0 - t.getPollution() * 1.0);
+			value += (valueAdded * 1.0 - t.getPollution() * 0.9);
 		} else if (z == ZoneType.INDUSTRIAL) {
 			value += (t.materialValue() * 0.5 + t.getPollution() * 0.5);
 		} else if (z == ZoneType.RESIDENTIAL) {
