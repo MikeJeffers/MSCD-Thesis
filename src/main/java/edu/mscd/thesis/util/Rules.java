@@ -73,7 +73,7 @@ public class Rules {
 		valueAdded = Util.boundValue(rtd * MAX, 0, MAX);
 
 		if (z == ZoneType.COMMERICAL) {
-			value += (valueAdded * 1.0 - t.getPollution() * 0.9);
+			value += (valueAdded * 1.0 - t.getPollution() * 1.0);
 		} else if (z == ZoneType.INDUSTRIAL) {
 			value += (t.materialValue() * 0.5 + t.getPollution() * 0.5);
 		} else if (z == ZoneType.RESIDENTIAL) {
@@ -211,18 +211,21 @@ public class Rules {
 
 	/**
 	 * Per-Capita birthrate game logic
-	 * @param p - Person w/ attributes to determine spawn potential
-	 * @param currentPopulation - Birthrate declines as world fills to max potential
+	 * 
+	 * @param p
+	 *            - Person w/ attributes to determine spawn potential
+	 * @param currentPopulation
+	 *            - Birthrate declines as world fills to max potential
 	 * @return true if this Person will spawn another Person
 	 */
-	public static boolean willSpawn(Person p, int currentPopulation){
-		if(p.employed() && !p.homeless()){
-			double [] src = new double[]{BASE_POPULATION, MAX_POPULATION};
+	public static boolean willSpawn(Person p, int currentPopulation) {
+		if (p.employed() && !p.homeless()) {
+			double[] src = new double[] { BASE_POPULATION, MAX_POPULATION };
 			double popFactor = Util.mapValue(currentPopulation, src, NORM);
-			popFactor = (1.0-Math.pow(popFactor, 1.5))*(double)(MAX_SPAWN_RATE- MIN_SPAWN_RATE);
-			double spawnRate = MIN_SPAWN_RATE+popFactor;
+			popFactor = (1.0 - Math.pow(popFactor, 1.5)) * (double) (MAX_SPAWN_RATE - MIN_SPAWN_RATE);
+			double spawnRate = MIN_SPAWN_RATE + popFactor;
 			int rand = Util.getRandomBetween(0, 100);
-			if(spawnRate>rand){
+			if (spawnRate > rand) {
 				return true;
 			}
 		}
