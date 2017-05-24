@@ -51,7 +51,7 @@ public abstract class AbstractNetwork implements Configurable {
 			epoch++;
 		}while(train.getError() > conf.getMaxError() && epoch < conf.getMaxTrainingEpochs() && DATASET.size()>0);
 
-		System.out.println("Epochs Required:" + epoch + " to achieve Error:" + train.getError());
+		System.out.println(this.getClass().getSimpleName()+"; Epochs Required:" + epoch + " to achieve Error:" + train.getError());
 		lastIteration = train.getIteration();
 		pauseState = train.pause();
 	}
@@ -66,9 +66,9 @@ public abstract class AbstractNetwork implements Configurable {
 				false, OUTPUT_LAYER_SIZE));
 		network.getStructure().finalizeStructure();
 		network.reset();
-		System.out.println(network.toString());
+		System.out.println(this.getClass().getSimpleName()+network.toString());
 		for (int i = 0; i < network.getLayerCount(); i++) {
-			System.out.println(network.getLayerNeuronCount(i));
+			System.out.println("Layer["+i+"] neurons:"+network.getLayerNeuronCount(i)+" ActFunc:"+network.getActivation(i).getClass().getSimpleName());
 		}
 	}
 

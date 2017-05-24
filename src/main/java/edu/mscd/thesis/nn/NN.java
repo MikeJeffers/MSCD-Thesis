@@ -46,7 +46,8 @@ public class NN extends AbstractNetwork implements AI {
 	private Action act;
 	private WeightVector<CityProperty> weights;
 
-	private AiAction prevAct = new AiAction();
+	private static final int MAX_ITERATION = 15;
+	private static List<Action> actionHistory = new ArrayList<Action>();
 	private Action prevLearned = new AiAction();
 
 	private TileMapper tileMap;
@@ -58,7 +59,7 @@ public class NN extends AbstractNetwork implements AI {
 	private Lock lock;
 	private volatile boolean forceUpdate = false;
 	
-	private static final int MAX_ITERATION = 15;
+	
 
 	public NN(Model state) {
 		this.lock = new ReentrantLock();
@@ -73,6 +74,19 @@ public class NN extends AbstractNetwork implements AI {
 		initNetwork();
 		initTraining();
 		train();
+	}
+	
+	private boolean isMoveRepeat(Action act){
+		return actionHistory.contains(act);
+	}
+	
+	private void addMoveToHistory(Action act){
+		while(actionHistory.size()>MAX_ITERATION){
+			actionHistory.remove(0);
+		}
+		if(!isMoveRepeat(act)){
+			actionHistory.add(act);
+		}
 	}
 
 	@Override
@@ -101,7 +115,7 @@ public class NN extends AbstractNetwork implements AI {
 
 	@Override
 	public Action takeNextAction() {
-		AiAction move = (AiAction) prevAct.copy();
+		AiAction move = new AiAction();
 		Action zoneAction = this.zoneDecider.takeNextAction();
 		ZoneType zoneType = zoneAction.getZoneType();
 		int radius = zoneAction.getRadius();
@@ -122,7 +136,7 @@ public class NN extends AbstractNetwork implements AI {
 		
 		List<Integer> blackListed = new ArrayList<Integer>();
 		int count=0;
-		while (move.equals(prevAct) && count<MAX_ITERATION) {
+		while ((isMoveRepeat(move) && count<MAX_ITERATION)|| count==0) {
 			int maxIndex = 0;
 			int minIndex = 0;
 			double maxScore = -Rules.MAX;
@@ -186,8 +200,7 @@ public class NN extends AbstractNetwork implements AI {
 			this.configure(this.conf);
 		}
 		System.out.println(move);
-		System.out.println(prevAct);
-		prevAct = move;
+		addMoveToHistory(move);
 		System.out.println("AI-move success!");
 		return move;
 	}
