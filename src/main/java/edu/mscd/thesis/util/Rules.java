@@ -70,19 +70,22 @@ public class Rules {
 		if(z==ZoneType.EMPTY){
 			return 0;
 		}
-		double value = 1.0;
+		double value = 0.0;
 		double norm = Util.mapValue(t.getCurrentLandValue(), SRC, NORM);
 		double v = Math.sqrt(norm);
 		if (z == ZoneType.COMMERICAL) {
-			v*=225;
+			v*=300;
+			v = v-t.getPollution();
 			value = v-t.getPollution();
 		} else if (z == ZoneType.INDUSTRIAL) {
 			// =)
 			value = t.materialValue();
 		} else if (z == ZoneType.RESIDENTIAL) {
-			v*=150;
+			v*=100;
+			v = v-t.getPollution();
 			value = v-t.getPollution();
 		}
+		
 		return value * GROWTH_RATE;
 	}
 	

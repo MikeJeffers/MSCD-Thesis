@@ -50,22 +50,22 @@ public class TileRenderer implements Renderer<Tile> {
 			g.setFill(landValueColor);
 		} else if (renderMode == RenderMode.DENSITY) {
 			double level = 0;
-
-			if (tile.getZone().getBuilding() != null) {
-				level = tile.getZone().getBuilding().getDensity().getDensityLevel();
+			double max = tile.getType().getMaxDensity().getDensityLevel();
+			double red = 1.0;
+			double blue = 0.0;
+			if(max!=0){
+				if (tile.getZone().getBuilding() != null) {
+					level = tile.getZone().getBuilding().getDensity().getDensityLevel();
+				}
+				 red = level / max;
+				 blue = (level / (max * 2));
 			}
-
-			double max = Density.VERYHIGH.getDensityLevel();
-			double red = level / max;
-			double blue = (level / (max * 2));
 			double green = 0.5;
 			double alpha = 1;
 			Color densityColor = new Color(red, green, blue, alpha);
-
 			g.setFill(densityColor);
 		} else if (renderMode == RenderMode.POLICY) {
 			double value = tile.getOverlayValue();
-
 			Color col = Color.MAGENTA;
 			if (value == 1.0) {
 				col = Color.CYAN;
