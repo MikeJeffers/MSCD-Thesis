@@ -43,8 +43,8 @@ public class Util {
 	 */
 	public static final int MAX_SEQUENTIAL = (Rules.WORLD_X * Rules.WORLD_Y) / 8;
 	// GUI constants
-	public static final int WINDOW_WIDTH = 400;
-	public static final int WINDOW_HEIGHT = 300;
+	public static final int WINDOW_WIDTH = 1200;
+	public static final int WINDOW_HEIGHT = 900;
 	public static final int CHART_WIDTH = 450;
 	public static final int CHART_HEIGHT = 300;
 	public static final long MAX_FRAME_DURATION = 2000000000L;
@@ -52,7 +52,7 @@ public class Util {
 	public static final double SCALE_FACTOR = Util.getScaleFactor(Rules.WORLD_X, Rules.WORLD_Y, WINDOW_WIDTH,
 			WINDOW_HEIGHT);
 	public static final boolean SCREENSHOT = false;
-	public static final boolean REPORT = true;
+	public static final boolean REPORT = false;
 	public static final int ZONETYPES = ZoneType.values().length;
 	public static final int TILE_ATTRIBUTES = 5;
 	public static final int MAX_RADIUS = 6;

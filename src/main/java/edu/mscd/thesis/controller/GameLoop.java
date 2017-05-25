@@ -20,7 +20,7 @@ public class GameLoop extends AnimationTimer implements Controller {
 	private long previousTime = System.currentTimeMillis();
 
 	private int turn = 0;
-	
+
 	private boolean repeatMove;
 
 	private Action mostRecentlyAppliedAction = new UserAction();
@@ -44,7 +44,6 @@ public class GameLoop extends AnimationTimer implements Controller {
 
 	@Override
 	public void handle(long now) {
-
 		if (!gameConfig.isPaused() && now - previousTime > gameConfig.getSpeed() * Util.MAX_FRAME_DURATION) {
 			System.out.println(now - previousTime);
 			step = true;
@@ -67,11 +66,13 @@ public class GameLoop extends AnimationTimer implements Controller {
 
 	private void turn() {
 		turn++;
-		ai.getLock().lock();
-		try {
-			ai.update(model, mostRecentlyAppliedAction, view.getWeightVector());
-		} finally {
-			ai.getLock().unlock();
+		if (gameConfig.getAiMode() != AiMode.OFF) {
+			ai.getLock().lock();
+			try {
+				ai.update(model, mostRecentlyAppliedAction, view.getWeightVector());
+			} finally {
+				ai.getLock().unlock();
+			}
 		}
 		model.getLock().lock();
 		try {
@@ -83,17 +84,19 @@ public class GameLoop extends AnimationTimer implements Controller {
 	}
 
 	private void getCurrentQValueMap(Action action) {
-		ai.getLock().lock();
-		double[] map = new double[Rules.TILE_COUNT];
-		try {
-			map = ai.getMapOfValues(model, action);
-		} finally {
-			ai.getLock().unlock();
+		if (gameConfig.getAiMode() != AiMode.OFF) {
+			ai.getLock().lock();
+			double[] map = new double[Rules.TILE_COUNT];
+			try {
+				map = ai.getMapOfValues(model, action);
+			} finally {
+				ai.getLock().unlock();
+			}
+			double[] norm = new double[] { 0, 1 };
+			map = Util.mapValues(map, norm);
+			model.setOverlay(map);
+			takeScreen = true;
 		}
-		double[] norm = new double[] { 0, 1 };
-		map = Util.mapValues(map, norm);
-		model.setOverlay(map);
-		takeScreen = true;
 	}
 
 	private void render() {
@@ -131,7 +134,7 @@ public class GameLoop extends AnimationTimer implements Controller {
 
 	@Override
 	public void notifyViewEvent(ViewData data) {
-		if(data==null){
+		if (data == null) {
 			return;
 		}
 		AiMode mode = gameConfig.getAiMode();
@@ -150,11 +153,11 @@ public class GameLoop extends AnimationTimer implements Controller {
 			} else if (!a.isAI()) {
 				if (!a.isMove()) {
 					Tile targ = model.getWorld().getTileAt(a.getTarget());
-					if(targ!=null){
+					if (targ != null) {
 						view.setTileToolTip(targ.getLabelText());
 					}
 				} else {
-					if(!repeatMove){
+					if (!repeatMove) {
 						if (gameConfig.isPaused()) {
 							step = true;
 						}
@@ -164,7 +167,7 @@ public class GameLoop extends AnimationTimer implements Controller {
 					}
 				}
 				if (prevUserAct.getZoneType() != a.getZoneType()) {
-					System.out.println("Displaying Q-Map for "+a.getZoneType());
+					System.out.println("Displaying Q-Map for " + a.getZoneType());
 					getCurrentQValueMap(a);
 				}
 				prevUserAct = a;
@@ -190,24 +193,24 @@ public class GameLoop extends AnimationTimer implements Controller {
 	}
 
 	private void reportNewConfig(AiConfig conf, int turnCount) {
-		if(Util.REPORT){
+		if (Util.REPORT) {
 			StringBuilder sb = new StringBuilder("Turn:");
 			sb.append(turnCount);
-			if(ai instanceof RandomBenchmark){
+			if (ai instanceof RandomBenchmark) {
 				sb.append("--RANDOM--");
-			}else{
+			} else {
 				sb.append("--NewConfig--");
 				sb.append(conf.toString());
 			}
 			sb.append("\n--Weights--");
 			sb.append(view.getWeightVector().toString());
 			Util.report(sb.toString());
-			
+
 		}
 	}
-	
-	private void reportScore(double score, int turn){
-		if(Util.REPORT){
+
+	private void reportScore(double score, int turn) {
+		if (Util.REPORT) {
 			Util.report("Turn:" + turn + "; Score=" + score);
 		}
 	}

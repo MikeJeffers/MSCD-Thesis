@@ -23,21 +23,22 @@ public class Rules {
 	public static final int WORLD_X = 32;
 	public static final int WORLD_Y = 24;
 	public static final int TILE_COUNT = WORLD_X * WORLD_Y;
-	public static final int WORLD_TILE_NOISE = 1;
+	public static final int WORLD_TILE_NOISE = 0;
 	// Game Constants and factors
 	public static final int MAX = 255;
 	public static final int MAX_PERCENTAGE = 100;
 	// Zone growth factors
 	public static final int GROWTH_THRESHOLD = 125;
 	public static final int BASE_GROWTH_COST = 25;
-	public static final double GROWTH_RATE = 0.5;
+	public static final double GROWTH_RATE = 1.5;
+	public static final int MAX_ABANDONED = 25;
 	// City population and Person constants
 	public static final int STARTING_POPULATION = 100;
 	public static final int BASE_POPULATION = 50;
 	public static final int MAX_POPULATION = TILE_COUNT * Density.VERYHIGH.getDensityLevel();
 	public static final int MIN_SPAWN_RATE = 1;
 	public static final int MAX_SPAWN_RATE = MIN_SPAWN_RATE * 5;
-	public static final int LIFE_SPAN = 100;
+	public static final int LIFE_SPAN = 200;
 	public static final int WEALTH_UNIT = 10;
 	public static final int WEALTH_DECAY = 2;
 	public static final int HAPPINESS_UNIT = 10;
@@ -51,7 +52,7 @@ public class Rules {
 
 	// Common vars
 	private static final double[] NORM = new double[] { 0, 1 };
-	private static final double[] MAX_RANGE = new double[] { 0, 255 };
+	private static final double[] SRC = new double[] { 0, MAX };
 
 	/**
 	 * Method to produce value for which a given tile's zone should grow. This
@@ -66,21 +67,25 @@ public class Rules {
 	 *         value
 	 */
 	public static double getGrowthValue(Tile t, ZoneType z) {
-		double value = 0;
-		double valueAdded = t.getCurrentLandValue() - t.baseLandValue();
-		double normed = Util.mapValue(valueAdded, MAX_RANGE, NORM);
-		double rtd = Math.sqrt(Math.abs(normed));
-		valueAdded = Util.boundValue(rtd * MAX, 0, MAX);
-
+		if(z==ZoneType.EMPTY){
+			return 0;
+		}
+		double value = 1.0;
+		double norm = Util.mapValue(t.getCurrentLandValue(), SRC, NORM);
+		double v = Math.sqrt(norm);
 		if (z == ZoneType.COMMERICAL) {
-			value += (valueAdded * 1.0 - t.getPollution() * 1.0);
+			v*=225;
+			value = v-t.getPollution();
 		} else if (z == ZoneType.INDUSTRIAL) {
-			value += (t.materialValue() * 0.5 + t.getPollution() * 0.5);
+			// =)
+			value = t.materialValue();
 		} else if (z == ZoneType.RESIDENTIAL) {
-			value += (valueAdded * 1.0 - t.getPollution() * 1.0);
+			v*=150;
+			value = v-t.getPollution();
 		}
 		return value * GROWTH_RATE;
 	}
+	
 
 	public static double getDemandForZoneType(ZoneType zt, World w) {
 		int r = w.getCity().getZoneCount(ZoneType.RESIDENTIAL);

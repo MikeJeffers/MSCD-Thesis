@@ -26,6 +26,7 @@ public abstract class AbstractBuilding implements Building {
 	private int maxOccupants;
 	private int wealthLevel;
 	private Density density;
+	private int abandonedCount;
 	
 
 	public AbstractBuilding(Pos2D pos, TileType tType, ZoneType zType, Density density) {
@@ -43,13 +44,16 @@ public abstract class AbstractBuilding implements Building {
 		int currentOccupancy = this.currentOccupancy();
 		int maxOccupancy = this.getMaxOccupants();
 		int growthCost = Rules.BASE_GROWTH_COST*currentDensityLevel;
+		if(currentOccupancy<maxOccupancy-1){
+			abandonedCount++;
+		}else{
+			abandonedCount=0;
+		}
 		if(currentOccupancy>=maxOccupancy && (growthValue-growthCost)>Rules.GROWTH_THRESHOLD && tileMaxDensity>currentDensityLevel){
 			this.changeDensity(getDensity().getNextLevel());
 			return growthValue - growthCost;
-		}else if(currentDensityLevel==0 && (growthValue-growthCost)>Rules.GROWTH_THRESHOLD){
-			this.changeDensity(getDensity().getNextLevel());
-			return growthValue - growthCost;
-		}else if(growthValue<Rules.GROWTH_THRESHOLD){
+		
+		}else if(growthValue<Rules.GROWTH_THRESHOLD || abandonedCount>Rules.MAX_ABANDONED){
 			this.changeDensity(getDensity().getPrevLevel());
 			return growthValue;
 		}
@@ -59,6 +63,7 @@ public abstract class AbstractBuilding implements Building {
 
 	@Override
 	public void changeDensity(Density density) {
+		this.abandonedCount = 0;
 		this.density = density;
 	}
 
