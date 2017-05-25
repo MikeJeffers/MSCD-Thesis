@@ -38,7 +38,7 @@ public class Rules {
 	public static final int MAX_POPULATION = TILE_COUNT * Density.VERYHIGH.getDensityLevel();
 	public static final int MIN_SPAWN_RATE = 1;
 	public static final int MAX_SPAWN_RATE = MIN_SPAWN_RATE * 5;
-	public static final int LIFE_SPAN = 200;
+	public static final int LIFE_SPAN = 100;
 	public static final int WEALTH_UNIT = 10;
 	public static final int WEALTH_DECAY = 2;
 	public static final int HAPPINESS_UNIT = 10;
@@ -74,15 +74,13 @@ public class Rules {
 		double norm = Util.mapValue(t.getCurrentLandValue(), SRC, NORM);
 		double v = Math.sqrt(norm);
 		if (z == ZoneType.COMMERICAL) {
-			v*=300;
-			v = v-t.getPollution();
+			v*=254;
 			value = v-t.getPollution();
 		} else if (z == ZoneType.INDUSTRIAL) {
 			// =)
-			value = t.materialValue();
+			value = t.materialValue()/2;
 		} else if (z == ZoneType.RESIDENTIAL) {
 			v*=100;
-			v = v-t.getPollution();
 			value = v-t.getPollution();
 		}
 		

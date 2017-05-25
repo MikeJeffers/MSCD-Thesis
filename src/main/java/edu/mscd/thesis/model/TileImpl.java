@@ -18,6 +18,8 @@ public class TileImpl implements Tile {
 	private ZoneFactory factory;
 	private volatile double landValue;
 	private volatile double pollution;
+	private Object landValueLock = new Object();
+	private Object pollutionLock = new Object();
 
 	public TileImpl(Pos2D pos, TileType type, ZoneFactory factory) {
 		this.pos = pos;
@@ -34,8 +36,12 @@ public class TileImpl implements Tile {
 		if (zoning != null) {
 			zoning.update();
 		}
-		this.pollution = pollutionDecay(this.pollution);
-		this.landValue = landValueDecay(this.landValue);
+		synchronized(landValueLock){
+			this.landValue = landValueDecay(this.landValue);
+		}
+		synchronized(pollutionLock){
+			this.pollution = pollutionDecay(this.pollution);
+		}
 	}
 
 	private double pollutionDecay(double pollution) {
@@ -157,9 +163,11 @@ public class TileImpl implements Tile {
 	}
 
 	@Override
-	public synchronized void pollute(double pollution) {
-		this.pollution += pollution;
-		this.pollution = Util.boundValue(this.pollution, 0, Rules.MAX);
+	public void pollute(double pollution) {
+		synchronized(pollutionLock){
+			this.pollution += pollution;
+			this.pollution = Util.boundValue(this.pollution, 0, Rules.MAX);
+		}
 	}
 
 	@Override
@@ -168,9 +176,11 @@ public class TileImpl implements Tile {
 	}
 
 	@Override
-	public synchronized void modifyLandValue(double factor) {
-		this.landValue += factor;
-		this.landValue = Util.boundValue(this.landValue, this.baseLandValue(), Rules.MAX);
+	public void modifyLandValue(double factor) {
+		synchronized(landValueLock){
+			this.landValue += factor;
+			this.landValue = Util.boundValue(this.landValue, this.baseLandValue(), Rules.MAX);
+		}
 	}
 
 	@Override
