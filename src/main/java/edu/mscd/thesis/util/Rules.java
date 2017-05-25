@@ -77,13 +77,11 @@ public class Rules {
 			v*=254;
 			value = v-t.getPollution();
 		} else if (z == ZoneType.INDUSTRIAL) {
-			// =)
 			value = t.materialValue()/2;
 		} else if (z == ZoneType.RESIDENTIAL) {
 			v*=100;
 			value = v-t.getPollution();
 		}
-		
 		return value * GROWTH_RATE;
 	}
 	

@@ -2,7 +2,6 @@ package edu.mscd.thesis.view;
 
 import edu.mscd.thesis.model.Pos2D;
 import edu.mscd.thesis.model.Tile;
-import edu.mscd.thesis.model.zones.Density;
 import edu.mscd.thesis.model.zones.Zone;
 import edu.mscd.thesis.util.Rules;
 import edu.mscd.thesis.util.Util;
