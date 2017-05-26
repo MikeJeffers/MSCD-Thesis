@@ -14,6 +14,7 @@ import edu.mscd.thesis.model.bldgs.House;
 import edu.mscd.thesis.model.city.Citizen;
 import edu.mscd.thesis.model.zones.Density;
 import edu.mscd.thesis.model.zones.ZoneType;
+import edu.mscd.thesis.util.Rules;
 
 public class TestPerson {
 	private static Building work;
@@ -47,21 +48,23 @@ public class TestPerson {
 	public void testInit() {
 		Person p = new Citizen(1);
 		assertNotNull(p);
-		
 	}
 	
 	@Test
-	public void testMethodCalls(){
-		
+	public void testStates(){
 		Person p = new Citizen(1);
-		assertNotNull(p);
-		p.fire();
-		p.evict();
-		assertNotNull(p);
+		assertFalse(p.employed());
+		work.addOccupant(p);
+		assertTrue(p.employed());
+		assertTrue(p.homeless());
+		home.addOccupant(p);
+		assertFalse(p.homeless());
+		work.addOccupant(p);
+		assertTrue(p.employed());
 	}
 	
 	@Test
-	public void testPersonStates() {
+	public void testStatesWithUpdate() {
 		int id = 1;
 		Person p = new Citizen(id);
 		assertEquals(id, p.getID());
@@ -78,6 +81,8 @@ public class TestPerson {
 		
 		//Turn
 		p.update();
+		work.update(Rules.MAX);
+		home.update(Rules.MAX);
 		assertNotNull(p);
 		assertEquals(id, p.getID());
 		assertFalse(p.employed());
@@ -89,8 +94,8 @@ public class TestPerson {
 		assertTrue(age<p.getAge());
 		
 		//Change state
-		p.employAt(work);
-		p.liveAt(home);
+		home.addOccupant(p);
+		work.addOccupant(p);
 		assertNotNull(p);
 		assertTrue(p.employed());
 		assertFalse(p.homeless());
@@ -100,6 +105,8 @@ public class TestPerson {
 		//Take some number of turns
 		for(int i=0; i<5; i++){
 			p.update();
+			work.update(Rules.MAX);
+			home.update(Rules.MAX);
 		}
 		
 		assertNotNull(p);
@@ -110,12 +117,6 @@ public class TestPerson {
 		assertTrue(money<p.getMoney());
 		assertTrue(happiness<p.getHappiness());
 		assertTrue(age<p.getAge());
-		
-		
-		
 	}
-	
-
-	
 
 }

@@ -8,16 +8,33 @@ import edu.mscd.thesis.model.Pos2D;
 import edu.mscd.thesis.model.TileType;
 import edu.mscd.thesis.model.zones.Density;
 import edu.mscd.thesis.model.zones.ZoneType;
+import edu.mscd.thesis.util.Rules;
 
 public abstract class Home extends AbstractBuilding {
 
 	public Home(Pos2D pos, TileType tileType, ZoneType zoneType, Density density) {
 		super(pos, tileType, zoneType, density);
 	}
+	
+	@Override
+	public double update(double growthValue){
+		houseOccupants();
+		return growthValue = super.update(growthValue);
+	}
+	
+	private void houseOccupants(){
+		for(Person p: this.getOccupants()){
+			double distFactor = 1.0;
+			if(p.getWork()!=null && p.getHome()!=null){
+				double dist = p.getWork().getPos().distBetween(p.getHome().getPos());
+				distFactor = Rules.distanceDecayFunction(dist);
+			}
+			p.please((int) ((Rules.HAPPINESS_UNIT*this.getDensity().getDensityLevel())*distFactor));
+		}
+	}
 
 	@Override
 	public void setMaxOccupancy(int max) {
-
 		int diff = super.getOccupants().size() - max;
 		if (diff > 0) {
 			Collection<Person> toRemove = new ArrayList<Person>();

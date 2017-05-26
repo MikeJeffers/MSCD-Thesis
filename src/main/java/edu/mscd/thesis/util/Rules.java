@@ -23,7 +23,7 @@ public class Rules {
 	public static final int WORLD_X = 32;
 	public static final int WORLD_Y = 24;
 	public static final int TILE_COUNT = WORLD_X * WORLD_Y;
-	public static final int WORLD_TILE_NOISE = 0;
+	public static final int WORLD_TILE_NOISE = 1;
 	// Game Constants and factors
 	public static final int MAX = 255;
 	public static final int MAX_PERCENTAGE = 100;
@@ -39,9 +39,9 @@ public class Rules {
 	public static final int MIN_SPAWN_RATE = 1;
 	public static final int MAX_SPAWN_RATE = MIN_SPAWN_RATE * 5;
 	public static final int LIFE_SPAN = 100;
-	public static final int WEALTH_UNIT = 10;
+	public static final int WEALTH_UNIT = 5;
 	public static final int WEALTH_DECAY = 2;
-	public static final int HAPPINESS_UNIT = 10;
+	public static final int HAPPINESS_UNIT = 5;
 	public static final int HAPPINESS_DECAY = 2;
 	public static final double R_DEMAND_BASE = 0.05;
 	// Tile effect factors
@@ -234,6 +234,17 @@ public class Rules {
 			}
 		}
 		return false;
+	}
+	
+	
+	/**
+	 * Decay function to determine factor to modify benefit of home-work
+	 * @param x - Distance between work and home
+	 * @return modifier
+	 */
+	public static double distanceDecayFunction(double x){
+		double value = (1.0/(1.0+Math.pow(x/5.0, 2)))+1;
+		return Util.boundValue(value, 1, 2);
 	}
 
 }

@@ -101,17 +101,22 @@ public class Citizen implements Person {
 	@Override
 	public void update() {
 		age++;
-		if (this.employed()) {
-			money += Rules.WEALTH_UNIT;
-		}
-		if (!this.homeless()) {
-			happiness += Rules.HAPPINESS_UNIT;
-		}
+
 		happiness -= Rules.HAPPINESS_DECAY;
 		money -= Rules.WEALTH_DECAY;
 
 		happiness = (int) Util.boundValue(happiness, -Rules.MAX, Rules.MAX);
 		money = (int) Util.boundValue(money, -Rules.MAX, Rules.MAX);
+	}
+	
+	@Override
+	public void please(int amount) {
+		happiness+=amount;
+	}
+
+	@Override
+	public void pay(int amount) {
+		money+=amount;
 	}
 
 	@Override
@@ -137,5 +142,7 @@ public class Citizen implements Person {
 	public int getAge() {
 		return this.age;
 	}
+
+	
 
 }

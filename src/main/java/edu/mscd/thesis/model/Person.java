@@ -4,25 +4,26 @@ package edu.mscd.thesis.model;
 import edu.mscd.thesis.model.bldgs.Building;
 
 public interface Person{
-	Pos2D getCurrentPos();
+	public Pos2D getCurrentPos();
 
-	Building getHome();
-	boolean homeless();
+	public Building getHome();
+	public boolean homeless();
 
-	Building getWork();
-	boolean employed();
+	public Building getWork();
+	public boolean employed();
 
-	void fire();
-	void evict();
-	void employAt(Building b);
+	public void fire();
+	public void evict();
+	public void employAt(Building b);
 
-	void liveAt(Building b);
+	public void liveAt(Building b);
 
-	int getHappiness();
-
-	int getMoney();
-	int getID();
-	int getAge();
+	public int getHappiness();
+	public void please(int amount);
+	public int getMoney();
+	public void pay(int amount);
+	public int getID();
+	public int getAge();
 	void update();
 	
 }
