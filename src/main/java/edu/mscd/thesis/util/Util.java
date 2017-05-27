@@ -17,9 +17,12 @@ import java.util.Random;
 import javax.imageio.ImageIO;
 
 import edu.mscd.thesis.controller.Action;
+import edu.mscd.thesis.geodata.GeoType;
 import edu.mscd.thesis.model.Pos2D;
 import edu.mscd.thesis.model.Tile;
+import edu.mscd.thesis.model.TileType;
 import edu.mscd.thesis.model.city.CityProperty;
+import edu.mscd.thesis.model.zones.Density;
 import edu.mscd.thesis.model.zones.ZoneType;
 import javafx.collections.ObservableList;
 import javafx.embed.swing.SwingFXUtils;
@@ -28,6 +31,7 @@ import javafx.scene.chart.XYChart.Data;
 import javafx.scene.chart.XYChart.Series;
 import javafx.scene.image.WritableImage;
 import javafx.scene.layout.GridPane;
+import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
 /**
@@ -414,6 +418,46 @@ public class Util {
 			System.err.println("Failed to save screenshot");
 			e.printStackTrace();
 		}
+	}
+	
+	
+	public static GeoType computeGeoType(Color pixelColor){
+		double minDiff = 3;
+		GeoType closestType = GeoType.CROPS;
+		for(GeoType geo: GeoType.values()){
+			double difference = Util.colorDistance(geo.getColor(), pixelColor);
+			if(difference<minDiff){
+				minDiff = difference;
+				closestType = geo;
+			}
+		}
+		return closestType;
+	}
+	
+	public static void growZoningByGeotype(GeoType g, Tile t){
+		if(g.getDensity()==Density.NONE){
+			return;
+		}else{
+			t.setZone(ZoneType.values()[Util.getRandomBetween(0, 3)]);
+			for(int i =0; i<g.getDensity().getDensityLevel(); i++){
+				t.getZone().deltaValue(Rules.MAX);
+				t.getZone().update();
+			}
+		}
+	}
+	
+	public static TileType getTileTypeOfGeoType(GeoType g){
+		TileType[] tileTypes = g.getPossibleTiles();
+		int randSelect = Util.getRandomBetween(0, tileTypes.length);
+		return tileTypes[randSelect];
+	}
+	
+	private static double colorDistance(Color aColor, Color bColor){
+		double delta = 0;
+		delta+=Math.abs(aColor.getRed()-bColor.getRed());
+		delta+=Math.abs(aColor.getGreen()-bColor.getGreen());
+		delta+=Math.abs(aColor.getBlue()-bColor.getBlue());
+		return delta;
 	}
 
 }

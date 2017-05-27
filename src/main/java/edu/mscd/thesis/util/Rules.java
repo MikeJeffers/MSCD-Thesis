@@ -20,8 +20,8 @@ import edu.mscd.thesis.model.zones.ZoneType;
  *
  */
 public class Rules {
-	public static final int WORLD_X = 32;
-	public static final int WORLD_Y = 24;
+	public static final int WORLD_X = 80;
+	public static final int WORLD_Y = 60;
 	public static final int TILE_COUNT = WORLD_X * WORLD_Y;
 	public static final int WORLD_TILE_NOISE = 1;
 	// Game Constants and factors
@@ -33,7 +33,7 @@ public class Rules {
 	public static final double GROWTH_RATE = 1.5;
 	public static final int MAX_ABANDONED = 25;
 	// City population and Person constants
-	public static final int STARTING_POPULATION = 100;
+	public static final int STARTING_POPULATION = 500;
 	public static final int BASE_POPULATION = 50;
 	public static final int MAX_POPULATION = TILE_COUNT * Density.VERYHIGH.getDensityLevel();
 	public static final int MIN_SPAWN_RATE = 1;

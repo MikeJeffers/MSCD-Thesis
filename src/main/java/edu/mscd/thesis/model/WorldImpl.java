@@ -1,20 +1,28 @@
 package edu.mscd.thesis.model;
 
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Random;
+import java.util.Stack;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import javax.imageio.ImageIO;
+
 import edu.mscd.thesis.controller.Action;
 import edu.mscd.thesis.controller.ModelData;
 import edu.mscd.thesis.controller.Observer;
+import edu.mscd.thesis.geodata.GeoType;
 import edu.mscd.thesis.model.bldgs.Building;
 import edu.mscd.thesis.model.city.City;
 import edu.mscd.thesis.model.city.CityImpl;
+import edu.mscd.thesis.model.zones.Density;
 import edu.mscd.thesis.model.zones.Zone;
 import edu.mscd.thesis.model.zones.ZoneFactory;
 import edu.mscd.thesis.model.zones.ZoneFactoryImpl;
@@ -24,6 +32,7 @@ import edu.mscd.thesis.util.TileUpdaterService;
 import edu.mscd.thesis.util.Util;
 import edu.mscd.thesis.view.Selection;
 import javafx.application.Platform;
+import javafx.scene.paint.Color;
 
 public class WorldImpl implements World {
 	private Tile[] tiles;
@@ -45,15 +54,54 @@ public class WorldImpl implements World {
 		tiles = new Tile[size];
 		this.rows = sizeY;
 		this.cols = sizeX;
-		this.smoothWorldInit(Rules.WORLD_TILE_NOISE);
+		// this.smoothWorldInit(Rules.WORLD_TILE_NOISE);
+		this.createWorldFromFile();
 		this.city = new CityImpl(this);
+		
 		tileUpdater = new TileUpdaterService(this);
 	}
-	
+
+	private void createWorldFromFile() {
+		ZoneFactory zFact = new ZoneFactoryImpl();
+		for (int i = 0; i < tiles.length; i++) {
+			Pos2D p = new Pos2D((i % cols), (i / cols));
+			Tile t = new TileImpl(p, TileType.BARREN, zFact);
+			tiles[i] = t;
+		}
+		try {
+			int i = 0;
+			BufferedImage img = ImageIO.read(new File("resources/Maps/DENVER.png"));
+			int stepX = img.getWidth() / this.cols;
+			int stepY = img.getHeight() / this.rows;
+
+			for (int y = 0; y < this.rows; y++) {
+				for (int x = 0; x < this.cols; x++) {
+					if (i >= tiles.length) {
+						break;
+					}
+					int rgb = img.getRGB(x * stepX, y * stepY);
+					Color pixelColor = Color.rgb((rgb >> 16) & 0xFF, (rgb >> 8) & 0xFF, (rgb >> 0) & 0xFF);
+					GeoType geo = Util.computeGeoType(pixelColor);
+					TileType type = Util.getTileTypeOfGeoType(geo);
+					Pos2D coordinate = new Pos2D(x, y);
+					Tile t = new TileImpl(coordinate, type, zFact);
+					Util.growZoningByGeotype(geo, t);
+					tiles[i] = t;
+					i++;
+				}
+			}
+
+		} catch (IOException e) {
+			e.printStackTrace();
+			smoothWorldInit(Rules.WORLD_TILE_NOISE);
+		}
+	}
+
 	/**
-	 * World created with smooth transitions between random mountain peaks and water bodies
+	 * World created with smooth transitions between random mountain peaks and
+	 * water bodies
 	 */
-	private void smoothWorldInit(int noise){
+	private void smoothWorldInit(int noise) {
 		Random r = new Random();
 		TileType[] types = TileType.values();
 		ZoneFactory zFact = new ZoneFactoryImpl();
@@ -63,25 +111,25 @@ public class WorldImpl implements World {
 			tiles[i] = t;
 		}
 		int totalCells = tiles.length;
-		int numMountains = (int) Math.sqrt(rows+r.nextInt(rows));
-		int numOceans = (int) Math.sqrt(rows+r.nextInt(rows));
-		int maxSize = (int) Util.boundValue(Math.sqrt(cols)/2, 1, 5);
-		for(int i=0; i<numMountains; i++){
+		int numMountains = (int) Math.sqrt(rows + r.nextInt(rows));
+		int numOceans = (int) Math.sqrt(rows + r.nextInt(rows));
+		int maxSize = (int) Util.boundValue(Math.sqrt(cols) / 2, 1, 5);
+		for (int i = 0; i < numMountains; i++) {
 			int location = r.nextInt(totalCells);
 			Tile t = new TileImpl(tiles[location].getPos(), TileType.MOUNTAIN, zFact);
-			tiles[location] = t;	
+			tiles[location] = t;
 			List<Tile> neighbors = Util.getNeighborsCircularDist(t, tiles, r.nextInt(maxSize));
-			for(Tile n: neighbors){
+			for (Tile n : neighbors) {
 				int index = Util.getIndexOf(n, this.tiles);
 				tiles[index] = new TileImpl(tiles[index].getPos(), TileType.MOUNTAIN, zFact);
 			}
 		}
-		for(int i=0; i<numOceans; i++){
+		for (int i = 0; i < numOceans; i++) {
 			int location = r.nextInt(totalCells);
 			Tile t = new TileImpl(tiles[location].getPos(), TileType.OCEAN, zFact);
-			tiles[location] = t;	
+			tiles[location] = t;
 			List<Tile> neighbors = Util.getNeighborsCircularDist(t, tiles, r.nextInt(maxSize));
-			for(Tile n: neighbors){
+			for (Tile n : neighbors) {
 				int index = Util.getIndexOf(n, this.tiles);
 				tiles[index] = new TileImpl(tiles[index].getPos(), TileType.OCEAN, zFact);
 			}
@@ -90,33 +138,32 @@ public class WorldImpl implements World {
 		for (int i = 0; i < tiles.length; i++) {
 			double distToMtn = distanceTo(tiles[i].getPos(), TileType.MOUNTAIN);
 			double distToOcean = distanceTo(tiles[i].getPos(), TileType.OCEAN);
-			double ratio = distToOcean/(distToOcean+distToMtn+0.001);
-			int typeSelection = (int) Math.floor(ratio*(types.length));
-			typeSelection+=(int)Util.getRandomBetween(-noise, noise+1);
+			double ratio = distToOcean / (distToOcean + distToMtn + 0.001);
+			int typeSelection = (int) Math.floor(ratio * (types.length));
+			typeSelection += (int) Util.getRandomBetween(-noise, noise + 1);
 			typeSelection = (int) Util.boundValue(typeSelection, 0, types.length);
-			typeSelection = (typeSelection)%types.length;
+			typeSelection = (typeSelection) % types.length;
 			Tile t = new TileImpl(tiles[i].getPos(), types[typeSelection], zFact);
 			smoothed.add(t);
 		}
-		for(int i=0; i<tiles.length; i++){
+		for (int i = 0; i < tiles.length; i++) {
 			tiles[i] = smoothed.get(i);
 		}
-		
+
 	}
-	
-	private double distanceTo(Pos2D origin, TileType tileOfThisType){
+
+	private double distanceTo(Pos2D origin, TileType tileOfThisType) {
 		double minDist = Double.MAX_VALUE;
-		for(int i=0; i<this.tiles.length; i++){
-			if(tiles[i].getType()==tileOfThisType){
+		for (int i = 0; i < this.tiles.length; i++) {
+			if (tiles[i].getType() == tileOfThisType) {
 				double dist = origin.distBetween(tiles[i].getPos());
-				if(dist<minDist){
+				if (dist < minDist) {
 					minDist = dist;
 				}
 			}
 		}
 		return minDist;
 	}
-	
 
 	@Override
 	public void run() {
@@ -124,20 +171,20 @@ public class WorldImpl implements World {
 			Action msg;
 			while ((msg = queue.poll()) != null) {
 				this.lock.lock();
-				try{
+				try {
 					processAction(msg);
-				}finally{
+				} finally {
 					lock.unlock();
 				}
 			}
-			if(updateCalled){
+			if (updateCalled) {
 				this.lock.lock();
-				try{
+				try {
 					updateTasks();
-				}finally{
+				} finally {
 					lock.unlock();
 				}
-				updateCalled=false;
+				updateCalled = false;
 			}
 		}
 
@@ -147,8 +194,7 @@ public class WorldImpl implements World {
 		this.setAllZonesAround(data.getTarget(), data.getZoneType(), data.getRadius(), data.isSquare(), data.isMove());
 	}
 
-	
-	private void updateTasks(){
+	private void updateTasks() {
 		Collection<Person> homeless = this.city.getHomeless();
 		Collection<Person> unemployed = this.city.getUnemployed();
 
@@ -182,15 +228,16 @@ public class WorldImpl implements World {
 		tileUpdater.runUpdates();
 		city.update();
 		Platform.runLater(new Runnable() {
-            @Override public void run() {
-            	notifyObserver(city.getData());
-            }
-        });
+			@Override
+			public void run() {
+				notifyObserver(city.getData());
+			}
+		});
 	}
-	
+
 	@Override
 	public void update() {
-		this.updateCalled =true;
+		this.updateCalled = true;
 	}
 
 	private Building findClosestOpenHome(Tile t) {
@@ -376,14 +423,12 @@ public class WorldImpl implements World {
 	@Override
 	public void halt() {
 		this.isRunning = false;
-		
+
 	}
 
 	@Override
 	public Lock getLock() {
 		return this.lock;
 	}
-
-
 
 }
