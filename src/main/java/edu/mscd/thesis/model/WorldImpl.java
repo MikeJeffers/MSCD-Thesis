@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Random;
-import java.util.Stack;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.locks.Lock;
@@ -22,7 +21,6 @@ import edu.mscd.thesis.geodata.GeoType;
 import edu.mscd.thesis.model.bldgs.Building;
 import edu.mscd.thesis.model.city.City;
 import edu.mscd.thesis.model.city.CityImpl;
-import edu.mscd.thesis.model.zones.Density;
 import edu.mscd.thesis.model.zones.Zone;
 import edu.mscd.thesis.model.zones.ZoneFactory;
 import edu.mscd.thesis.model.zones.ZoneFactoryImpl;
@@ -47,21 +45,42 @@ public class WorldImpl implements World {
 	private volatile boolean isRunning = true;
 	private Lock lock;
 
-	public WorldImpl(int sizeX, int sizeY) {
+	private boolean isLoadedCity = false;
+
+	public WorldImpl(int sizeX, int sizeY, String fileName, boolean seedCity) {
 		this.lock = new ReentrantLock();
 		this.observers = new ArrayList<Observer<ModelData>>();
 		int size = sizeX * sizeY;
 		tiles = new Tile[size];
 		this.rows = sizeY;
 		this.cols = sizeX;
-		// this.smoothWorldInit(Rules.WORLD_TILE_NOISE);
-		this.createWorldFromFile();
-		this.city = new CityImpl(this);
+		fileName = Util.MAPS_PATH+fileName+Util.IMG_EXT;
+		if(Util.testFile(fileName)){
+			System.out.println("Loading "+fileName);
+			this.createWorldFromFile(fileName, seedCity);
+		}else{
+			this.smoothWorldInit(Rules.WORLD_TILE_NOISE);
+		}
+		System.out.println("World initialized");
 		
+		this.city = new CityImpl(this);
+
 		tileUpdater = new TileUpdaterService(this);
+		if (isLoadedCity && seedCity) {
+			System.out.println("Growing City...");
+			this.lock.lock();
+			for(int i=0; i<10; i++){
+				for(Tile t: tiles){
+					t.getZone().deltaValue(Rules.MAX);
+				}
+				this.updateTasks();
+			}
+			this.lock.unlock();
+			System.out.println("...City seeded.");
+		}
 	}
 
-	private void createWorldFromFile() {
+	private void createWorldFromFile(String fileName, boolean seed) {
 		ZoneFactory zFact = new ZoneFactoryImpl();
 		for (int i = 0; i < tiles.length; i++) {
 			Pos2D p = new Pos2D((i % cols), (i / cols));
@@ -70,10 +89,9 @@ public class WorldImpl implements World {
 		}
 		try {
 			int i = 0;
-			BufferedImage img = ImageIO.read(new File("resources/Maps/DENVER.png"));
+			BufferedImage img = ImageIO.read(new File(fileName));
 			int stepX = img.getWidth() / this.cols;
 			int stepY = img.getHeight() / this.rows;
-
 			for (int y = 0; y < this.rows; y++) {
 				for (int x = 0; x < this.cols; x++) {
 					if (i >= tiles.length) {
@@ -85,14 +103,17 @@ public class WorldImpl implements World {
 					TileType type = Util.getTileTypeOfGeoType(geo);
 					Pos2D coordinate = new Pos2D(x, y);
 					Tile t = new TileImpl(coordinate, type, zFact);
-					Util.growZoningByGeotype(geo, t);
+					if(seed){
+						Util.growZoningByGeotype(geo, t);
+					}
 					tiles[i] = t;
 					i++;
 				}
 			}
+			isLoadedCity = true;
 
 		} catch (IOException e) {
-			e.printStackTrace();
+			isLoadedCity = false;
 			smoothWorldInit(Rules.WORLD_TILE_NOISE);
 		}
 	}
@@ -126,18 +147,18 @@ public class WorldImpl implements World {
 		}
 		for (int i = 0; i < numOceans; i++) {
 			int location = r.nextInt(totalCells);
-			Tile t = new TileImpl(tiles[location].getPos(), TileType.OCEAN, zFact);
+			Tile t = new TileImpl(tiles[location].getPos(), TileType.WATER, zFact);
 			tiles[location] = t;
 			List<Tile> neighbors = Util.getNeighborsCircularDist(t, tiles, r.nextInt(maxSize));
 			for (Tile n : neighbors) {
 				int index = Util.getIndexOf(n, this.tiles);
-				tiles[index] = new TileImpl(tiles[index].getPos(), TileType.OCEAN, zFact);
+				tiles[index] = new TileImpl(tiles[index].getPos(), TileType.WATER, zFact);
 			}
 		}
 		List<Tile> smoothed = new ArrayList<Tile>();
 		for (int i = 0; i < tiles.length; i++) {
 			double distToMtn = distanceTo(tiles[i].getPos(), TileType.MOUNTAIN);
-			double distToOcean = distanceTo(tiles[i].getPos(), TileType.OCEAN);
+			double distToOcean = distanceTo(tiles[i].getPos(), TileType.WATER);
 			double ratio = distToOcean / (distToOcean + distToMtn + 0.001);
 			int typeSelection = (int) Math.floor(ratio * (types.length));
 			typeSelection += (int) Util.getRandomBetween(-noise, noise + 1);

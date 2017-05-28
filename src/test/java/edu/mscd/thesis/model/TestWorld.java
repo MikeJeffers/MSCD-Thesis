@@ -38,7 +38,7 @@ public class TestWorld {
 		for (int i = 1; i < 5; i++) {
 			int x = (i + 1) * 2;
 			int y = (i + 1) * 3;
-			World w = new WorldImpl(x, y);
+			World w = new WorldImpl(x, y, "", false);
 			assertNotNull(w);
 			assertNotNull(w.getCity());
 			assertTrue(w.getTiles().length == x * y);
@@ -49,7 +49,7 @@ public class TestWorld {
 	@Test
 	public void testZoningOfWorld() {
 		Pos2D target = new Pos2D(2, 2);
-		World w = new WorldImpl(5, 5);
+		World w = new WorldImpl(5, 5, "", false);
 		Zone zoneAtTarg = w.getZoneAt(target);
 		assertTrue(ZoneType.EMPTY == zoneAtTarg.getZoneType());
 		boolean success = w.setZoneAt(target, ZoneType.RESIDENTIAL);
