@@ -17,9 +17,12 @@ import java.util.Random;
 import javax.imageio.ImageIO;
 
 import edu.mscd.thesis.controller.Action;
+import edu.mscd.thesis.geodata.GeoType;
 import edu.mscd.thesis.model.Pos2D;
 import edu.mscd.thesis.model.Tile;
+import edu.mscd.thesis.model.TileType;
 import edu.mscd.thesis.model.city.CityProperty;
+import edu.mscd.thesis.model.zones.Density;
 import edu.mscd.thesis.model.zones.ZoneType;
 import javafx.collections.ObservableList;
 import javafx.embed.swing.SwingFXUtils;
@@ -28,6 +31,7 @@ import javafx.scene.chart.XYChart.Data;
 import javafx.scene.chart.XYChart.Series;
 import javafx.scene.image.WritableImage;
 import javafx.scene.layout.GridPane;
+import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
 /**
@@ -56,10 +60,15 @@ public class Util {
 	public static final int ZONETYPES = ZoneType.values().length;
 	public static final int TILE_ATTRIBUTES = 5;
 	public static final int MAX_RADIUS = 6;
+	
+	public static final String MAPS_PATH = "resources/Maps/";
+	public static final String SPRITES_PATH = "resources/";
+	public static final String IMG_EXT = ".png";
 
 	private static Random random = new Random();
 	private static DateFormat df = new SimpleDateFormat("yyMMdd_HHmmss_SSS");
 	private static final Date compileTime = new Date();
+	
 
 	/**
 	 * Get all Tiles in tile array that are within ManhattanDistance of
@@ -414,6 +423,84 @@ public class Util {
 			System.err.println("Failed to save screenshot");
 			e.printStackTrace();
 		}
+	}
+	
+	/**
+	 * USED WITH GEOTIFFS converted to RGB 8-bit PNGS only!!
+	 * Using the NLCD 2011 (CONUS) Land Cover Legend colors, identify the landcover classification by color
+	 * @param pixelColor - Color of pixel from a GeoTIFF image 
+	 * @return GeoType classification derived from pixel's color
+	 */
+	public static GeoType computeGeoType(Color pixelColor){
+		double minDiff = 3;
+		GeoType closestType = GeoType.CROPS;
+		for(GeoType geo: GeoType.values()){
+			double difference = Util.colorDistance(geo.getColor(), pixelColor);
+			if(difference<minDiff){
+				minDiff = difference;
+				closestType = geo;
+			}
+		}
+		return closestType;
+	}
+	
+	/**
+	 * Manually spur growth of Tile to simulate actual zoning density
+	 * @param g - GeoType used to produce Tile
+	 * @param t - Tile produced from Geotype to be seeded with Zone
+	 */
+	public static void growZoningByGeotype(GeoType g, Tile t){
+		Density geoDensity = g.getDensity();
+		if(geoDensity==Density.NONE){
+			return;
+		}else{
+			if(geoDensity==Density.HIGH){
+				t.setZone(ZoneType.RESIDENTIAL);
+			}else if(geoDensity==Density.MED){
+				t.setZone(ZoneType.values()[Util.getRandomBetween(0, 2)]);
+			}else if(geoDensity==Density.LOW){
+				t.setZone(ZoneType.values()[Util.getRandomBetween(0, 3)]);
+			}else if(geoDensity==Density.VERYLOW){
+				t.setZone(ZoneType.values()[Util.getRandomBetween(1, 3)]);
+			}else{
+				t.setZone(ZoneType.values()[Util.getRandomBetween(0, 3)]);
+			}
+			for(int i =0; i<g.getDensity().getDensityLevel(); i++){
+				t.getZone().deltaValue(Rules.MAX);
+				t.getZone().update();
+			}
+		}
+	}
+	
+	/**
+	 * GeoTypes could be a number of different TileTypes
+	 * This will select a TileType under the GeoType's designation
+	 * @param g - Geotype to derive tiletype from
+	 * @return TileType
+	 */
+	public static TileType getTileTypeOfGeoType(GeoType g){
+		TileType[] tileTypes = g.getPossibleTiles();
+		int randSelect = Util.getRandomBetween(0, tileTypes.length);
+		return tileTypes[randSelect];
+	}
+	
+	private static double colorDistance(Color aColor, Color bColor){
+		double delta = 0;
+		delta+=Math.abs(aColor.getRed()-bColor.getRed());
+		delta+=Math.abs(aColor.getGreen()-bColor.getGreen());
+		delta+=Math.abs(aColor.getBlue()-bColor.getBlue());
+		return delta;
+	}
+	
+	
+	/**
+	 * Tests if a file path is valid and is the location of a file
+	 * @param filePath - String for filepath
+	 * @return true if File exists given path
+	 */
+	public static boolean testFile(String filePath){
+		File f = new File(filePath);
+		return f.exists() && f.isFile();
 	}
 
 }

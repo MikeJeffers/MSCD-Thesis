@@ -84,7 +84,7 @@ public class TestUtil {
 
 	@Test(timeout = 15000)
 	public void testConcurrentModelCopy() {
-		Model m = new WorldImpl(Rules.WORLD_X, Rules.WORLD_Y);
+		Model m = new WorldImpl(Rules.WORLD_X, Rules.WORLD_Y, "", false);
 		Thread modelThread = new Thread(m);
 		modelThread.start();
 		Thread a = new Thread(new Runnable() {

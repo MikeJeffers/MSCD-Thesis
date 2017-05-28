@@ -18,5 +18,11 @@ test {
     include "edu/mscd/thesis/main/AllTests.class"
 }
 
+run {
+    if (project.hasProperty("args")) {
+        args project.args.split(" ")
+    }
+}
+
 
 

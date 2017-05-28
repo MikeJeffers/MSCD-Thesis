@@ -1,5 +1,7 @@
 package edu.mscd.thesis.main;
 
+import java.util.Map;
+
 import edu.mscd.thesis.controller.Controller;
 import edu.mscd.thesis.controller.GameLoop;
 import edu.mscd.thesis.model.Model;
@@ -29,11 +31,17 @@ public class Launcher extends Application {
 	private Thread controllerThread;
 	private Thread aiThread;
 
+	private Map<String, String> args;
+	private static final String RANDOM_BENCH = "r";
+	private static final String MAP_FROM_FILE = "load";
+	private static final String SEED_CITY = "seed";
+
 	public Launcher() {
 	}
 
 	@Override
 	public void init() {
+		this.args = this.getParameters().getNamed();
 		model = initModel();
 		ai = initAi(model);
 		view = initView();
@@ -63,7 +71,16 @@ public class Launcher extends Application {
 	}
 
 	private Model initModel() {
-		Model m = new WorldImpl(Rules.WORLD_X, Rules.WORLD_Y);
+		Model m = null;
+		if(args.containsKey(MAP_FROM_FILE)){
+			boolean seedCity = false;
+			if(args.containsKey(SEED_CITY) && args.get(SEED_CITY).equalsIgnoreCase("true")){
+				seedCity = true;
+			}
+			m = new WorldImpl(Rules.WORLD_X, Rules.WORLD_Y, args.get(MAP_FROM_FILE), seedCity);
+		}else{
+			m = new WorldImpl(Rules.WORLD_X, Rules.WORLD_Y, "", false);
+		}
 		modelThread = new Thread(m);
 		modelThread.start();
 		return m;
@@ -78,14 +95,16 @@ public class Launcher extends Application {
 	}
 
 	private AI initAi(Model initialState) {
-		//AI ai = new RandomBenchmark(initialState);
-		AI ai = new NN(initialState);
+		AI ai = null;
+		if (args.containsKey(RANDOM_BENCH)&& args.get(RANDOM_BENCH).equalsIgnoreCase("true")) {
+			ai = new RandomBenchmark(initialState);
+		} else {
+			ai = new NN(initialState);
+		}
 		aiThread = new Thread(ai);
 		aiThread.start();
 		return ai;
 
 	}
-
-
 
 }

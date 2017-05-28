@@ -2,6 +2,7 @@ package edu.mscd.thesis.view;
 
 public enum RenderMode {
 	NORMAL("Normal"),
+	TERRAIN("Terrain"),
 	POLLUTION("Pollution"),
 	LANDVALUE("Landvalues"),
 	GROWTH("Growth"),
