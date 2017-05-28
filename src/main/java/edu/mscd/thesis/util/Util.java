@@ -55,8 +55,8 @@ public class Util {
 	public static final int MAX_CHART_DATAPTS = 256;
 	public static final double SCALE_FACTOR = Util.getScaleFactor(Rules.WORLD_X, Rules.WORLD_Y, WINDOW_WIDTH,
 			WINDOW_HEIGHT);
-	public static final boolean SCREENSHOT = false;
-	public static final boolean REPORT = false;
+	public static final boolean SCREENSHOT = true;
+	public static final boolean REPORT = true;
 	public static final int ZONETYPES = ZoneType.values().length;
 	public static final int TILE_ATTRIBUTES = 5;
 	public static final int MAX_RADIUS = 6;

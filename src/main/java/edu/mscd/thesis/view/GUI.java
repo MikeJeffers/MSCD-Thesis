@@ -24,6 +24,7 @@ import edu.mscd.thesis.view.viewdata.Action;
 import edu.mscd.thesis.view.viewdata.AiAction;
 import edu.mscd.thesis.view.viewdata.AiConfigImpl;
 import edu.mscd.thesis.view.viewdata.AiMode;
+import edu.mscd.thesis.view.viewdata.DocumentMode;
 import edu.mscd.thesis.view.viewdata.GameConfigImpl;
 import edu.mscd.thesis.view.viewdata.NNConstants;
 import edu.mscd.thesis.view.viewdata.UserAction;
@@ -116,6 +117,7 @@ public class GUI implements View {
 		GridPane controlPane = new GridPane();
 		Pane zonePane = makeZonePane();
 		Pane cameraControls = makeControlButtons(gc);
+		Pane recordingControls = makeRecordingControls();
 		Pane renderModeControls = makeRenderModeControls();
 		Pane chartPane = makeStackedChartPane();
 		Pane metricsPane = makeMetricsPane();
@@ -133,14 +135,15 @@ public class GUI implements View {
 		controlPane.add(chartPane, 0, 0, 2, 4);
 		controlPane.add(zonePane, 0, 5);
 		controlPane.add(cameraControls, 0, 6);
-		controlPane.add(renderModeControls, 0, 7);
-		controlPane.add(metricsPane, 0, 8);
-		controlPane.add(scorePane, 0, 9);
-
-		controlPane.add(moveReporter, 0, 10, 2, 1);
-		controlPane.add(aiSettingsPane, 1, 5, 1, 2);
-		controlPane.add(tileInfoPane, 1, 7);
-		controlPane.add(weightSliders, 1, 8);
+		controlPane.add(recordingControls, 0, 7);
+		controlPane.add(renderModeControls, 0, 8);
+		controlPane.add(metricsPane, 0, 9);
+		controlPane.add(scorePane, 0, 10);
+		controlPane.add(moveReporter, 0, 11, 2, 1);
+		
+		controlPane.add(aiSettingsPane, 1, 5, 1, 3);
+		controlPane.add(tileInfoPane, 1, 8);
+		controlPane.add(weightSliders, 1, 9);
 
 		//Util.setGridVisible(controlPane);
 
@@ -155,6 +158,49 @@ public class GUI implements View {
 
 		this.stage = stage;
 		stage.show();
+	}
+
+	private Pane makeRecordingControls() {
+		GridPane pane = new GridPane();
+		Label title = new Label("Recording Settings: ");
+		// combo
+		Label modeLabel = new Label("Mode: ");
+		ComboBox<DocumentMode> combo = new ComboBox<DocumentMode>();
+		combo.getItems().setAll(DocumentMode.values());
+		combo.setTooltip(new Tooltip("Sets game-data recording mode"));
+		combo.setValue(DocumentMode.OFF);
+		combo.valueProperty().addListener(new ChangeListener<DocumentMode>() {
+			@Override
+			public void changed(ObservableValue<? extends DocumentMode> observable, DocumentMode oldValue,
+					DocumentMode newValue) {
+				gameConfig.setDocumentMode(newValue);
+				notifyObserver((ViewData) gameConfig.copy());
+			}
+		});
+		gameConfig.setDocumentMode(DocumentMode.OFF);
+
+		// Slider
+		Label sliderLabel = new Label("Interval: ");
+		Label dataReadout = new Label("10");
+		Slider slider = new Slider(1, 100, 10);
+		Tooltip tip = new Tooltip("Sets the Interval for DocumentMode ON_INTERVAL");
+		slider.setTooltip(tip);
+		gameConfig.setInterval(10);
+		slider.valueProperty().addListener(new ChangeListener<Number>() {
+			@Override
+			public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
+				int interval = newValue.intValue();
+				gameConfig.setInterval(interval);
+				dataReadout.setText(Integer.toString(interval));
+			}
+		});
+		pane.add(title, 0, 0);
+		pane.add(modeLabel, 0, 1);
+		pane.add(combo, 1, 1);
+		pane.add(sliderLabel, 0, 2);
+		pane.add(slider, 1, 2);
+		pane.add(dataReadout, 2, 2);
+		return pane;
 	}
 
 	private Pane makeTileLabelPane(Label label) {
@@ -585,7 +631,6 @@ public class GUI implements View {
 
 	private Pane makeMetricsPane() {
 		GridPane pane = new GridPane();
-
 		Label metricsLabel = new Label("Data Readout: ");
 		GridPane.setRowIndex(metricsLabel, 0);
 		GridPane.setColumnIndex(metricsLabel, 0);

@@ -1,20 +1,23 @@
 package edu.mscd.thesis.view.viewdata;
 
+import edu.mscd.thesis.util.Util;
 
-public class GameConfigImpl extends AbstractConfigData implements GameConfig{
-	
+public class GameConfigImpl extends AbstractConfigData implements GameConfig {
+
 	private boolean isPaused;
 	private boolean isStep;
 	private double speed;
 	private AiMode aiMode;
 	private DocumentMode documentMode;
-	
-	public GameConfigImpl(){
+	private int interval;
+
+	public GameConfigImpl() {
 		this.speed = 0.5;
-		this.isStep =false;
+		this.isStep = false;
 		this.isPaused = true;
 		this.aiMode = AiMode.ON_FOLLOW;
-		this.documentMode = DocumentMode.OFF;	
+		this.documentMode = DocumentMode.OFF;
+		this.interval = 10;
 	}
 
 	@Override
@@ -46,7 +49,7 @@ public class GameConfigImpl extends AbstractConfigData implements GameConfig{
 	}
 
 	public void setSpeed(double speed) {
-		if(speed>0.0 && speed<=1.0){
+		if (speed > 0.0 && speed <= 1.0) {
 			this.speed = speed;
 		}
 	}
@@ -54,10 +57,13 @@ public class GameConfigImpl extends AbstractConfigData implements GameConfig{
 	public void setAiMode(AiMode aiMode) {
 		this.aiMode = aiMode;
 	}
-	
 
 	public void setDocumentMode(DocumentMode docMode) {
 		this.documentMode = docMode;
+	}
+	
+	public void setInterval(int interval){
+		this.interval = (int) Util.boundValue(interval, 1, 100);
 	}
 
 	@Override
@@ -68,9 +74,15 @@ public class GameConfigImpl extends AbstractConfigData implements GameConfig{
 		g.setStep(this.isStep());
 		g.setAiMode(this.getAiMode());
 		g.setDocumentMode(this.getDocumentMode());
+		g.setInterval(this.getInterval());
 		return g;
 	}
-	
+
+	@Override
+	public int getInterval() {
+		return this.interval;
+	}
+
 	@Override
 	public DocumentMode getDocumentMode() {
 		return this.documentMode;
@@ -95,9 +107,9 @@ public class GameConfigImpl extends AbstractConfigData implements GameConfig{
 	public AiConfig getAiConfig() {
 		return null;
 	}
-	
+
 	@Override
-	public String toString(){
+	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append(this.getClass().getName());
 		sb.append("{");
@@ -111,10 +123,10 @@ public class GameConfigImpl extends AbstractConfigData implements GameConfig{
 		sb.append(this.getAiMode());
 		sb.append(" docMode:");
 		sb.append(this.getDocumentMode());
+		sb.append(" int:");
+		sb.append(this.getInterval());
 		sb.append("}");
 		return sb.toString();
 	}
-
-	
 
 }
