@@ -22,7 +22,7 @@ public class TileRenderer implements Renderer<Tile> {
 	public void draw(Tile tile, GraphicsContext g) {
 		Pos2D tilePos = tile.getPos();
 
-		if (renderMode == RenderMode.NORMAL) {
+		if (renderMode == RenderMode.NORMAL || renderMode==RenderMode.TERRAIN) {
 			g.setFill(tile.getType().getColor());
 		} else if (renderMode == RenderMode.POLLUTION) {
 			double pollution = tile.getPollution();

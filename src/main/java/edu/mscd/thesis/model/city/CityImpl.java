@@ -163,7 +163,7 @@ public class CityImpl implements City {
 	@Override
 	public void update() {
 		Collection<Person> toRemove = new HashSet<Person>();
-		int toAddCounter = Rules.MIN_SPAWN_RATE;
+		int toAddCounter = 1;
 		int currentPop = this.totalPopulation();
 		synchronized (this.population) {
 			for (Person p : population) {
