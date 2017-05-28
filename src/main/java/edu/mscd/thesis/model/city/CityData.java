@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import edu.mscd.thesis.controller.ModelData;
+import edu.mscd.thesis.model.ModelData;
 
 public class CityData implements ModelData {
 	private Map<CityProperty, Double> map;

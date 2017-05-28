@@ -4,10 +4,11 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-import edu.mscd.thesis.model.Person;
-import edu.mscd.thesis.model.Tile;
 import edu.mscd.thesis.model.World;
 import edu.mscd.thesis.model.bldgs.Building;
+import edu.mscd.thesis.model.people.Citizen;
+import edu.mscd.thesis.model.people.Person;
+import edu.mscd.thesis.model.tiles.Tile;
 import edu.mscd.thesis.model.zones.Density;
 import edu.mscd.thesis.model.zones.ZoneType;
 import edu.mscd.thesis.util.Rules;

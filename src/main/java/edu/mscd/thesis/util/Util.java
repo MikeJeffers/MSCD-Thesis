@@ -16,14 +16,14 @@ import java.util.Random;
 
 import javax.imageio.ImageIO;
 
-import edu.mscd.thesis.controller.Action;
 import edu.mscd.thesis.geodata.GeoType;
 import edu.mscd.thesis.model.Pos2D;
-import edu.mscd.thesis.model.Tile;
-import edu.mscd.thesis.model.TileType;
 import edu.mscd.thesis.model.city.CityProperty;
+import edu.mscd.thesis.model.tiles.Tile;
+import edu.mscd.thesis.model.tiles.TileType;
 import edu.mscd.thesis.model.zones.Density;
 import edu.mscd.thesis.model.zones.ZoneType;
+import edu.mscd.thesis.view.viewdata.Action;
 import javafx.collections.ObservableList;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.Node;

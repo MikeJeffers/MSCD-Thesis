@@ -1,8 +1,8 @@
 package edu.mscd.thesis.view;
 
 import edu.mscd.thesis.controller.Observable;
-import edu.mscd.thesis.controller.ViewData;
 import edu.mscd.thesis.model.Model;
+import edu.mscd.thesis.view.viewdata.ViewData;
 import javafx.stage.Stage;
 
 /**

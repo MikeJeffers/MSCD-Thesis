@@ -1,6 +1,7 @@
 package edu.mscd.thesis.model;
 
 import edu.mscd.thesis.model.city.City;
+import edu.mscd.thesis.model.tiles.Tile;
 import edu.mscd.thesis.model.zones.Zone;
 import edu.mscd.thesis.model.zones.ZoneType;
 

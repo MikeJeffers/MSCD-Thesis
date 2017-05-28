@@ -2,8 +2,8 @@ package edu.mscd.thesis.model.zones;
 
 
 import edu.mscd.thesis.model.Pos2D;
-import edu.mscd.thesis.model.Tile;
 import edu.mscd.thesis.model.bldgs.Building;
+import edu.mscd.thesis.model.tiles.Tile;
 
 public interface Zone{
 	Pos2D getPos();

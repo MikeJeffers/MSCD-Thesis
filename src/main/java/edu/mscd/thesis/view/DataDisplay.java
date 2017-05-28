@@ -1,10 +1,10 @@
 package edu.mscd.thesis.view;
 
 
-import edu.mscd.thesis.controller.Action;
-import edu.mscd.thesis.controller.ModelData;
+import edu.mscd.thesis.model.ModelData;
 import edu.mscd.thesis.model.city.CityProperty;
 import edu.mscd.thesis.util.WeightVector;
+import edu.mscd.thesis.view.viewdata.Action;
 
 
 public interface DataDisplay {

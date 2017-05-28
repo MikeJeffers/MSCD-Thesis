@@ -2,10 +2,10 @@ package edu.mscd.thesis.model.bldgs;
 
 import java.util.Collection;
 
-import edu.mscd.thesis.model.Person;
 import edu.mscd.thesis.model.Pos2D;
+import edu.mscd.thesis.model.people.Person;
 import edu.mscd.thesis.model.zones.Density;
-import edu.mscd.thesis.view.Sprite;
+import edu.mscd.thesis.view.render.Sprite;
 
 public interface Building extends Sprite {
 

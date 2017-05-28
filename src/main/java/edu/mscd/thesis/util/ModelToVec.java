@@ -2,10 +2,10 @@ package edu.mscd.thesis.util;
 
 import java.util.Map;
 
-import edu.mscd.thesis.model.Tile;
-import edu.mscd.thesis.model.TileType;
 import edu.mscd.thesis.model.city.CityData;
 import edu.mscd.thesis.model.city.CityProperty;
+import edu.mscd.thesis.model.tiles.Tile;
+import edu.mscd.thesis.model.tiles.TileType;
 import edu.mscd.thesis.model.zones.ZoneType;
 
 public class ModelToVec {

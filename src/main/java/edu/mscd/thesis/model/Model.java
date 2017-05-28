@@ -3,12 +3,11 @@ package edu.mscd.thesis.model;
 
 import java.util.concurrent.locks.Lock;
 
-import edu.mscd.thesis.controller.Action;
-import edu.mscd.thesis.controller.ModelData;
 import edu.mscd.thesis.controller.Observable;
 import edu.mscd.thesis.controller.Observer;
-import edu.mscd.thesis.view.Overlay;
-import edu.mscd.thesis.view.Selectable;
+import edu.mscd.thesis.model.tiles.Overlay;
+import edu.mscd.thesis.model.tiles.Selectable;
+import edu.mscd.thesis.view.viewdata.Action;
 
 public interface Model extends Observer<Action>, Observable<ModelData>, Overlay, Selectable, Runnable{
 	/**

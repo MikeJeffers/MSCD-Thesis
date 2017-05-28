@@ -3,15 +3,16 @@ package edu.mscd.thesis.model;
 
 import java.util.concurrent.locks.Lock;
 
-import edu.mscd.thesis.controller.Action;
-import edu.mscd.thesis.controller.ModelData;
 import edu.mscd.thesis.controller.Observer;
 import edu.mscd.thesis.model.city.City;
 import edu.mscd.thesis.model.city.CityReduced;
+import edu.mscd.thesis.model.tiles.Selection;
+import edu.mscd.thesis.model.tiles.Tile;
+import edu.mscd.thesis.model.tiles.TileReduced;
 import edu.mscd.thesis.model.zones.Zone;
 import edu.mscd.thesis.model.zones.ZoneType;
 import edu.mscd.thesis.util.Util;
-import edu.mscd.thesis.view.Selection;
+import edu.mscd.thesis.view.viewdata.Action;
 
 public class WorldReduced implements World {
 	private Tile[] tiles;

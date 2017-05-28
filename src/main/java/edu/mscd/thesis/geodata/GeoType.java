@@ -1,6 +1,6 @@
 package edu.mscd.thesis.geodata;
 
-import edu.mscd.thesis.model.TileType;
+import edu.mscd.thesis.model.tiles.TileType;
 import edu.mscd.thesis.model.zones.Density;
 import javafx.scene.paint.Color;
 

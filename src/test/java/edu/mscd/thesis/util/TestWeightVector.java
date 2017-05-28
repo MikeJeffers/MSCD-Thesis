@@ -9,6 +9,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import edu.mscd.thesis.model.city.CityData;
+import edu.mscd.thesis.model.city.CityDataWeightVector;
 import edu.mscd.thesis.model.city.CityProperty;
 
 public class TestWeightVector {

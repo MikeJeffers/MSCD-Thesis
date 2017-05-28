@@ -3,9 +3,9 @@ package edu.mscd.thesis.model.bldgs;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import edu.mscd.thesis.model.Person;
 import edu.mscd.thesis.model.Pos2D;
-import edu.mscd.thesis.model.TileType;
+import edu.mscd.thesis.model.people.Person;
+import edu.mscd.thesis.model.tiles.TileType;
 import edu.mscd.thesis.model.zones.Density;
 import edu.mscd.thesis.model.zones.ZoneType;
 import edu.mscd.thesis.util.Rules;

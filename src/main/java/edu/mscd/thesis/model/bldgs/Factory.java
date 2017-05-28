@@ -4,7 +4,7 @@ import java.io.File;
 
 
 import edu.mscd.thesis.model.Pos2D;
-import edu.mscd.thesis.model.TileType;
+import edu.mscd.thesis.model.tiles.TileType;
 import edu.mscd.thesis.model.zones.Density;
 import edu.mscd.thesis.model.zones.ZoneType;
 import javafx.scene.image.Image;

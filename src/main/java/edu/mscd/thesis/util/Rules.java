@@ -3,13 +3,13 @@ package edu.mscd.thesis.util;
 import java.util.Map;
 
 import edu.mscd.thesis.model.Model;
-import edu.mscd.thesis.model.Person;
-import edu.mscd.thesis.model.Tile;
-import edu.mscd.thesis.model.TileType;
 import edu.mscd.thesis.model.World;
 import edu.mscd.thesis.model.city.City;
 import edu.mscd.thesis.model.city.CityData;
 import edu.mscd.thesis.model.city.CityProperty;
+import edu.mscd.thesis.model.people.Person;
+import edu.mscd.thesis.model.tiles.Tile;
+import edu.mscd.thesis.model.tiles.TileType;
 import edu.mscd.thesis.model.zones.Density;
 import edu.mscd.thesis.model.zones.ZoneType;
 

@@ -1,5 +1,6 @@
 package edu.mscd.thesis.controller;
 
+import edu.mscd.thesis.model.ModelData;
 
 public class ModelListener implements Observer<ModelData>{
 	private Controller parent;

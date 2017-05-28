@@ -14,21 +14,24 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import javax.imageio.ImageIO;
 
-import edu.mscd.thesis.controller.Action;
-import edu.mscd.thesis.controller.ModelData;
 import edu.mscd.thesis.controller.Observer;
 import edu.mscd.thesis.geodata.GeoType;
 import edu.mscd.thesis.model.bldgs.Building;
 import edu.mscd.thesis.model.city.City;
 import edu.mscd.thesis.model.city.CityImpl;
+import edu.mscd.thesis.model.people.Person;
+import edu.mscd.thesis.model.tiles.Selection;
+import edu.mscd.thesis.model.tiles.Tile;
+import edu.mscd.thesis.model.tiles.TileImpl;
+import edu.mscd.thesis.model.tiles.TileType;
+import edu.mscd.thesis.model.tiles.TileUpdaterService;
 import edu.mscd.thesis.model.zones.Zone;
 import edu.mscd.thesis.model.zones.ZoneFactory;
 import edu.mscd.thesis.model.zones.ZoneFactoryImpl;
 import edu.mscd.thesis.model.zones.ZoneType;
 import edu.mscd.thesis.util.Rules;
-import edu.mscd.thesis.util.TileUpdaterService;
 import edu.mscd.thesis.util.Util;
-import edu.mscd.thesis.view.Selection;
+import edu.mscd.thesis.view.viewdata.Action;
 import javafx.application.Platform;
 import javafx.scene.paint.Color;
 

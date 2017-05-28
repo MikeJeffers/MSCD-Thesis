@@ -7,25 +7,27 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import edu.mscd.thesis.controller.Action;
-import edu.mscd.thesis.controller.AiAction;
-import edu.mscd.thesis.controller.AiConfigImpl;
-import edu.mscd.thesis.controller.AiMode;
-import edu.mscd.thesis.controller.GameConfigImpl;
-import edu.mscd.thesis.controller.ModelData;
+import edu.mscd.thesis.ai.activationfunctions.ActivationFunctions;
 import edu.mscd.thesis.controller.Observer;
-import edu.mscd.thesis.controller.UserAction;
-import edu.mscd.thesis.controller.ViewData;
 import edu.mscd.thesis.model.Model;
+import edu.mscd.thesis.model.ModelData;
 import edu.mscd.thesis.model.Pos2D;
+import edu.mscd.thesis.model.city.CityDataWeightVector;
 import edu.mscd.thesis.model.city.CityProperty;
 import edu.mscd.thesis.model.zones.ZoneType;
-import edu.mscd.thesis.nn.ActivationFunctions;
-import edu.mscd.thesis.util.CityDataWeightVector;
-import edu.mscd.thesis.util.NNConstants;
 import edu.mscd.thesis.util.Rules;
 import edu.mscd.thesis.util.Util;
 import edu.mscd.thesis.util.WeightVector;
+import edu.mscd.thesis.view.render.ModelRenderer;
+import edu.mscd.thesis.view.render.RenderMode;
+import edu.mscd.thesis.view.viewdata.Action;
+import edu.mscd.thesis.view.viewdata.AiAction;
+import edu.mscd.thesis.view.viewdata.AiConfigImpl;
+import edu.mscd.thesis.view.viewdata.AiMode;
+import edu.mscd.thesis.view.viewdata.GameConfigImpl;
+import edu.mscd.thesis.view.viewdata.NNConstants;
+import edu.mscd.thesis.view.viewdata.UserAction;
+import edu.mscd.thesis.view.viewdata.ViewData;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
@@ -640,9 +642,6 @@ public class GUI implements View {
 					userAct.setMove(true);
 					notifyObserver((ViewData) userAct.copy());
 				}
-				if (Util.SCREENSHOT) {
-					Util.takeScreenshot(stage);
-				}
 			}
 		});
 		canvas.addEventHandler(MouseEvent.MOUSE_MOVED, new EventHandler<MouseEvent>() {
@@ -904,9 +903,6 @@ public class GUI implements View {
 				if (gameConfig.isPaused()) {
 					gameConfig.setStep(true);
 					notifyObserver((ViewData) gameConfig.copy());
-					if (Util.SCREENSHOT) {
-						Util.takeScreenshot(stage);
-					}
 					gameConfig.setStep(false);
 				}
 			}

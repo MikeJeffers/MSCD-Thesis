@@ -1,12 +1,23 @@
 package edu.mscd.thesis.controller;
 
+import edu.mscd.thesis.ai.AI;
+import edu.mscd.thesis.ai.RandomBenchmark;
 import edu.mscd.thesis.model.Model;
-import edu.mscd.thesis.model.Tile;
-import edu.mscd.thesis.nn.AI;
-import edu.mscd.thesis.nn.RandomBenchmark;
+import edu.mscd.thesis.model.ModelData;
+import edu.mscd.thesis.model.tiles.Tile;
 import edu.mscd.thesis.util.Rules;
 import edu.mscd.thesis.util.Util;
 import edu.mscd.thesis.view.View;
+import edu.mscd.thesis.view.viewdata.Action;
+import edu.mscd.thesis.view.viewdata.AiAction;
+import edu.mscd.thesis.view.viewdata.AiConfig;
+import edu.mscd.thesis.view.viewdata.AiConfigImpl;
+import edu.mscd.thesis.view.viewdata.AiMode;
+import edu.mscd.thesis.view.viewdata.ConfigData;
+import edu.mscd.thesis.view.viewdata.GameConfig;
+import edu.mscd.thesis.view.viewdata.GameConfigImpl;
+import edu.mscd.thesis.view.viewdata.UserAction;
+import edu.mscd.thesis.view.viewdata.ViewData;
 import javafx.animation.AnimationTimer;
 
 public class GameLoop extends AnimationTimer implements Controller {

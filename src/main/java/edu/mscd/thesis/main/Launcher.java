@@ -2,13 +2,13 @@ package edu.mscd.thesis.main;
 
 import java.util.Map;
 
+import edu.mscd.thesis.ai.AI;
+import edu.mscd.thesis.ai.NN;
+import edu.mscd.thesis.ai.RandomBenchmark;
 import edu.mscd.thesis.controller.Controller;
 import edu.mscd.thesis.controller.GameLoop;
 import edu.mscd.thesis.model.Model;
 import edu.mscd.thesis.model.WorldImpl;
-import edu.mscd.thesis.nn.AI;
-import edu.mscd.thesis.nn.NN;
-import edu.mscd.thesis.nn.RandomBenchmark;
 import edu.mscd.thesis.util.Rules;
 import edu.mscd.thesis.view.GUI;
 import edu.mscd.thesis.view.View;

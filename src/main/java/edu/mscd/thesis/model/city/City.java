@@ -2,7 +2,7 @@ package edu.mscd.thesis.model.city;
 
 import java.util.Collection;
 
-import edu.mscd.thesis.model.Person;
+import edu.mscd.thesis.model.people.Person;
 import edu.mscd.thesis.model.zones.ZoneType;
 
 public interface City {
