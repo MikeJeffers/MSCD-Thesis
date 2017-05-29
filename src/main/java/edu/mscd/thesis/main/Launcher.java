@@ -1,6 +1,7 @@
 package edu.mscd.thesis.main;
 
 import java.util.Map;
+import java.util.Map.Entry;
 
 import edu.mscd.thesis.ai.AI;
 import edu.mscd.thesis.ai.NN;
@@ -10,6 +11,7 @@ import edu.mscd.thesis.controller.GameLoop;
 import edu.mscd.thesis.model.Model;
 import edu.mscd.thesis.model.WorldImpl;
 import edu.mscd.thesis.util.Rules;
+import edu.mscd.thesis.util.Util;
 import edu.mscd.thesis.view.GUI;
 import edu.mscd.thesis.view.View;
 import javafx.application.Application;
@@ -32,8 +34,8 @@ public class Launcher extends Application {
 	private Thread aiThread;
 
 	private Map<String, String> args;
-	private static final String RANDOM_BENCH = "r";
-	private static final String MAP_FROM_FILE = "load";
+	private static final String RANDOM_BENCH = "rand";
+	private static final String MAP_FROM_FILE = "map";
 	private static final String SEED_CITY = "seed";
 
 	public Launcher() {
@@ -42,10 +44,26 @@ public class Launcher extends Application {
 	@Override
 	public void init() {
 		this.args = this.getParameters().getNamed();
+		this.parseArgs();
 		model = initModel();
 		ai = initAi(model);
 		view = initView();
 		controller = initController(model, view, ai);
+	}
+	
+	private void parseArgs(){
+		if(Util.REPORT){
+			StringBuilder sb = new StringBuilder();
+			for(Entry<String,String> entry: this.args.entrySet()){
+				sb.append("_");
+				sb.append(entry.getKey());
+				sb.append("-");
+				sb.append(entry.getValue());
+				sb.append("_");
+			}
+			Util.title = sb.toString();
+			Util.report("ARGS="+sb.toString());
+		}
 	}
 
 	@Override

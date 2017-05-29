@@ -231,14 +231,14 @@ public class GameLoop extends AnimationTimer implements Controller {
 		if (Util.REPORT) {
 			StringBuilder sb = new StringBuilder("Turn:");
 			sb.append(turnCount);
+			sb.append(";--NewConfig--");
 			if (ai instanceof RandomBenchmark) {
-				sb.append("--RANDOM--");
+				sb.append("[RANDOM_BENCHMARK]");
 			} else {
-				sb.append("--NewConfig--");
-				sb.append(conf.toString());
+				sb.append("["+conf.toString()+"]");
 			}
 			sb.append("\n--Weights--");
-			sb.append(view.getWeightVector().toString());
+			sb.append("["+view.getWeightVector().toString()+"]");
 			Util.report(sb.toString());
 
 		}

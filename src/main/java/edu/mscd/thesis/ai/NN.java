@@ -46,7 +46,7 @@ public class NN extends AbstractNetwork implements AI {
 	private Action act;
 	private WeightVector<CityProperty> weights;
 
-	private static final int MAX_ITERATION = 15;
+	private static final int MAX_ITERATION = 10;
 	private static List<Action> actionHistory = new ArrayList<Action>();
 	private Action prevLearned = new AiAction();
 

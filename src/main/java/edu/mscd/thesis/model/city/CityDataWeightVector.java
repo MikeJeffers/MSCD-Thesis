@@ -42,11 +42,11 @@ public class CityDataWeightVector implements WeightVector<CityProperty>{
 		sb.append(this.getClass().getSimpleName());
 		sb.append(" {");
 		for(Entry<CityProperty, Double> pair: this.weightMap.entrySet()){
-			sb.append("[");
+			sb.append("(");
 			sb.append(pair.getKey());
 			sb.append(":");
 			sb.append(pair.getValue());
-			sb.append("]");
+			sb.append(")");
 		}
 		sb.append("}");
 		return sb.toString();
