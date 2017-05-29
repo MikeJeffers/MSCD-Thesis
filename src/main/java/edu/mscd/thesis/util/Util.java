@@ -411,7 +411,7 @@ public class Util {
 		WritableImage img = stage.getScene().snapshot(null);
 		Date date = Calendar.getInstance().getTime();
 		String stamp = df.format(date);
-		String dirString = "screenshots/Take_" + df.format(compileTime);
+		String dirString = "screenshots/Take_" + df.format(compileTime)+title;
 		System.out.print("Taking Screen @" + stamp + "....");
 		File dir = new File(dirString);
 		if (!dir.exists()) {
