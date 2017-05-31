@@ -57,23 +57,23 @@ public class WorldImpl implements World {
 		tiles = new Tile[size];
 		this.rows = sizeY;
 		this.cols = sizeX;
-		fileName = Util.MAPS_PATH+fileName+Util.IMG_EXT;
-		if(Util.testFile(fileName)){
-			System.out.println("Loading "+fileName);
+		fileName = Util.MAPS_PATH + fileName + Util.IMG_EXT;
+		if (Util.testFile(fileName)) {
+			System.out.println("Loading " + fileName);
 			this.createWorldFromFile(fileName, seedCity);
-		}else{
+		} else {
 			this.smoothWorldInit(Rules.WORLD_TILE_NOISE);
 		}
 		System.out.println("World initialized");
-		
+
 		this.city = new CityImpl(this);
 
 		tileUpdater = new TileUpdaterService(this);
 		if (isLoadedCity && seedCity) {
 			System.out.println("Growing City...");
 			this.lock.lock();
-			for(int i=0; i<10; i++){
-				for(Tile t: tiles){
+			for (int i = 0; i < 10; i++) {
+				for (Tile t : tiles) {
 					t.getZone().deltaValue(Rules.MAX);
 				}
 				this.updateTasks();
@@ -95,6 +95,7 @@ public class WorldImpl implements World {
 			BufferedImage img = ImageIO.read(new File(fileName));
 			int stepX = img.getWidth() / this.cols;
 			int stepY = img.getHeight() / this.rows;
+			GeoType[] gTypes = new GeoType[tiles.length];
 			for (int y = 0; y < this.rows; y++) {
 				for (int x = 0; x < this.cols; x++) {
 					if (i >= tiles.length) {
@@ -103,22 +104,57 @@ public class WorldImpl implements World {
 					int rgb = img.getRGB(x * stepX, y * stepY);
 					Color pixelColor = Color.rgb((rgb >> 16) & 0xFF, (rgb >> 8) & 0xFF, (rgb >> 0) & 0xFF);
 					GeoType geo = Util.computeGeoType(pixelColor);
+					gTypes[i] = geo;
 					TileType type = Util.getTileTypeOfGeoType(geo);
 					Pos2D coordinate = new Pos2D(x, y);
 					Tile t = new TileImpl(coordinate, type, zFact);
-					if(seed){
+					if (seed) {
 						Util.growZoningByGeotype(geo, t);
 					}
 					tiles[i] = t;
 					i++;
 				}
 			}
+			smoothTypes(1.7, zFact, gTypes, seed);
 			isLoadedCity = true;
 
 		} catch (IOException e) {
 			isLoadedCity = false;
 			smoothWorldInit(Rules.WORLD_TILE_NOISE);
 		}
+	}
+
+	private void smoothTypes(double maxRadius, ZoneFactory zFact, GeoType[] geoTypes, boolean seed) {
+		TileType[] types = TileType.values();
+		List<Tile> smoothed = new ArrayList<Tile>();
+		for (int i = 0; i < tiles.length; i++) {
+			double distToMtn = distanceTo(tiles[i].getPos(), TileType.MOUNTAIN);
+			double distToOcean = distanceTo(tiles[i].getPos(), TileType.WATER);
+			TileType type = TileType.MOUNTAIN;
+			double closer = Math.min(distToMtn, distToOcean);
+			double sign = 1.0;
+			Tile t = tiles[i];
+			if (closer < maxRadius) {
+				if (distToOcean < distToMtn) {
+					type = TileType.WATER;
+					sign = -1.0;
+				}
+				sign = sign * Util.getRandomBetween(0, (int) Math.round(maxRadius) + 1);
+				int typeSelection = (int) (type.ordinal() + (sign * Math.floor(closer))) % types.length;
+				if (sign == 0) {
+					typeSelection = tiles[i].getType().ordinal();
+				}
+				t = new TileImpl(tiles[i].getPos(), types[typeSelection], zFact);
+			}
+			smoothed.add(t);
+		}
+		for (int i = 0; i < tiles.length; i++) {
+			tiles[i] = smoothed.get(i);
+			if (seed) {
+				Util.growZoningByGeotype(geoTypes[i], tiles[i]);
+			}
+		}
+
 	}
 
 	/**
@@ -177,7 +213,7 @@ public class WorldImpl implements World {
 	}
 
 	private double distanceTo(Pos2D origin, TileType tileOfThisType) {
-		double minDist = Double.MAX_VALUE;
+		double minDist = Math.sqrt(Math.pow(Rules.WORLD_X, 2) + Math.pow(Rules.WORLD_Y, 2));
 		for (int i = 0; i < this.tiles.length; i++) {
 			if (tiles[i].getType() == tileOfThisType) {
 				double dist = origin.distBetween(tiles[i].getPos());
