@@ -16,7 +16,7 @@ public class GameConfigImpl extends AbstractConfigData implements GameConfig {
 		this.isStep = false;
 		this.isPaused = true;
 		this.aiMode = AiMode.ON_FOLLOW;
-		this.documentMode = DocumentMode.OFF;
+		this.documentMode = DocumentMode.EVERY_MOVE;
 		this.interval = 10;
 	}
 

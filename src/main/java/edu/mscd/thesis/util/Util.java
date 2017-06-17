@@ -5,6 +5,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.net.URL;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -61,8 +62,7 @@ public class Util {
 	public static final int TILE_ATTRIBUTES = 5;
 	public static final int MAX_RADIUS = 6;
 
-	public static final String MAPS_PATH = "resources/Maps/";
-	public static final String SPRITES_PATH = "resources/";
+	public static final String MAP_DIR = "Maps/";
 	public static final String IMG_EXT = ".png";
 
 	private static final Object LOCKOBJ = new Object();
@@ -411,12 +411,12 @@ public class Util {
 		WritableImage img = stage.getScene().snapshot(null);
 		Date date = Calendar.getInstance().getTime();
 		String stamp = df.format(date);
-		String dirString = "screenshots/Take_" + df.format(compileTime)+title;
-		System.out.print("Taking Screen @" + stamp + "....");
+		String dirString = "reports/Take_" + df.format(compileTime) + title+"/screens";
 		File dir = new File(dirString);
 		if (!dir.exists()) {
 			dir.mkdirs();
 		}
+		System.out.print("Taking Screen @" + stamp + "....");
 		File file = new File(dirString + "/screen" + stamp + ".png");
 
 		try {
@@ -512,9 +512,15 @@ public class Util {
 	 *            - String for filepath
 	 * @return true if File exists given path
 	 */
-	public static boolean testFile(String filePath) {
-		File f = new File(filePath);
-		return f.exists() && f.isFile();
+	public static boolean testFile(String filePath, ClassLoader loader) {
+		System.out.println(filePath);
+		URL url = loader.getResource(filePath);
+		System.out.println(url);
+		if (url != null) {
+			File f = new File(url.getFile());
+			return f!=null;
+		}
+		return false;
 	}
 
 }

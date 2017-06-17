@@ -168,7 +168,7 @@ public class GUI implements View {
 		ComboBox<DocumentMode> combo = new ComboBox<DocumentMode>();
 		combo.getItems().setAll(DocumentMode.values());
 		combo.setTooltip(new Tooltip("Sets game-data recording mode"));
-		combo.setValue(DocumentMode.OFF);
+		combo.setValue(DocumentMode.EVERY_MOVE);
 		combo.valueProperty().addListener(new ChangeListener<DocumentMode>() {
 			@Override
 			public void changed(ObservableValue<? extends DocumentMode> observable, DocumentMode oldValue,
@@ -177,7 +177,7 @@ public class GUI implements View {
 				notifyObserver((ViewData) gameConfig.copy());
 			}
 		});
-		gameConfig.setDocumentMode(DocumentMode.OFF);
+		gameConfig.setDocumentMode(DocumentMode.EVERY_MOVE);
 
 		// Slider
 		Label sliderLabel = new Label("Interval: ");

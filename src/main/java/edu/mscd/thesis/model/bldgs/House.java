@@ -1,7 +1,5 @@
 package edu.mscd.thesis.model.bldgs;
 
-import java.io.File;
-
 import edu.mscd.thesis.model.Pos2D;
 import edu.mscd.thesis.model.tiles.TileType;
 import edu.mscd.thesis.model.zones.Density;
@@ -18,21 +16,20 @@ public class House extends Home {
 	@Override
 	public void changeDensity(Density density) {
 		int level = density.getDensityLevel();
-		File file = new File("resources/house" + level + ".png");
-		Image img = new Image(file.toURI().toString());
+		Image img = new Image(this.getClass().getClassLoader().getResource("house" + level + ".png").toString());
 		super.setImage(img);
 		super.setWealthLevel(level);
 		super.setMaxOccupancy(level + 1);
 		super.changeDensity(density);
 	}
-	
+
 	@Override
-	public String getLabelText(){
+	public String getLabelText() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("\nHouse");
 		sb.append(super.getLabelText());
 		return sb.toString();
-		
+
 	}
 
 }

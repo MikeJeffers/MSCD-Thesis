@@ -1,7 +1,6 @@
 package edu.mscd.thesis.model;
 
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -57,8 +56,8 @@ public class WorldImpl implements World {
 		tiles = new Tile[size];
 		this.rows = sizeY;
 		this.cols = sizeX;
-		fileName = Util.MAPS_PATH + fileName + Util.IMG_EXT;
-		if (Util.testFile(fileName)) {
+		fileName = Util.MAP_DIR + fileName + Util.IMG_EXT;
+		if (Util.testFile(fileName, this.getClass().getClassLoader())) {
 			System.out.println("Loading " + fileName);
 			this.createWorldFromFile(fileName, seedCity);
 		} else {
@@ -92,7 +91,7 @@ public class WorldImpl implements World {
 		}
 		try {
 			int i = 0;
-			BufferedImage img = ImageIO.read(new File(fileName));
+			BufferedImage img = ImageIO.read(this.getClass().getClassLoader().getResource(fileName));
 			int stepX = img.getWidth() / this.cols;
 			int stepY = img.getHeight() / this.rows;
 			GeoType[] gTypes = new GeoType[tiles.length];
@@ -120,6 +119,7 @@ public class WorldImpl implements World {
 
 		} catch (IOException e) {
 			isLoadedCity = false;
+			System.err.println(e);
 			smoothWorldInit(Rules.WORLD_TILE_NOISE);
 		}
 	}
