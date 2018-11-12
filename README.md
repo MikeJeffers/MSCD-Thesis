@@ -3,6 +3,11 @@ Prototype for master's thesis
 
 ![Travis-CI](https://travis-ci.org/MikeJeffers/MSCD-Thesis.svg?branch=master)
 
+## Links
+![Video of AI playing the game!](https://vimeo.com/246687537)  
+![The Thesis](https://github.com/MikeJeffers/MSCD-Thesis/blob/master/dist/THESIS_PAPER.pdf)
+
+## Misc Notes and Documentation
 
 ![Current Work](https://cloud.githubusercontent.com/assets/2634337/23097028/a03b9e64-f5f7-11e6-8dbc-cb1df8adb815.gif)
 
