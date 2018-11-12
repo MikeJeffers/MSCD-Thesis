@@ -4,7 +4,7 @@ Prototype for master's thesis
 ![Travis-CI](https://travis-ci.org/MikeJeffers/MSCD-Thesis.svg?branch=master)
 
 ## Links
-![Video of AI playing the game!](https://vimeo.com/246687537)  
+[Video of AI playing the game!](https://vimeo.com/246687537)  
 ![The Thesis](https://github.com/MikeJeffers/MSCD-Thesis/blob/master/dist/THESIS_PAPER.pdf)
 
 ## Misc Notes and Documentation
